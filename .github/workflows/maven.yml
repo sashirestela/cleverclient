@@ -5,7 +5,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: ["main", "increase-testing-coverage"]
+    branches: ["main", "developer"]
   pull_request:
     branches: ["main"]
 
