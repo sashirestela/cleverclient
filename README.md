@@ -1,2 +1,3 @@
-# cleverclient
-A façade to Java's HttpClient component, which makes it easier to execute http operations by employing annotated interfaces.
+# CleverClient
+
+Java library that makes it easier to use the Java's HttpClient to perform http operations, using interfaces.

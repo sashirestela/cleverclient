@@ -1,0 +1,113 @@
+package io.github.sashirestela.cleverclient.util;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.github.sashirestela.cleverclient.support.CleverClientException;
+
+public class ReflectUtil {
+  private ReflectUtil() {
+  }
+
+  private static class SingletonHelper {
+    private static final ReflectUtil INSTANCE = new ReflectUtil();
+  }
+
+  public static ReflectUtil get() {
+    return SingletonHelper.INSTANCE;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T createProxy(Class<T> interfaceClass, InvocationHandler handler) {
+    return (T) Proxy.newProxyInstance(
+        interfaceClass.getClassLoader(),
+        new Class<?>[] { interfaceClass },
+        handler);
+  }
+
+  public Map<String, Object> getMapFields(Object object) {
+    final var GET_PREFIX = "get";
+    Map<String, Object> structure = new HashMap<>();
+    var clazz = object.getClass();
+    var fields = getFields(clazz);
+    for (var field : fields) {
+      var fieldName = field.getName();
+      var methodName = GET_PREFIX + CommonUtil.get().capitalize(fieldName);
+      Object fieldValue;
+      try {
+        var getMethod = clazz.getMethod(methodName);
+        fieldValue = getMethod.invoke(object);
+      } catch (Exception e) {
+        throw new CleverClientException("Cannot find the method {0} in the class {1}.", methodName,
+            clazz.getSimpleName(), e);
+      }
+      if (fieldValue != null) {
+        structure.put(getFieldName(field), getFieldValue(fieldValue));
+      }
+    }
+    return structure;
+  }
+
+  private Field[] getFields(Class<?> clazz) {
+    final var CLASS_OBJECT = "Object";
+    var fields = new Field[] {};
+    var nextClazz = clazz;
+    while (!nextClazz.getSimpleName().equals(CLASS_OBJECT)) {
+      fields = CommonUtil.get().concatArrays(fields, nextClazz.getDeclaredFields());
+      nextClazz = nextClazz.getSuperclass();
+    }
+    return fields;
+  }
+
+  private String getFieldName(Field field) {
+    final var JSON_PROPERTY_METHOD_NAME = "value";
+    var fieldName = field.getName();
+    if (field.isAnnotationPresent(JsonProperty.class)) {
+      fieldName = (String) getAnnotAttribValue(field, JsonProperty.class, JSON_PROPERTY_METHOD_NAME);
+    }
+    return fieldName;
+  }
+
+  private Object getFieldValue(Object fieldValue) {
+    if (fieldValue.getClass().isEnum()) {
+      var enumConstantName = ((Enum<?>) fieldValue).name();
+      try {
+        fieldValue = fieldValue.getClass().getField(enumConstantName).getAnnotation(JsonProperty.class).value();
+      } catch (NoSuchFieldException | SecurityException e) {
+        throw new CleverClientException("Cannot find the enum constant {0}.", enumConstantName, e);
+      }
+    }
+    return fieldValue;
+  }
+
+  private Object getAnnotAttribValue(AnnotatedElement element, Class<? extends Annotation> annotType,
+      String annotAttribName) {
+    Object value = null;
+    var annotation = element.getAnnotation(annotType);
+    if (annotation != null) {
+      Method annotAttrib = null;
+      try {
+        annotAttrib = annotType.getMethod(annotAttribName);
+      } catch (NoSuchMethodException | SecurityException e) {
+        throw new CleverClientException("Cannot find the method {0} in the annotation {1}.", annotAttribName,
+            annotType.getName(), e);
+      }
+      try {
+        value = annotAttrib.invoke(annotation, (Object[]) null);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        throw new CleverClientException("Cannot execute the method {0} in the annotation {1}.", annotAttribName,
+            annotType.getName(), e);
+      }
+    }
+    return value;
+  }
+}
