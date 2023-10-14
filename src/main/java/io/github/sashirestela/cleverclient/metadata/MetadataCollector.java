@@ -12,8 +12,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.sashirestela.cleverclient.ReturnType;
 import io.github.sashirestela.cleverclient.annotation.Resource;
+import io.github.sashirestela.cleverclient.http.ReturnType;
 import io.github.sashirestela.cleverclient.util.Constant;
 
 public class MetadataCollector {
@@ -22,15 +22,7 @@ public class MetadataCollector {
   private MetadataCollector() {
   }
 
-  private static class SingletonHelper {
-    private static final MetadataCollector INSTANCE = new MetadataCollector();
-  }
-
-  public static MetadataCollector get() {
-    return SingletonHelper.INSTANCE;
-  }
-
-  public Metadata collect(Class<?> clazz) {
+  public static Metadata collect(Class<?> clazz) {
     var urlFromResource = Optional
         .ofNullable(getAnnotValue(clazz.getAnnotation(Resource.class)))
         .orElse("");
@@ -61,7 +53,7 @@ public class MetadataCollector {
     return metadata;
   }
 
-  private Map<String, List<Metadata.Parameter>> getParametersByType(Parameter[] parameters) {
+  private static Map<String, List<Metadata.Parameter>> getParametersByType(Parameter[] parameters) {
     Map<String, List<Metadata.Parameter>> parametersByType = new HashMap<>();
     for (var paramType : Constant.PARAMETER_TYPES) {
       parametersByType.put(paramType, new ArrayList<>());
@@ -88,7 +80,7 @@ public class MetadataCollector {
     return parametersByType;
   }
 
-  private List<Metadata.Annotation> getAnnotationsMetadata(Annotation[] annotations) {
+  private static List<Metadata.Annotation> getAnnotationsMetadata(Annotation[] annotations) {
     List<Metadata.Annotation> annotationsMetadata = new ArrayList<>();
     for (Annotation annotation : annotations) {
       String annotName = annotation.annotationType().getSimpleName();
@@ -98,7 +90,7 @@ public class MetadataCollector {
     return annotationsMetadata;
   }
 
-  private String getAnnotValue(Annotation annotation) {
+  private static String getAnnotValue(Annotation annotation) {
     if (annotation == null) {
       return null;
     }
@@ -113,7 +105,7 @@ public class MetadataCollector {
     return (String) value;
   }
 
-  private Metadata.Annotation getAnnotIfIsInList(List<Metadata.Annotation> annotations, List<String> annotationNames) {
+  private static Metadata.Annotation getAnnotIfIsInList(List<Metadata.Annotation> annotations, List<String> annotationNames) {
     if (annotations.isEmpty()) {
       return null;
     } else {

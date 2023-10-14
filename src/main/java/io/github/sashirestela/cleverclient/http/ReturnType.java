@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient;
+package io.github.sashirestela.cleverclient.http;
 
 import java.lang.reflect.Method;
 

@@ -11,21 +11,12 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 public class JsonUtil {
-  private ObjectMapper objectMapper;
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
   private JsonUtil() {
-    objectMapper = new ObjectMapper();
   }
 
-  private static class SingletonHelper {
-    private static final JsonUtil INSTANCE = new JsonUtil();
-  }
-
-  public static JsonUtil get() {
-    return SingletonHelper.INSTANCE;
-  }
-
-  public <T> String objectToJson(T object) {
+  public static <T> String objectToJson(T object) {
     try {
       return objectMapper.writeValueAsString(object);
     } catch (JsonProcessingException e) {
@@ -33,7 +24,7 @@ public class JsonUtil {
     }
   }
 
-  public <T> T jsonToObject(String json, Class<T> clazz) {
+  public static <T> T jsonToObject(String json, Class<T> clazz) {
     try {
       return objectMapper.readValue(json, clazz);
     } catch (JsonProcessingException e) {
@@ -41,7 +32,7 @@ public class JsonUtil {
     }
   }
 
-  public <T> List<T> jsonToList(String json, Class<T> clazz) {
+  public static <T> List<T> jsonToList(String json, Class<T> clazz) {
     try {
       CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, clazz);
       return objectMapper.readValue(json, listType);
@@ -50,7 +41,7 @@ public class JsonUtil {
     }
   }
 
-  public <T, U> T jsonToParametricObject(String json, Class<T> clazzT, Class<U> clazzU) {
+  public static <T, U> T jsonToParametricObject(String json, Class<T> clazzT, Class<U> clazzU) {
     try {
       JavaType javaType = objectMapper.getTypeFactory().constructParametricType(clazzT, clazzU);
       return objectMapper.readValue(json, javaType);

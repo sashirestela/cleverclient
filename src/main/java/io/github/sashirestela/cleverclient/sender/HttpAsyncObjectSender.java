@@ -18,7 +18,7 @@ public class HttpAsyncObjectSender extends HttpSender {
 
       logger.debug("Response : {}", response.body());
 
-      return JsonUtil.get().jsonToObject(response.body(), responseClass);
+      return JsonUtil.jsonToObject(response.body(), responseClass);
     });
   }
 

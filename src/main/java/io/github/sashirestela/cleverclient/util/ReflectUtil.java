@@ -18,30 +18,22 @@ public class ReflectUtil {
   private ReflectUtil() {
   }
 
-  private static class SingletonHelper {
-    private static final ReflectUtil INSTANCE = new ReflectUtil();
-  }
-
-  public static ReflectUtil get() {
-    return SingletonHelper.INSTANCE;
-  }
-
   @SuppressWarnings("unchecked")
-  public <T> T createProxy(Class<T> interfaceClass, InvocationHandler handler) {
+  public static <T> T createProxy(Class<T> interfaceClass, InvocationHandler handler) {
     return (T) Proxy.newProxyInstance(
         interfaceClass.getClassLoader(),
         new Class<?>[] { interfaceClass },
         handler);
   }
 
-  public Map<String, Object> getMapFields(Object object) {
+  public static Map<String, Object> getMapFields(Object object) {
     final var GET_PREFIX = "get";
     Map<String, Object> structure = new HashMap<>();
     var clazz = object.getClass();
     var fields = getFields(clazz);
     for (var field : fields) {
       var fieldName = field.getName();
-      var methodName = GET_PREFIX + CommonUtil.get().capitalize(fieldName);
+      var methodName = GET_PREFIX + CommonUtil.capitalize(fieldName);
       Object fieldValue;
       try {
         var getMethod = clazz.getMethod(methodName);
@@ -57,18 +49,18 @@ public class ReflectUtil {
     return structure;
   }
 
-  private Field[] getFields(Class<?> clazz) {
+  private static Field[] getFields(Class<?> clazz) {
     final var CLASS_OBJECT = "Object";
     var fields = new Field[] {};
     var nextClazz = clazz;
     while (!nextClazz.getSimpleName().equals(CLASS_OBJECT)) {
-      fields = CommonUtil.get().concatArrays(fields, nextClazz.getDeclaredFields());
+      fields = CommonUtil.concatArrays(fields, nextClazz.getDeclaredFields());
       nextClazz = nextClazz.getSuperclass();
     }
     return fields;
   }
 
-  private String getFieldName(Field field) {
+  private static String getFieldName(Field field) {
     final var JSON_PROPERTY_METHOD_NAME = "value";
     var fieldName = field.getName();
     if (field.isAnnotationPresent(JsonProperty.class)) {
@@ -77,7 +69,7 @@ public class ReflectUtil {
     return fieldName;
   }
 
-  private Object getFieldValue(Object fieldValue) {
+  private static Object getFieldValue(Object fieldValue) {
     if (fieldValue.getClass().isEnum()) {
       var enumConstantName = ((Enum<?>) fieldValue).name();
       try {
@@ -89,7 +81,7 @@ public class ReflectUtil {
     return fieldValue;
   }
 
-  private Object getAnnotAttribValue(AnnotatedElement element, Class<? extends Annotation> annotType,
+  private static Object getAnnotAttribValue(AnnotatedElement element, Class<? extends Annotation> annotType,
       String annotAttribName) {
     Object value = null;
     var annotation = element.getAnnotation(annotType);

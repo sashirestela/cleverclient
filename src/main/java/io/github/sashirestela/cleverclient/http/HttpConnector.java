@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient;
+package io.github.sashirestela.cleverclient.http;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -46,12 +46,12 @@ public class HttpConnector {
       logger.debug("Body Request: (Empty)");
       bodyPublisher = BodyPublishers.noBody();
     } else if (isMultipart) {
-      var data = ReflectUtil.get().getMapFields(bodyObject);
-      var requestBytes = HttpMultipart.get().toByteArrays(data);
+      var data = ReflectUtil.getMapFields(bodyObject);
+      var requestBytes = HttpMultipart.toByteArrays(data);
       logger.debug("Body Request: {}", data);
       bodyPublisher = BodyPublishers.ofByteArrays(requestBytes);
     } else {
-      var requestString = JsonUtil.get().objectToJson(bodyObject);
+      var requestString = JsonUtil.objectToJson(bodyObject);
       logger.debug("Body Request: {}", requestString);
       bodyPublisher = BodyPublishers.ofString(requestString);
     }

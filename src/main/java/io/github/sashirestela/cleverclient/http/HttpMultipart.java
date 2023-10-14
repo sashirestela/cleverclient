@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient;
+package io.github.sashirestela.cleverclient.http;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,8 +12,6 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.util.Constant;
 
 public class HttpMultipart {
-  private static HttpMultipart multipart = null;
-
   private static final String DASH = "--";
   private static final String DQ = "\"";
   private static final String NL = "\r\n";
@@ -25,14 +23,7 @@ public class HttpMultipart {
   private HttpMultipart() {
   }
 
-  public static HttpMultipart get() {
-    if (multipart == null) {
-      multipart = new HttpMultipart();
-    }
-    return multipart;
-  }
-
-  public List<byte[]> toByteArrays(Map<String, Object> data) {
+  public static List<byte[]> toByteArrays(Map<String, Object> data) {
     List<byte[]> byteArrays = new ArrayList<>();
     for (var entry : data.entrySet()) {
       byteArrays.add(toBytes(DASH + Constant.BOUNDARY_VALUE + NL));
@@ -66,7 +57,7 @@ public class HttpMultipart {
     return byteArrays;
   }
 
-  private byte[] toBytes(String text) {
+  private static byte[] toBytes(String text) {
     return text.getBytes(StandardCharsets.UTF_8);
   }
 }

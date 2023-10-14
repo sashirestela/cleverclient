@@ -21,7 +21,7 @@ public class HttpAsyncStreamSender extends HttpSender {
           .peek(rawData -> logger.debug("Response : {}", rawData))
           .map(CleverClientSSE::new)
           .filter(CleverClientSSE::isActualData)
-          .map(event -> JsonUtil.get().jsonToObject(event.getActualData(), responseClass));
+          .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
     });
   }
 

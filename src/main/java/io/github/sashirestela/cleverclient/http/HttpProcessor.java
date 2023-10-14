@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient;
+package io.github.sashirestela.cleverclient.http;
 
 import java.lang.reflect.Method;
 import java.net.http.HttpClient;
@@ -17,27 +17,16 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import io.github.sashirestela.cleverclient.util.Constant;
 import io.github.sashirestela.cleverclient.util.ReflectUtil;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
-@NoArgsConstructor
-@Getter
 public class HttpProcessor {
   private static Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
-  @NonNull
   private HttpClient httpClient;
-
-  @NonNull
   private String urlBase;
-
   private List<String> headers;
   private Metadata metadata;
   private URLBuilder urlBuilder;
 
-  @Builder
   public HttpProcessor(HttpClient httpClient, String urlBase, List<String> headers) {
     this.httpClient = httpClient;
     this.urlBase = urlBase;
@@ -56,12 +45,12 @@ public class HttpProcessor {
    *                       {@link HttpInvocationHandler HttpInvocationHandler}.
    * @return A "virtual" instance for the interface.
    */
-  public <T> T create(Class<T> interfaceClass, InvocationFilter filter) {
-    metadata = MetadataCollector.get().collect(interfaceClass);
+  public <T> T createProxy(Class<T> interfaceClass, InvocationFilter filter) {
+    metadata = MetadataCollector.collect(interfaceClass);
     validateMetadata();
     urlBuilder = new URLBuilder(metadata);
     var httpInvocationHandler = new HttpInvocationHandler(this, filter);
-    var proxy = ReflectUtil.get().createProxy(interfaceClass, httpInvocationHandler);
+    var proxy = ReflectUtil.createProxy(interfaceClass, httpInvocationHandler);
     logger.debug("Created Instance : {}", interfaceClass.getSimpleName());
     return proxy;
   }
@@ -99,8 +88,8 @@ public class HttpProcessor {
     final var PATH = Path.class.getSimpleName();
     metadata.getMethods().forEach((methodName, methodMetadata) -> {
       var url = methodMetadata.getUrl();
-      var listPathParams = CommonUtil.get().findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
-      if (!CommonUtil.get().isNullOrEmpty(listPathParams)) {
+      var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
+      if (!CommonUtil.isNullOrEmpty(listPathParams)) {
         listPathParams.forEach(pathParam -> methodMetadata.getParametersByType().get(PATH).stream()
             .filter(paramMetadata -> pathParam.equals(paramMetadata.getAnnotationValue())).findFirst()
             .orElseThrow(() -> new CleverClientException(
