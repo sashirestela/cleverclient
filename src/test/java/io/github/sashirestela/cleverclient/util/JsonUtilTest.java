@@ -17,12 +17,10 @@ import lombok.NoArgsConstructor;
 
 class JsonUtilTest {
 
-  JsonUtil jsonUtil = JsonUtil.get();
-
   @Test
   void shouldConvertObjectToJsonWhenClassHasNoIssues() {
     TestClass object = new TestClass("test", 10);
-    String actualJson = jsonUtil.objectToJson(object);
+    String actualJson = JsonUtil.objectToJson(object);
     String expectedJson = "{\"first\":\"test\",\"second\":10}";
     assertEquals(expectedJson, actualJson);
   }
@@ -30,13 +28,13 @@ class JsonUtilTest {
   @Test
   void shouldThrowExceptionWhenConvertingAnObjectOfClassWithIssues() {
     FailClass object = new FailClass("test", 10);
-    assertThrows(CleverClientException.class, () -> jsonUtil.objectToJson(object));
+    assertThrows(CleverClientException.class, () -> JsonUtil.objectToJson(object));
   }
 
   @Test
   void shouldConvertJsonToObjectWhenJsonHasNoIssues() {
     String json = "{\"first\":\"test\",\"second\":10}";
-    TestClass actualObject = jsonUtil.jsonToObject(json, TestClass.class);
+    TestClass actualObject = JsonUtil.jsonToObject(json, TestClass.class);
     TestClass expectedObject = new TestClass("test", 10);
     assertEquals(expectedObject.getFirst(), actualObject.getFirst());
     assertEquals(expectedObject.getSecond(), actualObject.getSecond());
@@ -45,13 +43,13 @@ class JsonUtilTest {
   @Test
   void shouldThrowExceptionWhenConvertingJsonToObjectWithIssues() {
     String json = "{\"first\":\"test\",\"secondish\":10}";
-    assertThrows(CleverClientException.class, () -> jsonUtil.jsonToObject(json, TestClass.class));
+    assertThrows(CleverClientException.class, () -> JsonUtil.jsonToObject(json, TestClass.class));
   }
 
   @Test
   void shouldConvertJsonToListWhenJsonHasNoIssues() {
     String json = "[{\"first\":\"test1\",\"second\":10},{\"first\":\"test2\",\"second\":20}]";
-    List<TestClass> actualList = jsonUtil.jsonToList(json, TestClass.class);
+    List<TestClass> actualList = JsonUtil.jsonToList(json, TestClass.class);
     List<TestClass> expectedList = Arrays.asList(
         new TestClass("test1", 10),
         new TestClass("test2", 20));
@@ -65,7 +63,7 @@ class JsonUtilTest {
   @Test
   void shouldThrowExceptionWhenConvertingJsonToListWithIssues() {
     String json = "[{\"first\":\"test1\",\"second\":10},{\"firstish\":\"test2\",\"secondish\":20}]";
-    assertThrows(CleverClientException.class, () -> jsonUtil.jsonToList(json, TestClass.class));
+    assertThrows(CleverClientException.class, () -> JsonUtil.jsonToList(json, TestClass.class));
   }
 
   @Test
@@ -73,7 +71,7 @@ class JsonUtilTest {
   void shouldConvertJsonToParametricObjectWhenJsonHasNoIssues() {
     String json = "{\"id\":\"abc\",\"data\":[{\"first\":\"test1\",\"second\":10}," +
         "{\"first\":\"test2\",\"second\":20}]}";
-    TestGeneric<TestClass> actualObject = jsonUtil.jsonToParametricObject(json, TestGeneric.class,
+    TestGeneric<TestClass> actualObject = JsonUtil.jsonToParametricObject(json, TestGeneric.class,
         TestClass.class);
     List<TestClass> actualList = actualObject.getData();
     List<TestClass> expectedList = Arrays.asList(
@@ -94,7 +92,7 @@ class JsonUtilTest {
     String json = "{\"id\":\"abc\",\"data\":[{\"first\":\"test1\",\"second\":10}," +
         "{\"firstish\":\"test2\",\"secondish\":20}]}";
     assertThrows(CleverClientException.class,
-        () -> jsonUtil.jsonToParametricObject(json, TestGeneric.class, TestClass.class));
+        () -> JsonUtil.jsonToParametricObject(json, TestGeneric.class, TestClass.class));
   }
 
   @NoArgsConstructor

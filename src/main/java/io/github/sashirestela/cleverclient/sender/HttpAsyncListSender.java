@@ -18,7 +18,7 @@ public class HttpAsyncListSender extends HttpSender {
 
       logger.debug("Response : {}", response.body());
 
-      return JsonUtil.get().jsonToList(response.body(), responseClass);
+      return JsonUtil.jsonToList(response.body(), responseClass);
     });
   }
 

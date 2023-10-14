@@ -15,7 +15,7 @@ class CommonUtilTest {
   void shouldReturnTrueWhenListIsNullOrEmpty() {
     List<?>[] testData = { null, new ArrayList<>() };
     for (List<?> data : testData) {
-      boolean actualCondition = CommonUtil.get().isNullOrEmpty(data);
+      boolean actualCondition = CommonUtil.isNullOrEmpty(data);
       boolean expectedCondition = true;
       assertEquals(expectedCondition, actualCondition);
     }
@@ -23,7 +23,7 @@ class CommonUtilTest {
 
   @Test
   void shouldReturnFalseWhenListIsNotEmpty() {
-    boolean actualCondition = CommonUtil.get().isNullOrEmpty(Arrays.asList("one", "two"));
+    boolean actualCondition = CommonUtil.isNullOrEmpty(Arrays.asList("one", "two"));
     boolean expectedCondition = false;
     assertEquals(expectedCondition, actualCondition);
   }
@@ -32,7 +32,7 @@ class CommonUtilTest {
   void shouldReturnTrueWhenArrayIsNullOrEmpty() {
     Object[][] testData = { null, new String[] {} };
     for (Object[] data : testData) {
-      boolean actualCondition = CommonUtil.get().isNullOrEmpty(data);
+      boolean actualCondition = CommonUtil.isNullOrEmpty(data);
       boolean expectedCondition = true;
       assertEquals(expectedCondition, actualCondition);
     }
@@ -40,7 +40,7 @@ class CommonUtilTest {
 
   @Test
   void shouldReturnFalseWhenArrayIsNotEmpty() {
-    boolean actualCondition = CommonUtil.get().isNullOrEmpty(new String[] { "one", "two" });
+    boolean actualCondition = CommonUtil.isNullOrEmpty(new String[] { "one", "two" });
     boolean expectedCondition = false;
     assertEquals(expectedCondition, actualCondition);
   }
@@ -49,7 +49,7 @@ class CommonUtilTest {
   void shouldReturnTrueWhenStringIsNullOrEmptyOrBlank() {
     String[] testData = { null, "", " " };
     for (String data : testData) {
-      boolean actualCondition = CommonUtil.get().isNullOrEmpty(data);
+      boolean actualCondition = CommonUtil.isNullOrEmpty(data);
       boolean expectedCondition = true;
       assertEquals(expectedCondition, actualCondition);
     }
@@ -57,7 +57,7 @@ class CommonUtilTest {
 
   @Test
   void shouldReturnFalseWhenStringIsNotEmpty() {
-    boolean actualCondition = CommonUtil.get().isNullOrEmpty("text");
+    boolean actualCondition = CommonUtil.isNullOrEmpty("text");
     boolean expectedCondition = false;
     assertEquals(expectedCondition, actualCondition);
   }
@@ -71,7 +71,7 @@ class CommonUtilTest {
         { "/api/service/{path1}/{path2}", Constant.REGEX_PATH_PARAM_URL, Arrays.asList("path1", "path2") }
     };
     for (Object[] data : testData) {
-      List<String> actualListMatches = CommonUtil.get().findFullMatches((String) data[0], (String) data[1]);
+      List<String> actualListMatches = CommonUtil.findFullMatches((String) data[0], (String) data[1]);
       List<String> expectedListMatches = (List<String>) data[2];
       assertEquals(expectedListMatches, actualListMatches);
     }
@@ -85,7 +85,7 @@ class CommonUtilTest {
         { "g", "G" }
     };
     for (String[] data : testData) {
-      String actualText = CommonUtil.get().capitalize(data[0]);
+      String actualText = CommonUtil.capitalize(data[0]);
       String expectedText = data[1];
       assertEquals(expectedText, actualText);
     }
@@ -100,7 +100,7 @@ class CommonUtilTest {
         { {}, {}, {} }
     };
     for (Object[][] data : testData) {
-      Object[] actualArray = CommonUtil.get().concatArrays(data[0], data[1]);
+      Object[] actualArray = CommonUtil.concatArrays(data[0], data[1]);
       Object[] expectedArray = data[2];
       assertArrayEquals(expectedArray, actualArray);
     }

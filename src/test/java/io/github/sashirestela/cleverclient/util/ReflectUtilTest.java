@@ -22,7 +22,7 @@ class ReflectUtilTest {
 
   @Test
   void shouldExecuteHandlerWhenInterfaceMethodIsCalled() {
-    TestInterface test = ReflectUtil.get().createProxy(TestInterface.class, new InvocationHandler() {
+    TestInterface test = ReflectUtil.createProxy(TestInterface.class, new InvocationHandler() {
       @Override
       public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         return "Text from handler.";
@@ -42,7 +42,7 @@ class ReflectUtilTest {
         .property(20)
         .testEnumField(TestEnum.ENUM1)
         .build();
-    Map<String, Object> actualMapFields = ReflectUtil.get().getMapFields(object);
+    Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
     Map<String, Object> expectedMapFields = Map.of(
         "integer", 10,
         "string", "text",
@@ -61,7 +61,7 @@ class ReflectUtilTest {
         .property(null)
         .testEnumField(TestEnum.ENUM1)
         .build();
-    Map<String, Object> actualMapFields = ReflectUtil.get().getMapFields(object);
+    Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
     Map<String, Object> expectedMapFields = Map.of(
         "integer", 10,
         "string", "text",
