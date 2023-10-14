@@ -23,16 +23,16 @@ import org.junit.jupiter.api.Test;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 @SuppressWarnings("unchecked")
-class HttpProcessorTest {
+class CleverClientTest {
 
-  HttpProcessor httpProcessor;
+  CleverClient cleverClient;
   HttpClient httpClient = mock(HttpClient.class);
   HttpResponse<String> httpResponse = mock(HttpResponse.class);
   HttpResponse<Stream<String>> httpResponseStream = mock(HttpResponse.class);
 
   @BeforeEach
   void init() {
-    httpProcessor = HttpProcessor.builder()
+    cleverClient = CleverClient.builder()
         .urlBase("https://api.demmo")
         .headers(List.of("Authorization", "Bearer qwerty"))
         .httpClient(httpClient)
@@ -42,29 +42,29 @@ class HttpProcessorTest {
   @Test
   void shouldThownExceptionWhenCallingCreateMethodForNoAnnotedMethod() {
     Exception exception = assertThrows(CleverClientException.class,
-        () -> httpProcessor.create(ITest.NotAnnotatedService.class, null));
+        () -> cleverClient.create(ITest.NotAnnotatedService.class, null));
     assertTrue(exception.getMessage().contains("Missing HTTP anotation for the method"));
   }
 
   @Test
   void shouldThownExceptionWhenCallingCreateMethodForBadPathParamMethod() {
     Exception exception = assertThrows(CleverClientException.class,
-        () -> httpProcessor.create(ITest.BadPathParamService.class, null));
+        () -> cleverClient.create(ITest.BadPathParamService.class, null));
     assertTrue(exception.getMessage().contains("Path param demoId in the url cannot find"));
   }
 
   @Test
   void shouldSetInternalStateWhenCallingCreateMethodForWellFormedService() {
-    httpProcessor.create(ITest.GoodService.class, null);
-    assertNotNull(httpProcessor.getMetadata());
-    assertNotNull(httpProcessor.getUrlBuilder());
-    assertNotNull(httpProcessor.getHttpClient());
-    assertNotNull(httpProcessor.getUrlBase());
+    cleverClient.create(ITest.GoodService.class, null);
+    assertNotNull(cleverClient.getMetadata());
+    assertNotNull(cleverClient.getUrlBuilder());
+    assertNotNull(cleverClient.getHttpClient());
+    assertNotNull(cleverClient.getUrlBase());
   }
 
   @Test
   void shouldThownExceptionWhenCallingMethodReturnTypeIsUnsupported() {
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     Exception exception = assertThrows(CleverClientException.class,
         () -> service.unsupportedMethod());
     assertTrue(exception.getMessage().contains("Unsupported return type"));
@@ -77,7 +77,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     var actualDemo = service.getDemoPlain(100).join();
     var expectedDemo = "{\"id\":100,\"description\":\"Description\",\"active\":true}";
     
@@ -91,7 +91,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     var actualDemo = service.getDemo(100).join();
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
@@ -105,7 +105,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("[{\"id\":100,\"description\":\"Description\",\"active\":true}]");
 
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     var actualListDemo = service.getDemos().join();
     var actualDemo = actualListDemo.get(0);
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -120,7 +120,7 @@ class HttpProcessorTest {
     when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponseStream.body()).thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr")).join();
     var actualDemo = actualStreamDemo.findFirst().get();
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -136,7 +136,7 @@ class HttpProcessorTest {
     when(httpResponse.body()).thenReturn(
       "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
     
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     var futureService = service.getDemo(100);
     Exception exception = assertThrows(CompletionException.class,
         () -> futureService.join());
@@ -151,7 +151,7 @@ class HttpProcessorTest {
     when(httpResponseStream.body()).thenReturn(Stream.of(
       "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}"));
     
-    var service = httpProcessor.create(ITest.GoodService.class, null);
+    var service = cleverClient.create(ITest.GoodService.class, null);
     var futureService = service.getDemoStream(new ITest.RequestDemo("Descr"));
     Exception exception = assertThrows(CompletionException.class,
         () -> futureService.join());

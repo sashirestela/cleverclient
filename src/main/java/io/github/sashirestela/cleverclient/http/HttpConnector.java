@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient;
+package io.github.sashirestela.cleverclient.http;
 
 import java.net.URI;
 import java.net.http.HttpClient;

@@ -12,8 +12,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.sashirestela.cleverclient.ReturnType;
 import io.github.sashirestela.cleverclient.annotation.Resource;
+import io.github.sashirestela.cleverclient.http.ReturnType;
 import io.github.sashirestela.cleverclient.util.Constant;
 
 public class MetadataCollector {

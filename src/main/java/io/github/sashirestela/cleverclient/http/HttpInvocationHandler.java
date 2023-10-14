@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient;
+package io.github.sashirestela.cleverclient.http;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -6,13 +6,15 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.sashirestela.cleverclient.CleverClient;
+
 public class HttpInvocationHandler implements InvocationHandler {
   private static Logger logger = LoggerFactory.getLogger(HttpInvocationHandler.class);
 
-  private HttpProcessor processor;
+  private CleverClient processor;
   private InvocationFilter filter;
 
-  public HttpInvocationHandler(HttpProcessor processor, InvocationFilter filter) {
+  public HttpInvocationHandler(CleverClient processor, InvocationFilter filter) {
     this.processor = processor;
     this.filter = filter;
   }

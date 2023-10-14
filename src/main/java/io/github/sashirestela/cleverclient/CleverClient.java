@@ -11,6 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.Path;
+import io.github.sashirestela.cleverclient.http.HttpConnector;
+import io.github.sashirestela.cleverclient.http.HttpInvocationHandler;
+import io.github.sashirestela.cleverclient.http.InvocationFilter;
+import io.github.sashirestela.cleverclient.http.URLBuilder;
 import io.github.sashirestela.cleverclient.metadata.Metadata;
 import io.github.sashirestela.cleverclient.metadata.MetadataCollector;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
@@ -24,8 +28,8 @@ import lombok.NonNull;
 
 @NoArgsConstructor
 @Getter
-public class HttpProcessor {
-  private static Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
+public class CleverClient {
+  private static Logger logger = LoggerFactory.getLogger(CleverClient.class);
 
   @NonNull
   private HttpClient httpClient;
@@ -38,7 +42,7 @@ public class HttpProcessor {
   private URLBuilder urlBuilder;
 
   @Builder
-  public HttpProcessor(HttpClient httpClient, String urlBase, List<String> headers) {
+  public CleverClient(HttpClient httpClient, String urlBase, List<String> headers) {
     this.httpClient = httpClient;
     this.urlBase = urlBase;
     this.headers = headers;

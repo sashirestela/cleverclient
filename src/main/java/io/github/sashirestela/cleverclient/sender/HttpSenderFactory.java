@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.sashirestela.cleverclient.ReturnType;
-import io.github.sashirestela.cleverclient.ReturnType.Category;
+import io.github.sashirestela.cleverclient.http.ReturnType;
+import io.github.sashirestela.cleverclient.http.ReturnType.Category;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 public class HttpSenderFactory {

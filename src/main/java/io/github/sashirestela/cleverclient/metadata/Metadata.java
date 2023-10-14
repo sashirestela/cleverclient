@@ -3,7 +3,7 @@ package io.github.sashirestela.cleverclient.metadata;
 import java.util.List;
 import java.util.Map;
 
-import io.github.sashirestela.cleverclient.ReturnType;
+import io.github.sashirestela.cleverclient.http.ReturnType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
