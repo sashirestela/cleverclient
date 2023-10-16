@@ -21,6 +21,7 @@ public class HttpSenderFactory {
     sendersMap = new EnumMap<>(Category.class);
     sendersMap.put(Category.ASYNC_STREAM, HttpAsyncStreamSender::new);
     sendersMap.put(Category.ASYNC_LIST, HttpAsyncListSender::new);
+    sendersMap.put(Category.ASYNC_GENERIC, HttpAsyncGenericSender::new);
     sendersMap.put(Category.ASYNC_OBJECT, HttpAsyncObjectSender::new);
     sendersMap.put(Category.ASYNC_PLAIN_TEXT, HttpAsyncPlainTextSender::new);
   }

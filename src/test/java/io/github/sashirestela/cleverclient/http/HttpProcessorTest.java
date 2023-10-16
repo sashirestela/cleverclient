@@ -11,7 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
@@ -34,7 +33,7 @@ class HttpProcessorTest {
     httpProcessor = new HttpProcessor(
         httpClient,
         "https://api.demmo",
-        List.of("Authorization", "Bearer qwerty"));
+        null);
   }
 
   @Test
@@ -82,6 +81,21 @@ class HttpProcessorTest {
     
     var service = httpProcessor.createProxy(ITest.GoodService.class, null);
     var actualDemo = service.getDemo(100).join();
+    var expectedDemo = new ITest.Demo(100, "Description", true);
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAGenericWhenMethodReturnTypeIsAnObject() {
+    when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenReturn(CompletableFuture.completedFuture(httpResponse));
+    when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponse.body()).thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
+    
+    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var actualGenericDemo = service.getGenericDemo(1).join();
+    var actualDemo = actualGenericDemo.getListDemo().get(0);
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
     assertEquals(expectedDemo, actualDemo);

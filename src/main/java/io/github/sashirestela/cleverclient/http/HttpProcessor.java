@@ -30,7 +30,7 @@ public class HttpProcessor {
   public HttpProcessor(HttpClient httpClient, String urlBase, List<String> headers) {
     this.httpClient = httpClient;
     this.urlBase = urlBase;
-    this.headers = headers;
+    this.headers = Optional.ofNullable(headers).orElse(List.of());
   }
 
   /**

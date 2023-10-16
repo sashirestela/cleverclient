@@ -4,15 +4,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 public class ReflectUtil {
   private ReflectUtil() {
@@ -34,13 +31,12 @@ public class ReflectUtil {
     for (var field : fields) {
       var fieldName = field.getName();
       var methodName = GET_PREFIX + CommonUtil.capitalize(fieldName);
-      Object fieldValue;
+      Object fieldValue = null;
       try {
         var getMethod = clazz.getMethod(methodName);
         fieldValue = getMethod.invoke(object);
       } catch (Exception e) {
-        throw new CleverClientException("Cannot find the method {0} in the class {1}.", methodName,
-            clazz.getSimpleName(), e);
+        // This shouldn't happen
       }
       if (fieldValue != null) {
         structure.put(getFieldName(field), getFieldValue(fieldValue));
@@ -75,7 +71,7 @@ public class ReflectUtil {
       try {
         fieldValue = fieldValue.getClass().getField(enumConstantName).getAnnotation(JsonProperty.class).value();
       } catch (NoSuchFieldException | SecurityException e) {
-        throw new CleverClientException("Cannot find the enum constant {0}.", enumConstantName, e);
+        // This shouldn't happen
       }
     }
     return fieldValue;
@@ -89,15 +85,9 @@ public class ReflectUtil {
       Method annotAttrib = null;
       try {
         annotAttrib = annotType.getMethod(annotAttribName);
-      } catch (NoSuchMethodException | SecurityException e) {
-        throw new CleverClientException("Cannot find the method {0} in the annotation {1}.", annotAttribName,
-            annotType.getName(), e);
-      }
-      try {
         value = annotAttrib.invoke(annotation, (Object[]) null);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-        throw new CleverClientException("Cannot execute the method {0} in the annotation {1}.", annotAttribName,
-            annotType.getName(), e);
+      } catch (Exception e) {
+        // This shouldn't happen
       }
     }
     return value;

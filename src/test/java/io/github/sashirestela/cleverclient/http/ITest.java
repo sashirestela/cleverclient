@@ -46,6 +46,9 @@ interface ITest {
     @GET("/demos/{demoId}")
     CompletableFuture<Demo> getDemo(@Path("demoId") Integer demoId);
 
+    @GET("/demos/{genericDemoId}")
+    CompletableFuture<Generic<Demo>> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
+
     @GET("/demos")
     CompletableFuture<List<Demo>> getDemos();
 
@@ -76,5 +79,15 @@ interface ITest {
 
     private String prefix;
 
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  static class Generic<T> {
+
+    private Integer id;
+
+    private List<T> listDemo;
   }
 }

@@ -15,7 +15,8 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 public abstract class HttpSender {
   protected static Logger logger = LoggerFactory.getLogger(HttpSender.class);
 
-  public abstract <T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass);
+  public abstract <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
+      Class<S> genericClass);
 
   @SuppressWarnings("unchecked")
   protected void throwExceptionIfErrorIsPresent(HttpResponse<?> response, boolean isStream) {

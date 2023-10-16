@@ -10,7 +10,9 @@ import io.github.sashirestela.cleverclient.util.JsonUtil;
 public class HttpAsyncStreamSender extends HttpSender {
 
   @Override
-  public <T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass) {
+  public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
+      Class<S> genericClass) {
+
     var httpResponseFuture = httpClient.sendAsync(httpRequest, BodyHandlers.ofLines());
 
     return httpResponseFuture.thenApply(response -> {

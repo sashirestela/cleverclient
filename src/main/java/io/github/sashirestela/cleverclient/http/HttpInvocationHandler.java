@@ -1,5 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
@@ -24,9 +26,21 @@ public class HttpInvocationHandler implements InvocationHandler {
       filter.apply(method, arguments);
       logger.debug("Applied Filter : {}", filter.getClass().getSimpleName());
     }
-    var responseObject = processor.resolve(method, arguments);
-    logger.debug("Received Response");
-
-    return responseObject;
+    if (method.isDefault()) {
+      return MethodHandles.lookup()
+          .findSpecial(
+              method.getDeclaringClass(),
+              method.getName(),
+              MethodType.methodType(
+                  method.getReturnType(),
+                  method.getParameterTypes()),
+              method.getDeclaringClass())
+          .bindTo(proxy)
+          .invokeWithArguments(arguments);
+    } else {
+      var responseObject = processor.resolve(method, arguments);
+      logger.debug("Received Response");
+      return responseObject;
+    }
   }
 }
