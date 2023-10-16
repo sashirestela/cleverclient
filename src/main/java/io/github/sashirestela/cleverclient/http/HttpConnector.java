@@ -31,13 +31,25 @@ public class HttpConnector {
   public Object sendRequest() {
     var bodyPublisher = createBodyPublisher(bodyObject, isMultipart);
     var responseClass = returnType.getBaseClass();
-    var httpRequest = HttpRequest.newBuilder()
-        .uri(URI.create(url))
-        .headers(headersArray)
-        .method(httpMethod, bodyPublisher)
-        .build();
+    HttpRequest httpRequest = null;
+    if (headersArray.length > 0) {
+      httpRequest = HttpRequest.newBuilder()
+          .uri(URI.create(url))
+          .headers(headersArray)
+          .method(httpMethod, bodyPublisher)
+          .build();
+    } else {
+      httpRequest = HttpRequest.newBuilder()
+          .uri(URI.create(url))
+          .method(httpMethod, bodyPublisher)
+          .build();
+    }
     var httpSender = HttpSenderFactory.get().createSender(returnType);
-    return httpSender.sendRequest(httpClient, httpRequest, responseClass);
+    if (returnType.isGeneric()) {
+      return httpSender.sendRequest(httpClient, httpRequest, responseClass, returnType.getGenericClass());
+    } else {
+      return httpSender.sendRequest(httpClient, httpRequest, responseClass, null);
+    }
   }
 
   private BodyPublisher createBodyPublisher(Object bodyObject, boolean isMultipart) {
