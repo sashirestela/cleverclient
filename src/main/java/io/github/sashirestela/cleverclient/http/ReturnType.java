@@ -8,18 +8,23 @@ public class ReturnType {
   private static final String LIST = "java.util.List";
   private static final String STRING = "java.lang.String";
 
+  private static final String REGEX = "[<>]";
+  private static final String JAVA_PCK = "java";
+
   private String fullClassName;
   private String[] returnTypeArray;
   private int size;
+  private int firstIndex;
   private int lastIndex;
   private int prevLastIndex;
 
   public ReturnType(String fullClassName) {
     this.fullClassName = fullClassName;
-    returnTypeArray = fullClassName.split("[<>]", 0);
+    returnTypeArray = fullClassName.split(REGEX, 0);
     size = returnTypeArray.length;
+    firstIndex = 0;
     lastIndex = size - 1;
-    prevLastIndex = size > 1 ? lastIndex - 1 : -1;
+    prevLastIndex = lastIndex - 1;
   }
 
   public ReturnType(Method method) {
@@ -31,53 +36,78 @@ public class ReturnType {
   }
 
   public Class<?> getBaseClass() {
-    Class<?> baseClass = null;
+    return getClass(lastIndex);
+  }
+
+  public Class<?> getGenericClass() {
+    return getClass(prevLastIndex);
+  }
+
+  private Class<?> getClass(int index) {
+    Class<?> clazz = null;
     try {
-      baseClass = Class.forName(returnTypeArray[lastIndex]);
+      clazz = Class.forName(returnTypeArray[index]);
     } catch (ClassNotFoundException e) {
       // This shouldn't happen
     }
-    return baseClass;
+    return clazz;
   }
 
   public Category category() {
     if (isAsync()) {
-      if (isStream()) {
-        return Category.ASYNC_STREAM;
-      } else if (isList()) {
-        return Category.ASYNC_LIST;
-      } else if (isObject()) {
-        return Category.ASYNC_OBJECT;
-      } else if (isPlainText()) {
-        return Category.ASYNC_PLAIN_TEXT;
-      } else {
-        return null;
-      }
+      return asyncCategory();
     } else {
-      if (isStream()) {
-        return Category.SYNC_STREAM;
-      } else if (isList()) {
-        return Category.SYNC_LIST;
-      } else if (isObject()) {
-        return Category.SYNC_OBJECT;
-      } else if (isPlainText()) {
-        return Category.SYNC_PLAIN_TEXT;
-      } else {
-        return null;
-      }
+      return syncCategory();
+    }
+  }
+
+  private Category asyncCategory() {
+    if (isStream()) {
+      return Category.ASYNC_STREAM;
+    } else if (isList()) {
+      return Category.ASYNC_LIST;
+    } else if (isGeneric()) {
+      return Category.ASYNC_GENERIC;
+    } else if (isObject()) {
+      return Category.ASYNC_OBJECT;
+    } else if (isPlainText()) {
+      return Category.ASYNC_PLAIN_TEXT;
+    } else {
+      return null;
+    }
+  }
+
+  private Category syncCategory() {
+    if (isStream()) {
+      return Category.SYNC_STREAM;
+    } else if (isList()) {
+      return Category.SYNC_LIST;
+    } else if (isGeneric()) {
+      return Category.SYNC_GENERIC;
+    } else if (isObject()) {
+      return Category.SYNC_OBJECT;
+    } else if (isPlainText()) {
+      return Category.SYNC_PLAIN_TEXT;
+    } else {
+      return null;
     }
   }
 
   public boolean isAsync() {
-    return size > 1 && ASYNC.equals(returnTypeArray[0]);
+    return size > 1 && ASYNC.equals(returnTypeArray[firstIndex]);
   }
 
   public boolean isStream() {
-    return size != 1 && STREAM.equals(returnTypeArray[prevLastIndex]);
+    return size > 1 && STREAM.equals(returnTypeArray[prevLastIndex]);
   }
 
   public boolean isList() {
-    return size != 1 && LIST.equals(returnTypeArray[prevLastIndex]);
+    return size > 1 && LIST.equals(returnTypeArray[prevLastIndex]);
+  }
+
+  public boolean isGeneric() {
+    return ((isAsync() && size > 2) || (!isAsync() && size > 1))
+        && !returnTypeArray[prevLastIndex].startsWith(JAVA_PCK);
   }
 
   public boolean isObject() {
@@ -95,10 +125,12 @@ public class ReturnType {
   public enum Category {
     ASYNC_STREAM,
     ASYNC_LIST,
+    ASYNC_GENERIC,
     ASYNC_OBJECT,
     ASYNC_PLAIN_TEXT,
     SYNC_STREAM,
     SYNC_LIST,
+    SYNC_GENERIC,
     SYNC_OBJECT,
     SYNC_PLAIN_TEXT;
   }

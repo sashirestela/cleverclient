@@ -4,10 +4,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 
-public class HttpAsyncPlainTextSender extends HttpSender {
+import io.github.sashirestela.cleverclient.util.JsonUtil;
+
+public class HttpAsyncGenericSender extends HttpSender {
 
   @Override
-  @SuppressWarnings("unchecked")
   public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
       Class<S> genericClass) {
 
@@ -19,7 +20,7 @@ public class HttpAsyncPlainTextSender extends HttpSender {
 
       logger.debug("Response : {}", response.body());
 
-      return (T) response.body();
+      return JsonUtil.jsonToParametricObject(response.body(), genericClass, responseClass);
     });
   }
 

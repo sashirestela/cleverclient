@@ -27,10 +27,12 @@ class ReturnTypeTest {
     var testData = Map.of(
         "asyncStreamMethod", ReturnType.Category.ASYNC_STREAM,
         "asyncListMethod", ReturnType.Category.ASYNC_LIST,
+        "asyncGenericMethod", ReturnType.Category.ASYNC_GENERIC,
         "asyncObjectMethod", ReturnType.Category.ASYNC_OBJECT,
         "asyncStringMethod", ReturnType.Category.ASYNC_PLAIN_TEXT,
         "syncStreamMethod", ReturnType.Category.SYNC_STREAM,
         "syncListMethod", ReturnType.Category.SYNC_LIST,
+        "syncGenericMethod", ReturnType.Category.SYNC_GENERIC,
         "syncObjectMethod", ReturnType.Category.SYNC_OBJECT,
         "syncStringMethod", ReturnType.Category.SYNC_PLAIN_TEXT);
     for (String methodName : testData.keySet()) {
@@ -58,6 +60,8 @@ class ReturnTypeTest {
 
     CompletableFuture<List<Object>> asyncListMethod();
 
+    CompletableFuture<Generic<Object>> asyncGenericMethod();
+
     CompletableFuture<Object> asyncObjectMethod();
 
     CompletableFuture<String> asyncStringMethod();
@@ -68,10 +72,16 @@ class ReturnTypeTest {
 
     List<Object> syncListMethod();
 
+    Generic<Object> syncGenericMethod();
+
     Object syncObjectMethod();
 
     String syncStringMethod();
 
     Set<Object> syncSetMethod();
+  }
+
+  static interface Generic<T> {
+
   }
 }
