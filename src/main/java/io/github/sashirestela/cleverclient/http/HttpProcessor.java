@@ -40,9 +40,6 @@ public class HttpProcessor {
    * 
    * @param <T>            A generic interface.
    * @param interfaceClass Service of a generic interface
-   * @param filter         Object that could modify the arguments passed to the
-   *                       method invocation, before to be handled by
-   *                       {@link HttpInvocationHandler HttpInvocationHandler}.
    * @return A "virtual" instance for the interface.
    */
   public <T> T createProxy(Class<T> interfaceClass) {
