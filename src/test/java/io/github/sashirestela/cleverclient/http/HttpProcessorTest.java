@@ -160,4 +160,13 @@ class HttpProcessorTest {
         () -> futureService.join());
     assertTrue(exception.getMessage().contains("The resource does not exist"));
   }
+
+  @Test
+  void shouldExecuteDefaultMethodWhenItIsCalled() {
+    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var actualValue = service.defaultMethod("Test");
+    var expectedValue = "Hello Test";
+    
+    assertEquals(expectedValue, actualValue);
+  }
 }

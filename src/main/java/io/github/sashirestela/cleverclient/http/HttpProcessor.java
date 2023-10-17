@@ -80,10 +80,13 @@ public class HttpProcessor {
   }
 
   private void validateMetadata() {
-    metadata.getMethods().forEach((methodName, methodMetadata) -> Optional
-        .ofNullable(methodMetadata.getHttpAnnotation())
-        .orElseThrow(
-            () -> new CleverClientException("Missing HTTP anotation for the method {0}.", methodName, null)));
+    metadata.getMethods().forEach((methodName, methodMetadata) -> {
+      if (!methodMetadata.isDefault()) {
+        Optional.ofNullable(methodMetadata.getHttpAnnotation())
+            .orElseThrow(
+                () -> new CleverClientException("Missing HTTP anotation for the method {0}.", methodName, null));
+      }
+    });
 
     final var PATH = Path.class.getSimpleName();
     metadata.getMethods().forEach((methodName, methodMetadata) -> {

@@ -55,6 +55,9 @@ interface ITest {
     @POST("/demos")
     CompletableFuture<Stream<Demo>> getDemoStream(@Body RequestDemo request);
 
+    default String defaultMethod(String name) {
+      return "Hello " + name;
+    }
   }
 
   @NoArgsConstructor

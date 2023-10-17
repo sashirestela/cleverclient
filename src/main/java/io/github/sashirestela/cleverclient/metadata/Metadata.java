@@ -23,6 +23,7 @@ public class Metadata {
 
     private String name;
     private ReturnType returnType;
+    private boolean isDefault;
     private Metadata.Annotation httpAnnotation;
     private boolean isMultipart;
     private String url;
