@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
-import io.github.sashirestela.cleverclient.http.InvocationFilter;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,10 +38,6 @@ public class CleverClient {
   }
 
   public <T> T create(Class<T> interfaceClass) {
-    return httpProcessor.createProxy(interfaceClass, null);
-  }
-
-  public <T> T create(Class<T> interfaceClass, InvocationFilter filter) {
-    return httpProcessor.createProxy(interfaceClass, filter);
+    return httpProcessor.createProxy(interfaceClass);
   }
 }

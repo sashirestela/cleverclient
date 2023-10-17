@@ -45,11 +45,11 @@ public class HttpProcessor {
    *                       {@link HttpInvocationHandler HttpInvocationHandler}.
    * @return A "virtual" instance for the interface.
    */
-  public <T> T createProxy(Class<T> interfaceClass, InvocationFilter filter) {
+  public <T> T createProxy(Class<T> interfaceClass) {
     metadata = MetadataCollector.collect(interfaceClass);
     validateMetadata();
     urlBuilder = new URLBuilder(metadata);
-    var httpInvocationHandler = new HttpInvocationHandler(this, filter);
+    var httpInvocationHandler = new HttpInvocationHandler(this);
     var proxy = ReflectUtil.createProxy(interfaceClass, httpInvocationHandler);
     logger.debug("Created Instance : {}", interfaceClass.getSimpleName());
     return proxy;
