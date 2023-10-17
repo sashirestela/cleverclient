@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
+import io.github.sashirestela.cleverclient.annotation.Multipart;
 import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.Path;
 import lombok.AllArgsConstructor;
@@ -55,6 +56,10 @@ interface ITest {
     @POST("/demos")
     CompletableFuture<Stream<Demo>> getDemoStream(@Body RequestDemo request);
 
+    @Multipart
+    @POST("/demos")
+    CompletableFuture<Demo> getFile(@Body RequestDemo request);
+
     default String defaultMethod(String name) {
       return "Hello " + name;
     }
@@ -81,6 +86,8 @@ interface ITest {
   static class RequestDemo {
 
     private String prefix;
+
+    private java.nio.file.Path file;
 
   }
 
