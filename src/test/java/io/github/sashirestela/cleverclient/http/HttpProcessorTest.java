@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
@@ -39,20 +40,20 @@ class HttpProcessorTest {
   @Test
   void shouldThownExceptionWhenCallingCreateMethodForNoAnnotedMethod() {
     Exception exception = assertThrows(CleverClientException.class,
-        () -> httpProcessor.createProxy(ITest.NotAnnotatedService.class, null));
+        () -> httpProcessor.createProxy(ITest.NotAnnotatedService.class));
     assertTrue(exception.getMessage().contains("Missing HTTP anotation for the method"));
   }
 
   @Test
   void shouldThownExceptionWhenCallingCreateMethodForBadPathParamMethod() {
     Exception exception = assertThrows(CleverClientException.class,
-        () -> httpProcessor.createProxy(ITest.BadPathParamService.class, null));
+        () -> httpProcessor.createProxy(ITest.BadPathParamService.class));
     assertTrue(exception.getMessage().contains("Path param demoId in the url cannot find"));
   }
 
   @Test
   void shouldThownExceptionWhenCallingMethodReturnTypeIsUnsupported() {
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
     Exception exception = assertThrows(CleverClientException.class,
         () -> service.unsupportedMethod());
     assertTrue(exception.getMessage().contains("Unsupported return type"));
@@ -65,7 +66,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
     var actualDemo = service.getDemoPlain(100).join();
     var expectedDemo = "{\"id\":100,\"description\":\"Description\",\"active\":true}";
     
@@ -79,7 +80,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
     var actualDemo = service.getDemo(100).join();
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
@@ -93,7 +94,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
     var actualGenericDemo = service.getGenericDemo(1).join();
     var actualDemo = actualGenericDemo.getListDemo().get(0);
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -108,7 +109,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("[{\"id\":100,\"description\":\"Description\",\"active\":true}]");
 
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
     var actualListDemo = service.getDemos().join();
     var actualDemo = actualListDemo.get(0);
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -123,9 +124,23 @@ class HttpProcessorTest {
     when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponseStream.body()).thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
-    var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr")).join();
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr", null)).join();
     var actualDemo = actualStreamDemo.findFirst().get();
+    var expectedDemo = new ITest.Demo(100, "Description", true);
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAnObjectWhenMethodIsAnnotatedWithMultipart() {
+    when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenReturn(CompletableFuture.completedFuture(httpResponse));
+    when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
+    
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var actualDemo = service.getFile(new ITest.RequestDemo("Descr", Paths.get("src/test/resources/image.png"))).join();
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
     assertEquals(expectedDemo, actualDemo);
@@ -139,7 +154,7 @@ class HttpProcessorTest {
     when(httpResponse.body()).thenReturn(
       "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
     var futureService = service.getDemo(100);
     Exception exception = assertThrows(CompletionException.class,
         () -> futureService.join());
@@ -154,10 +169,19 @@ class HttpProcessorTest {
     when(httpResponseStream.body()).thenReturn(Stream.of(
       "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}"));
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class, null);
-    var futureService = service.getDemoStream(new ITest.RequestDemo("Descr"));
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var futureService = service.getDemoStream(new ITest.RequestDemo("Descr", null));
     Exception exception = assertThrows(CompletionException.class,
         () -> futureService.join());
     assertTrue(exception.getMessage().contains("The resource does not exist"));
+  }
+
+  @Test
+  void shouldExecuteDefaultMethodWhenItIsCalled() {
+    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var actualValue = service.defaultMethod("Test");
+    var expectedValue = "Hello Test";
+
+    assertEquals(expectedValue, actualValue);
   }
 }

@@ -12,20 +12,14 @@ public class HttpInvocationHandler implements InvocationHandler {
   private static Logger logger = LoggerFactory.getLogger(HttpInvocationHandler.class);
 
   private HttpProcessor processor;
-  private InvocationFilter filter;
 
-  public HttpInvocationHandler(HttpProcessor processor, InvocationFilter filter) {
+  public HttpInvocationHandler(HttpProcessor processor) {
     this.processor = processor;
-    this.filter = filter;
   }
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
     logger.debug("Invoked Method : {}.{}()", method.getDeclaringClass().getSimpleName(), method.getName());
-    if (filter != null) {
-      filter.apply(method, arguments);
-      logger.debug("Applied Filter : {}", filter.getClass().getSimpleName());
-    }
     if (method.isDefault()) {
       return MethodHandles.lookup()
           .findSpecial(

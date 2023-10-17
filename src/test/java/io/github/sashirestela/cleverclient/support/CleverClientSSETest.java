@@ -23,6 +23,21 @@ class CleverClientSSETest {
   }
 
   @Test
+  void shouldReturnExpectedValueWhenRawDataHasDifferentValuesAndAEndOfStreamIsSetted() {
+    CleverClientSSE.setEndOfStream("END");
+    Object[][] testData = {
+      { new CleverClientSSE("data: This is the actual data."), true },
+      { new CleverClientSSE("data: END"), false }
+  };
+  for (Object[] data : testData) {
+    CleverClientSSE event = (CleverClientSSE) data[0];
+    boolean actualCondition = event.isActualData();
+    boolean expectedCondition = (boolean) data[1];
+    assertEquals(expectedCondition, actualCondition);
+  }
+}
+
+  @Test
   @SuppressWarnings("unused")
   void shouldReturnTheActualDataWhenRawDataMeetsConditions() {
     CleverClientSSE event = new CleverClientSSE("data:   This is the actual data.  ");

@@ -38,6 +38,7 @@ public class MetadataCollector {
       var methodMetadata = Metadata.Method.builder()
           .name(method.getName())
           .returnType(new ReturnType(fullClassName))
+          .isDefault(method.isDefault())
           .httpAnnotation(httpAnnotation)
           .isMultipart(isMultipart)
           .url(urlFromResource + urlFromHttp)
