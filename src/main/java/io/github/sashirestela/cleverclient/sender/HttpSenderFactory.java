@@ -24,6 +24,11 @@ public class HttpSenderFactory {
     sendersMap.put(Category.ASYNC_GENERIC, HttpAsyncGenericSender::new);
     sendersMap.put(Category.ASYNC_OBJECT, HttpAsyncObjectSender::new);
     sendersMap.put(Category.ASYNC_PLAIN_TEXT, HttpAsyncPlainTextSender::new);
+    sendersMap.put(Category.SYNC_STREAM, HttpSyncStreamSender::new);
+    sendersMap.put(Category.SYNC_LIST, HttpSyncListSender::new);
+    sendersMap.put(Category.SYNC_GENERIC, HttpSyncGenericSender::new);
+    sendersMap.put(Category.SYNC_OBJECT, HttpSyncObjectSender::new);
+    sendersMap.put(Category.SYNC_PLAIN_TEXT, HttpSyncPlainTextSender::new);
   }
 
   public static HttpSenderFactory get() {

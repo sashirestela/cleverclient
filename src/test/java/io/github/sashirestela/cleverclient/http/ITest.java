@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -36,10 +37,10 @@ interface ITest {
 
   }
 
-  interface GoodService {
+  interface AsyncService {
 
     @GET("/demos")
-    List<Demo> unsupportedMethod();
+    Set<Demo> unsupportedMethod();
 
     @GET("/demos/{demoId}")
     CompletableFuture<String> getDemoPlain(@Path("demoId") Integer demoId);
@@ -63,6 +64,24 @@ interface ITest {
     default String defaultMethod(String name) {
       return "Hello " + name;
     }
+  }
+
+  interface SyncService {
+
+    @GET("/demos/{demoId}")
+    String getDemoPlain(@Path("demoId") Integer demoId);
+
+    @GET("/demos/{demoId}")
+    Demo getDemo(@Path("demoId") Integer demoId);
+
+    @GET("/demos/{genericDemoId}")
+    Generic<Demo> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
+
+    @GET("/demos")
+    List<Demo> getDemos();
+
+    @POST("/demos")
+    Stream<Demo> getDemoStream(@Body RequestDemo request);
   }
 
   @NoArgsConstructor
