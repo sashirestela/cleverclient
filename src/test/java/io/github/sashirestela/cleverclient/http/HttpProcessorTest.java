@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -53,20 +54,93 @@ class HttpProcessorTest {
 
   @Test
   void shouldThownExceptionWhenCallingMethodReturnTypeIsUnsupported() {
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     Exception exception = assertThrows(CleverClientException.class,
         () -> service.unsupportedMethod());
     assertTrue(exception.getMessage().contains("Unsupported return type"));
   }
 
   @Test
-  void shouldReturnAStringWhenMethodReturnTypeIsAString() {
+  void shouldReturnAStringSyncWhenMethodReturnTypeIsAString() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenReturn(httpResponse);
+    when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    var actualDemo = service.getDemoPlain(100);
+    var expectedDemo = "{\"id\":100,\"description\":\"Description\",\"active\":true}";
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAnObjectSyncWhenMethodReturnTypeIsAnObject() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenReturn(httpResponse);
+    when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    var actualDemo = service.getDemo(100);
+    var expectedDemo = new ITest.Demo(100, "Description", true);
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAGenericSyncWhenMethodReturnTypeIsAnObject() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenReturn(httpResponse);
+    when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponse.body()).thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    var actualGenericDemo = service.getGenericDemo(1);
+    var actualDemo = actualGenericDemo.getListDemo().get(0);
+    var expectedDemo = new ITest.Demo(100, "Description", true);
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAListSyncWhenMethodReturnTypeIsAList() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenReturn(httpResponse);
+    when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponse.body()).thenReturn("[{\"id\":100,\"description\":\"Description\",\"active\":true}]");
+
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    var actualListDemo = service.getDemos();
+    var actualDemo = actualListDemo.get(0);
+    var expectedDemo = new ITest.Demo(100, "Description", true);
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAStreamSyncWhenMethodReturnTypeIsAStream() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
+        .thenReturn(httpResponseStream);
+    when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    when(httpResponseStream.body()).thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
+
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr", null));
+    var actualDemo = actualStreamDemo.findFirst().get();
+    var expectedDemo = new ITest.Demo(100, "Description", true);
+    
+    assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldReturnAStringAsyncWhenMethodReturnTypeIsAString() {
     when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
         .thenReturn(CompletableFuture.completedFuture(httpResponse));
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualDemo = service.getDemoPlain(100).join();
     var expectedDemo = "{\"id\":100,\"description\":\"Description\",\"active\":true}";
     
@@ -74,13 +148,13 @@ class HttpProcessorTest {
   }
 
   @Test
-  void shouldReturnAnObjectWhenMethodReturnTypeIsAnObject() {
+  void shouldReturnAnObjectAsyncWhenMethodReturnTypeIsAnObject() {
     when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
         .thenReturn(CompletableFuture.completedFuture(httpResponse));
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualDemo = service.getDemo(100).join();
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
@@ -88,13 +162,13 @@ class HttpProcessorTest {
   }
 
   @Test
-  void shouldReturnAGenericWhenMethodReturnTypeIsAnObject() {
+  void shouldReturnAGenericAsyncWhenMethodReturnTypeIsAnObject() {
     when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
         .thenReturn(CompletableFuture.completedFuture(httpResponse));
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualGenericDemo = service.getGenericDemo(1).join();
     var actualDemo = actualGenericDemo.getListDemo().get(0);
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -103,13 +177,13 @@ class HttpProcessorTest {
   }
 
   @Test
-  void shouldReturnAListWhenMethodReturnTypeIsAList() {
+  void shouldReturnAListAsyncWhenMethodReturnTypeIsAList() {
     when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
         .thenReturn(CompletableFuture.completedFuture(httpResponse));
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("[{\"id\":100,\"description\":\"Description\",\"active\":true}]");
 
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualListDemo = service.getDemos().join();
     var actualDemo = actualListDemo.get(0);
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -118,13 +192,13 @@ class HttpProcessorTest {
   }
 
   @Test
-  void shouldReturnAStreamWhenMethodReturnTypeIsAStream() {
+  void shouldReturnAStreamAsyncWhenMethodReturnTypeIsAStream() {
     when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
         .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
     when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponseStream.body()).thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr", null)).join();
     var actualDemo = actualStreamDemo.findFirst().get();
     var expectedDemo = new ITest.Demo(100, "Description", true);
@@ -139,7 +213,7 @@ class HttpProcessorTest {
     when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
     when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualDemo = service.getFile(new ITest.RequestDemo("Descr", Paths.get("src/test/resources/image.png"))).join();
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
@@ -154,7 +228,7 @@ class HttpProcessorTest {
     when(httpResponse.body()).thenReturn(
       "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var futureService = service.getDemo(100);
     Exception exception = assertThrows(CompletionException.class,
         () -> futureService.join());
@@ -169,7 +243,7 @@ class HttpProcessorTest {
     when(httpResponseStream.body()).thenReturn(Stream.of(
       "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}"));
     
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var futureService = service.getDemoStream(new ITest.RequestDemo("Descr", null));
     Exception exception = assertThrows(CompletionException.class,
         () -> futureService.join());
@@ -178,7 +252,7 @@ class HttpProcessorTest {
 
   @Test
   void shouldExecuteDefaultMethodWhenItIsCalled() {
-    var service = httpProcessor.createProxy(ITest.GoodService.class);
+    var service = httpProcessor.createProxy(ITest.AsyncService.class);
     var actualValue = service.defaultMethod("Test");
     var expectedValue = "Hello Test";
 
