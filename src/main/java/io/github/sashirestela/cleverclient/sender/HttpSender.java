@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.util.CommonUtil;
 
 public abstract class HttpSender {
   protected static Logger logger = LoggerFactory.getLogger(HttpSender.class);
@@ -20,7 +21,8 @@ public abstract class HttpSender {
 
   @SuppressWarnings("unchecked")
   protected void throwExceptionIfErrorIsPresent(HttpResponse<?> response, boolean isStream) {
-    if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+    logger.debug("Response Code : {}", response.statusCode());
+    if (!CommonUtil.isInHundredsOf(response.statusCode(), HttpURLConnection.HTTP_OK)) {
       var data = "";
       if (isStream) {
         data = ((Stream<String>) response.body()).collect(Collectors.joining(System.getProperty("line.separator")));

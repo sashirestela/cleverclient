@@ -37,4 +37,8 @@ public class CommonUtil {
     System.arraycopy(array2, 0, result, array1.length, array2.length);
     return result;
   }
+
+  public static boolean isInHundredsOf(int value, int range) {
+    return Math.floor(value / 100.0) * 100 == range;
+  }
 }

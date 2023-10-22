@@ -105,4 +105,20 @@ class CommonUtilTest {
       assertArrayEquals(expectedArray, actualArray);
     }
   }
+
+  @Test
+  void shouldDetectIfValueIsInTheRangeWhenTwoValuesAreCompared() {
+    Object[][] testData = {
+        { 199, 200, false },
+        { 200, 200, true },
+        { 201, 200, true },
+        { 299, 200, true },
+        { 300, 200, false }
+    };
+    for (var data : testData) {
+      var actualResult = CommonUtil.isInHundredsOf((int) data[0], (int) data[1]);
+      var expectedResult = (boolean) data[2];
+      assertEquals(expectedResult, actualResult);
+    }
+  }
 }
