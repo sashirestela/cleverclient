@@ -10,6 +10,7 @@ import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Multipart;
 import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.Path;
+import io.github.sashirestela.cleverclient.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -37,28 +38,29 @@ interface ITest {
 
   }
 
+  @Resource("/demos")
   interface AsyncService {
 
-    @GET("/demos")
+    @GET
     Set<Demo> unsupportedMethod();
 
-    @GET("/demos/{demoId}")
+    @GET("/{demoId}")
     CompletableFuture<String> getDemoPlain(@Path("demoId") Integer demoId);
 
-    @GET("/demos/{demoId}")
+    @GET("/{demoId}")
     CompletableFuture<Demo> getDemo(@Path("demoId") Integer demoId);
 
-    @GET("/demos/{genericDemoId}")
+    @GET("/{genericDemoId}")
     CompletableFuture<Generic<Demo>> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
-    @GET("/demos")
+    @GET
     CompletableFuture<List<Demo>> getDemos();
 
-    @POST("/demos")
+    @POST
     CompletableFuture<Stream<Demo>> getDemoStream(@Body RequestDemo request);
 
     @Multipart
-    @POST("/demos")
+    @POST
     CompletableFuture<Demo> getFile(@Body RequestDemo request);
 
     default String defaultMethod(String name) {
@@ -66,21 +68,22 @@ interface ITest {
     }
   }
 
+  @Resource("/demos")
   interface SyncService {
 
-    @GET("/demos/{demoId}")
+    @GET("/{demoId}")
     String getDemoPlain(@Path("demoId") Integer demoId);
 
-    @GET("/demos/{demoId}")
+    @GET("/{demoId}")
     Demo getDemo(@Path("demoId") Integer demoId);
 
-    @GET("/demos/{genericDemoId}")
+    @GET("/{genericDemoId}")
     Generic<Demo> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
-    @GET("/demos")
+    @GET
     List<Demo> getDemos();
 
-    @POST("/demos")
+    @POST
     Stream<Demo> getDemoStream(@Body RequestDemo request);
   }
 
