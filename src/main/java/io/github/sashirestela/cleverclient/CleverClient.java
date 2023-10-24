@@ -11,10 +11,8 @@ import io.github.sashirestela.cleverclient.http.HttpProcessor;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-@NoArgsConstructor
 @Getter
 public class CleverClient {
   private static Logger logger = LoggerFactory.getLogger(CleverClient.class);
