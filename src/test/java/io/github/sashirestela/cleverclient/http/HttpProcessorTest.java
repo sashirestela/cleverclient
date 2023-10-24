@@ -75,6 +75,15 @@ class HttpProcessorTest {
   }
 
   @Test
+  void shouldThrownExceptionWhenMethodReturnTypeIsAString() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenThrow(new InterruptedException("The operation was interrupted"));
+
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    assertThrows(CleverClientException.class, () -> service.getDemoPlain(100));
+  }
+
+  @Test
   void shouldReturnAnObjectSyncWhenMethodReturnTypeIsAnObject() throws IOException, InterruptedException {
     when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
         .thenReturn(httpResponse);
@@ -86,6 +95,15 @@ class HttpProcessorTest {
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
     assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldThrownExceptionWhenMethodReturnTypeIsAnObject() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenThrow(new InterruptedException("The operation was interrupted"));
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    assertThrows(CleverClientException.class, () -> service.getDemo(100));
   }
 
   @Test
@@ -104,6 +122,15 @@ class HttpProcessorTest {
   }
 
   @Test
+  void shouldThrownExceptionWhenMethodReturnTypeIsAGenericObject() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenThrow(new InterruptedException("The operation was interrupted"));
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    assertThrows(CleverClientException.class, () -> service.getGenericDemo(1));
+  }
+
+  @Test
   void shouldReturnAListSyncWhenMethodReturnTypeIsAList() throws IOException, InterruptedException {
     when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
         .thenReturn(httpResponse);
@@ -119,6 +146,15 @@ class HttpProcessorTest {
   }
 
   @Test
+  void shouldThrownExceptionWhenMethodReturnTypeIsAList() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+        .thenThrow(new InterruptedException("The operation was interrupted"));
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    assertThrows(CleverClientException.class, () -> service.getDemos());
+  }
+
+  @Test
   void shouldReturnAStreamSyncWhenMethodReturnTypeIsAStream() throws IOException, InterruptedException {
     when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
         .thenReturn(httpResponseStream);
@@ -131,6 +167,16 @@ class HttpProcessorTest {
     var expectedDemo = new ITest.Demo(100, "Description", true);
     
     assertEquals(expectedDemo, actualDemo);
+  }
+
+  @Test
+  void shouldThrownExceptionWhenMethodReturnTypeIsAStream() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
+        .thenThrow(new InterruptedException("The operation was interrupted"));
+    
+    var service = httpProcessor.createProxy(ITest.SyncService.class);
+    var requestDemo = new ITest.RequestDemo("Descr", null);
+    assertThrows(CleverClientException.class, () -> service.getDemoStream(requestDemo));
   }
 
   @Test
