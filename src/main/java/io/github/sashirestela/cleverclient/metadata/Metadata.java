@@ -13,41 +13,41 @@ import lombok.Getter;
 @Builder
 public class Metadata {
 
-  private String name;
-  private Map<String, Metadata.Method> methods;
-
-  @AllArgsConstructor
-  @Getter
-  @Builder
-  public static class Method {
-
     private String name;
-    private ReturnType returnType;
-    private boolean isDefault;
-    private Metadata.Annotation httpAnnotation;
-    private boolean isMultipart;
-    private String url;
-    private Map<String, List<Metadata.Parameter>> parametersByType;
+    private Map<String, Metadata.Method> methods;
 
-  }
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class Method {
 
-  @AllArgsConstructor
-  @Getter
-  @Builder
-  public static class Parameter {
+        private String name;
+        private ReturnType returnType;
+        private boolean isDefault;
+        private Metadata.Annotation httpAnnotation;
+        private boolean isMultipart;
+        private String url;
+        private Map<String, List<Metadata.Parameter>> parametersByType;
 
-    private int index;
-    private Class<?> type;
-    private String annotationValue;
+    }
 
-  }
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class Parameter {
 
-  @AllArgsConstructor
-  @Getter
-  public static class Annotation {
+        private int index;
+        private Class<?> type;
+        private String annotationValue;
 
-    private String name;
-    private String value;
+    }
 
-  }
+    @AllArgsConstructor
+    @Getter
+    public static class Annotation {
+
+        private String name;
+        private String value;
+
+    }
 }

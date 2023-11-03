@@ -10,14 +10,14 @@ import lombok.ToString;
 @Getter
 @ToString
 public class ChatResponse {
-  private String id;
-  private String object;
-  private Long created;
-  private String model;
-  private List<Choice> choices;
-  private Usage usage;
+    private String id;
+    private String object;
+    private Long created;
+    private String model;
+    private List<Choice> choices;
+    private Usage usage;
 
-  public String firstContent() {
-    return getChoices().get(0).getMessage().getContent();
-  }
+    public String firstContent() {
+        return getChoices().get(0).getMessage().getContent();
+    }
 }

@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class Post {
-  private Integer id;
-  private String title;
-  private String body;
-  private Integer userId;
+    private Integer id;
+    private String title;
+    private String body;
+    private Integer userId;
 }

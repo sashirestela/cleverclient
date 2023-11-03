@@ -10,12 +10,12 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Usage {
-  @JsonProperty("prompt_tokens")
-  private Integer promptTokens;
+    @JsonProperty("prompt_tokens")
+    private Integer promptTokens;
 
-  @JsonProperty("completion_tokens")
-  private Integer completionTokens;
+    @JsonProperty("completion_tokens")
+    private Integer completionTokens;
 
-  @JsonProperty("total_tokens")
-  private Integer totalTokens;
+    @JsonProperty("total_tokens")
+    private Integer totalTokens;
 }

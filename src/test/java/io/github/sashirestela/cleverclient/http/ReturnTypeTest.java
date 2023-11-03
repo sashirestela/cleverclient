@@ -13,75 +13,75 @@ import org.junit.jupiter.api.Test;
 
 class ReturnTypeTest {
 
-  @Test
-  void shouldReturnBaseClassForAMethod() throws NoSuchMethodException, SecurityException {
-    var method = TestInterface.class.getMethod("asyncStreamMethod", new Class[] {});
-    var returnType = new ReturnType(method);
-    var actualClass = returnType.getBaseClass();
-    var expectedClass = Object.class;
-    assertEquals(expectedClass, actualClass);
-  }
-
-  @Test
-  void shouldReturnCategoryAccordingToTheMethodType() throws NoSuchMethodException, SecurityException {
-    var testData = Map.of(
-        "asyncStreamMethod", ReturnType.Category.ASYNC_STREAM,
-        "asyncListMethod", ReturnType.Category.ASYNC_LIST,
-        "asyncGenericMethod", ReturnType.Category.ASYNC_GENERIC,
-        "asyncObjectMethod", ReturnType.Category.ASYNC_OBJECT,
-        "asyncStringMethod", ReturnType.Category.ASYNC_PLAIN_TEXT,
-        "syncStreamMethod", ReturnType.Category.SYNC_STREAM,
-        "syncListMethod", ReturnType.Category.SYNC_LIST,
-        "syncGenericMethod", ReturnType.Category.SYNC_GENERIC,
-        "syncObjectMethod", ReturnType.Category.SYNC_OBJECT,
-        "syncStringMethod", ReturnType.Category.SYNC_PLAIN_TEXT);
-    for (String methodName : testData.keySet()) {
-      var method = TestInterface.class.getMethod(methodName, new Class[] {});
-      var returnType = new ReturnType(method);
-      var actualCategory = returnType.category();
-      var expectedCategory = testData.get(methodName);
-      assertEquals(expectedCategory, actualCategory);
+    @Test
+    void shouldReturnBaseClassForAMethod() throws NoSuchMethodException, SecurityException {
+        var method = TestInterface.class.getMethod("asyncStreamMethod", new Class[] {});
+        var returnType = new ReturnType(method);
+        var actualClass = returnType.getBaseClass();
+        var expectedClass = Object.class;
+        assertEquals(expectedClass, actualClass);
     }
-  }
 
-  @Test
-  void shouldReturnNullCategoryWhenMethodReturnTypeIsNotExpected() throws NoSuchMethodException, SecurityException {
-    var method = TestInterface.class.getMethod("asyncSetMethod", new Class[] {});
-    var returnType = new ReturnType(method);
-    assertNull(returnType.category());
-    method = TestInterface.class.getMethod("syncSetMethod", new Class[] {});
-    returnType = new ReturnType(method);
-    assertNull(returnType.category());
-  }
+    @Test
+    void shouldReturnCategoryAccordingToTheMethodType() throws NoSuchMethodException, SecurityException {
+        var testData = Map.of(
+                "asyncStreamMethod", ReturnType.Category.ASYNC_STREAM,
+                "asyncListMethod", ReturnType.Category.ASYNC_LIST,
+                "asyncGenericMethod", ReturnType.Category.ASYNC_GENERIC,
+                "asyncObjectMethod", ReturnType.Category.ASYNC_OBJECT,
+                "asyncStringMethod", ReturnType.Category.ASYNC_PLAIN_TEXT,
+                "syncStreamMethod", ReturnType.Category.SYNC_STREAM,
+                "syncListMethod", ReturnType.Category.SYNC_LIST,
+                "syncGenericMethod", ReturnType.Category.SYNC_GENERIC,
+                "syncObjectMethod", ReturnType.Category.SYNC_OBJECT,
+                "syncStringMethod", ReturnType.Category.SYNC_PLAIN_TEXT);
+        for (String methodName : testData.keySet()) {
+            var method = TestInterface.class.getMethod(methodName, new Class[] {});
+            var returnType = new ReturnType(method);
+            var actualCategory = returnType.category();
+            var expectedCategory = testData.get(methodName);
+            assertEquals(expectedCategory, actualCategory);
+        }
+    }
 
-  static interface TestInterface {
+    @Test
+    void shouldReturnNullCategoryWhenMethodReturnTypeIsNotExpected() throws NoSuchMethodException, SecurityException {
+        var method = TestInterface.class.getMethod("asyncSetMethod", new Class[] {});
+        var returnType = new ReturnType(method);
+        assertNull(returnType.category());
+        method = TestInterface.class.getMethod("syncSetMethod", new Class[] {});
+        returnType = new ReturnType(method);
+        assertNull(returnType.category());
+    }
 
-    CompletableFuture<Stream<Object>> asyncStreamMethod();
+    static interface TestInterface {
 
-    CompletableFuture<List<Object>> asyncListMethod();
+        CompletableFuture<Stream<Object>> asyncStreamMethod();
 
-    CompletableFuture<Generic<Object>> asyncGenericMethod();
+        CompletableFuture<List<Object>> asyncListMethod();
 
-    CompletableFuture<Object> asyncObjectMethod();
+        CompletableFuture<Generic<Object>> asyncGenericMethod();
 
-    CompletableFuture<String> asyncStringMethod();
+        CompletableFuture<Object> asyncObjectMethod();
 
-    CompletableFuture<Set<Object>> asyncSetMethod();
+        CompletableFuture<String> asyncStringMethod();
 
-    Stream<Object> syncStreamMethod();
+        CompletableFuture<Set<Object>> asyncSetMethod();
 
-    List<Object> syncListMethod();
+        Stream<Object> syncStreamMethod();
 
-    Generic<Object> syncGenericMethod();
+        List<Object> syncListMethod();
 
-    Object syncObjectMethod();
+        Generic<Object> syncGenericMethod();
 
-    String syncStringMethod();
+        Object syncObjectMethod();
 
-    Set<Object> syncSetMethod();
-  }
+        String syncStringMethod();
 
-  static interface Generic<T> {
+        Set<Object> syncSetMethod();
+    }
 
-  }
+    static interface Generic<T> {
+
+    }
 }

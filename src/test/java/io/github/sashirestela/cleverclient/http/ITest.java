@@ -19,107 +19,107 @@ import lombok.ToString;
 
 interface ITest {
 
-  interface NotAnnotatedService {
+    interface NotAnnotatedService {
 
-    @GET("/demos")
-    CompletableFuture<List<Demo>> goodMethod();
+        @GET("/demos")
+        CompletableFuture<List<Demo>> goodMethod();
 
-    String unannotatedMethod();
+        String unannotatedMethod();
 
-  }
-
-  interface BadPathParamService {
-
-    @GET("/demos")
-    CompletableFuture<List<Demo>> goodMethod();
-
-    @POST("/demos/{demoId}")
-    CompletableFuture<Demo> unmatchedPathParamMethod(@Path("demo_id") int demoId);
-
-  }
-
-  @Resource("/demos")
-  interface AsyncService {
-
-    @GET
-    Set<Demo> unsupportedMethod();
-
-    @GET("/{demoId}")
-    CompletableFuture<String> getDemoPlain(@Path("demoId") Integer demoId);
-
-    @GET("/{demoId}")
-    CompletableFuture<Demo> getDemo(@Path("demoId") Integer demoId);
-
-    @GET("/{genericDemoId}")
-    CompletableFuture<Generic<Demo>> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
-
-    @GET
-    CompletableFuture<List<Demo>> getDemos();
-
-    @POST
-    CompletableFuture<Stream<Demo>> getDemoStream(@Body RequestDemo request);
-
-    @Multipart
-    @POST
-    CompletableFuture<Demo> getFile(@Body RequestDemo request);
-
-    default String defaultMethod(String name) {
-      return "Hello " + name;
     }
-  }
 
-  @Resource("/demos")
-  interface SyncService {
+    interface BadPathParamService {
 
-    @GET("/{demoId}")
-    String getDemoPlain(@Path("demoId") Integer demoId);
+        @GET("/demos")
+        CompletableFuture<List<Demo>> goodMethod();
 
-    @GET("/{demoId}")
-    Demo getDemo(@Path("demoId") Integer demoId);
+        @POST("/demos/{demoId}")
+        CompletableFuture<Demo> unmatchedPathParamMethod(@Path("demo_id") int demoId);
 
-    @GET("/{genericDemoId}")
-    Generic<Demo> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
+    }
 
-    @GET
-    List<Demo> getDemos();
+    @Resource("/demos")
+    interface AsyncService {
 
-    @POST
-    Stream<Demo> getDemoStream(@Body RequestDemo request);
-  }
+        @GET
+        Set<Demo> unsupportedMethod();
 
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Getter
-  @ToString
-  @EqualsAndHashCode
-  static class Demo {
+        @GET("/{demoId}")
+        CompletableFuture<String> getDemoPlain(@Path("demoId") Integer demoId);
 
-    private Integer id;
+        @GET("/{demoId}")
+        CompletableFuture<Demo> getDemo(@Path("demoId") Integer demoId);
 
-    private String description;
+        @GET("/{genericDemoId}")
+        CompletableFuture<Generic<Demo>> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
-    private Boolean active;
+        @GET
+        CompletableFuture<List<Demo>> getDemos();
 
-  }
+        @POST
+        CompletableFuture<Stream<Demo>> getDemoStream(@Body RequestDemo request);
 
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Getter
-  static class RequestDemo {
+        @Multipart
+        @POST
+        CompletableFuture<Demo> getFile(@Body RequestDemo request);
 
-    private String prefix;
+        default String defaultMethod(String name) {
+            return "Hello " + name;
+        }
+    }
 
-    private java.nio.file.Path file;
+    @Resource("/demos")
+    interface SyncService {
 
-  }
+        @GET("/{demoId}")
+        String getDemoPlain(@Path("demoId") Integer demoId);
 
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Getter
-  static class Generic<T> {
+        @GET("/{demoId}")
+        Demo getDemo(@Path("demoId") Integer demoId);
 
-    private Integer id;
+        @GET("/{genericDemoId}")
+        Generic<Demo> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
-    private List<T> listDemo;
-  }
+        @GET
+        List<Demo> getDemos();
+
+        @POST
+        Stream<Demo> getDemoStream(@Body RequestDemo request);
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @ToString
+    @EqualsAndHashCode
+    static class Demo {
+
+        private Integer id;
+
+        private String description;
+
+        private Boolean active;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    static class RequestDemo {
+
+        private String prefix;
+
+        private java.nio.file.Path file;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    static class Generic<T> {
+
+        private Integer id;
+
+        private List<T> listDemo;
+    }
 }

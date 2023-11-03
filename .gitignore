@@ -12,3 +12,6 @@ dependency-reduced-pom.xml
 .flattened-pom.xml
 .factorypath
 *.log
+
+.replit
+replit.nix

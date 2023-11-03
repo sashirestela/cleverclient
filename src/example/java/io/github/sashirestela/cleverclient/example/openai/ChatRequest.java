@@ -10,8 +10,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ChatRequest {
-  private String model;
-  private List<Message> messages;
-  private Double temperature;
-  private Boolean stream;
+    private String model;
+    private List<Message> messages;
+    private Double temperature;
+    private Boolean stream;
 }

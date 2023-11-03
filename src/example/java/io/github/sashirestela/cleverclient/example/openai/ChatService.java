@@ -9,11 +9,11 @@ import io.github.sashirestela.cleverclient.annotation.Resource;
 
 @Resource("/v1/chat/completions")
 public interface ChatService {
-  
-  @POST
-  Stream<ChatResponse> createSyncStream(@Body ChatRequest chatRequest);
 
-  @POST
-  CompletableFuture<Stream<ChatResponse>> createAsyncStream(@Body ChatRequest chatRequest);
+    @POST
+    Stream<ChatResponse> createSyncStream(@Body ChatRequest chatRequest);
+
+    @POST
+    CompletableFuture<Stream<ChatResponse>> createAsyncStream(@Body ChatRequest chatRequest);
 
 }
