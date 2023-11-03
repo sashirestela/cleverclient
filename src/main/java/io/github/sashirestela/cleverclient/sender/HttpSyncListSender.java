@@ -10,25 +10,25 @@ import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class HttpSyncListSender extends HttpSender {
 
-  @Override
-  public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
-      Class<S> genericClass) {
-    try {
+    @Override
+    public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
+            Class<S> genericClass) {
+        try {
 
-      var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
+            var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
 
-      throwExceptionIfErrorIsPresent(httpResponse, false);
+            throwExceptionIfErrorIsPresent(httpResponse, false);
 
-      var rawData = httpResponse.body();
+            var rawData = httpResponse.body();
 
-      logger.debug("Response : {}", rawData);
+            logger.debug("Response : {}", rawData);
 
-      return JsonUtil.jsonToList(rawData, responseClass);
+            return JsonUtil.jsonToList(rawData, responseClass);
 
-    } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new CleverClientException(e.getMessage(), null, e);
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CleverClientException(e.getMessage(), null, e);
+        }
     }
-  }
 
 }

@@ -20,89 +20,89 @@ import lombok.experimental.SuperBuilder;
 
 class ReflectUtilTest {
 
-  @Test
-  void shouldExecuteHandlerWhenInterfaceMethodIsCalled() {
-    TestInterface test = ReflectUtil.createProxy(TestInterface.class, new InvocationHandler() {
-      @Override
-      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return "Text from handler.";
-      }
-    });
-    String actualValue = test.testMethod("example");
-    String expectedValue = "Text from handler.";
-    assertEquals(expectedValue, actualValue);
-  }
+    @Test
+    void shouldExecuteHandlerWhenInterfaceMethodIsCalled() {
+        TestInterface test = ReflectUtil.createProxy(TestInterface.class, new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                return "Text from handler.";
+            }
+        });
+        String actualValue = test.testMethod("example");
+        String expectedValue = "Text from handler.";
+        assertEquals(expectedValue, actualValue);
+    }
 
-  @Test
-  void shouldReturnMapOfAllFieldsWhenObjectHasNotNullFields() {
-    TestClass object = TestClass.builder()
-        .integerField(10)
-        .stringField("text")
-        .doubleField(3.1416)
-        .property(20)
-        .testEnumField(TestEnum.ENUM1)
-        .build();
-    Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
-    Map<String, Object> expectedMapFields = Map.of(
-        "integer", 10,
-        "string", "text",
-        "real", 3.1416,
-        "property", 20,
-        "enumerator", "enum1");
-    assertEquals(expectedMapFields, actualMapFields);
-  }
+    @Test
+    void shouldReturnMapOfAllFieldsWhenObjectHasNotNullFields() {
+        TestClass object = TestClass.builder()
+                .integerField(10)
+                .stringField("text")
+                .doubleField(3.1416)
+                .property(20)
+                .testEnumField(TestEnum.ENUM1)
+                .build();
+        Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
+        Map<String, Object> expectedMapFields = Map.of(
+                "integer", 10,
+                "string", "text",
+                "real", 3.1416,
+                "property", 20,
+                "enumerator", "enum1");
+        assertEquals(expectedMapFields, actualMapFields);
+    }
 
-  @Test
-  void shouldReturnMapOfNotNullFieldsWhenObjectHasNullFields() {
-    TestClass object = TestClass.builder()
-        .integerField(10)
-        .stringField("text")
-        .doubleField(3.1416)
-        .property(null)
-        .testEnumField(TestEnum.ENUM1)
-        .build();
-    Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
-    Map<String, Object> expectedMapFields = Map.of(
-        "integer", 10,
-        "string", "text",
-        "real", 3.1416,
-        "enumerator", "enum1");
-    assertEquals(expectedMapFields, actualMapFields);
-  }
+    @Test
+    void shouldReturnMapOfNotNullFieldsWhenObjectHasNullFields() {
+        TestClass object = TestClass.builder()
+                .integerField(10)
+                .stringField("text")
+                .doubleField(3.1416)
+                .property(null)
+                .testEnumField(TestEnum.ENUM1)
+                .build();
+        Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
+        Map<String, Object> expectedMapFields = Map.of(
+                "integer", 10,
+                "string", "text",
+                "real", 3.1416,
+                "enumerator", "enum1");
+        assertEquals(expectedMapFields, actualMapFields);
+    }
 
-  static interface TestInterface {
-    @GET("/api/test/url")
-    String testMethod(@Path("arg") String argument);
-  }
+    static interface TestInterface {
+        @GET("/api/test/url")
+        String testMethod(@Path("arg") String argument);
+    }
 
-  static enum TestEnum {
-    @JsonProperty("enum1")
-    ENUM1,
-    @JsonProperty("enum2")
-    ENUM2;
-  }
+    static enum TestEnum {
+        @JsonProperty("enum1")
+        ENUM1,
+        @JsonProperty("enum2")
+        ENUM2;
+    }
 
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @SuperBuilder
-  @Getter
-  static class SuperTestClass {
-    @JsonProperty("integer")
-    protected Integer integerField;
-    @JsonProperty("string")
-    protected String stringField;
-    @JsonProperty("real")
-    protected Double doubleField;
-  }
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    @Getter
+    static class SuperTestClass {
+        @JsonProperty("integer")
+        protected Integer integerField;
+        @JsonProperty("string")
+        protected String stringField;
+        @JsonProperty("real")
+        protected Double doubleField;
+    }
 
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @SuperBuilder
-  @Getter
-  @Setter
-  static class TestClass extends SuperTestClass {
-    private Integer property;
-    @JsonProperty("enumerator")
-    private TestEnum testEnumField;
-  }
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    @Getter
+    @Setter
+    static class TestClass extends SuperTestClass {
+        private Integer property;
+        @JsonProperty("enumerator")
+        private TestEnum testEnumField;
+    }
 }

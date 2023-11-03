@@ -9,22 +9,22 @@ import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class HttpAsyncStreamSender extends HttpSender {
 
-  @Override
-  public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
-      Class<S> genericClass) {
+    @Override
+    public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
+            Class<S> genericClass) {
 
-    var httpResponseFuture = httpClient.sendAsync(httpRequest, BodyHandlers.ofLines());
+        var httpResponseFuture = httpClient.sendAsync(httpRequest, BodyHandlers.ofLines());
 
-    return httpResponseFuture.thenApply(response -> {
+        return httpResponseFuture.thenApply(response -> {
 
-      throwExceptionIfErrorIsPresent(response, true);
+            throwExceptionIfErrorIsPresent(response, true);
 
-      return response.body()
-          .peek(rawData -> logger.debug("Response : {}", rawData))
-          .map(CleverClientSSE::new)
-          .filter(CleverClientSSE::isActualData)
-          .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
-    });
-  }
+            return response.body()
+                    .peek(rawData -> logger.debug("Response : {}", rawData))
+                    .map(CleverClientSSE::new)
+                    .filter(CleverClientSSE::isActualData)
+                    .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
+        });
+    }
 
 }

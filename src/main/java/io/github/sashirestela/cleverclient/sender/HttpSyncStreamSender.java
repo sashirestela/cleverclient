@@ -11,25 +11,25 @@ import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class HttpSyncStreamSender extends HttpSender {
 
-  @Override
-  public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
-      Class<S> genericClass) {
-    try {
+    @Override
+    public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
+            Class<S> genericClass) {
+        try {
 
-      var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofLines());
+            var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofLines());
 
-      throwExceptionIfErrorIsPresent(httpResponse, true);
+            throwExceptionIfErrorIsPresent(httpResponse, true);
 
-      return httpResponse.body()
-          .peek(rawData -> logger.debug("Response : {}", rawData))
-          .map(CleverClientSSE::new)
-          .filter(CleverClientSSE::isActualData)
-          .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
+            return httpResponse.body()
+                    .peek(rawData -> logger.debug("Response : {}", rawData))
+                    .map(CleverClientSSE::new)
+                    .filter(CleverClientSSE::isActualData)
+                    .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
 
-    } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new CleverClientException(e.getMessage(), null, e);
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CleverClientException(e.getMessage(), null, e);
+        }
     }
-  }
 
 }

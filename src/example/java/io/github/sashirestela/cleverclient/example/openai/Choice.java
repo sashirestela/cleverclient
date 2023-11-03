@@ -11,11 +11,11 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Choice {
-  private Integer index;
+    private Integer index;
 
-  @JsonAlias({ "delta" })
-  private Message message;
+    @JsonAlias({ "delta" })
+    private Message message;
 
-  @JsonProperty("finish_reason")
-  private String finishReason;
+    @JsonProperty("finish_reason")
+    private String finishReason;
 }

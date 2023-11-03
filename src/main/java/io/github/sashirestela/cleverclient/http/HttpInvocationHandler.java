@@ -9,32 +9,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpInvocationHandler implements InvocationHandler {
-  private static Logger logger = LoggerFactory.getLogger(HttpInvocationHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(HttpInvocationHandler.class);
 
-  private HttpProcessor processor;
+    private HttpProcessor processor;
 
-  public HttpInvocationHandler(HttpProcessor processor) {
-    this.processor = processor;
-  }
-
-  @Override
-  public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
-    logger.debug("Invoked Method : {}.{}()", method.getDeclaringClass().getSimpleName(), method.getName());
-    if (method.isDefault()) {
-      return MethodHandles.lookup()
-          .findSpecial(
-              method.getDeclaringClass(),
-              method.getName(),
-              MethodType.methodType(
-                  method.getReturnType(),
-                  method.getParameterTypes()),
-              method.getDeclaringClass())
-          .bindTo(proxy)
-          .invokeWithArguments(arguments);
-    } else {
-      var responseObject = processor.resolve(method, arguments);
-      logger.debug("Received Response");
-      return responseObject;
+    public HttpInvocationHandler(HttpProcessor processor) {
+        this.processor = processor;
     }
-  }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
+        logger.debug("Invoked Method : {}.{}()", method.getDeclaringClass().getSimpleName(), method.getName());
+        if (method.isDefault()) {
+            return MethodHandles.lookup()
+                    .findSpecial(
+                            method.getDeclaringClass(),
+                            method.getName(),
+                            MethodType.methodType(
+                                    method.getReturnType(),
+                                    method.getParameterTypes()),
+                            method.getDeclaringClass())
+                    .bindTo(proxy)
+                    .invokeWithArguments(arguments);
+        } else {
+            var responseObject = processor.resolve(method, arguments);
+            logger.debug("Received Response");
+            return responseObject;
+        }
+    }
 }
