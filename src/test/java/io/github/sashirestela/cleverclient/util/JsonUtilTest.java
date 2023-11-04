@@ -42,8 +42,17 @@ class JsonUtilTest {
 
     @Test
     void shouldThrowExceptionWhenConvertingJsonToObjectWithIssues() {
-        String json = "{\"first\":\"test\",\"secondish\":10}";
+        String json = "{\"first\":\"test\",\"second\":\"WRONG TYPE\"}";
         assertThrows(CleverClientException.class, () -> JsonUtil.jsonToObject(json, TestClass.class));
+    }
+
+    @Test
+    void shouldGracefullyIgnoreUnknownPropertiesWhenConvertingJsonToObject() {
+        String json = "{\"first\":\"test\",\"unknown_property\":1}";
+        TestClass actualObject = JsonUtil.jsonToObject(json, TestClass.class);
+        TestClass expectedObject = new TestClass("test", null);
+        assertEquals(expectedObject.getFirst(), actualObject.getFirst());
+        assertEquals(expectedObject.getSecond(), actualObject.getSecond());
     }
 
     @Test
@@ -62,7 +71,7 @@ class JsonUtilTest {
 
     @Test
     void shouldThrowExceptionWhenConvertingJsonToListWithIssues() {
-        String json = "[{\"first\":\"test1\",\"second\":10},{\"firstish\":\"test2\",\"secondish\":20}]";
+        String json = "[{\"first\":\"test1\",\"second\":10},{\"first\":[\"WRONG TYPE\"],\"second\":\"WRONG TYPE\"}]";
         assertThrows(CleverClientException.class, () -> JsonUtil.jsonToList(json, TestClass.class));
     }
 
@@ -90,7 +99,7 @@ class JsonUtilTest {
     @Test
     void shouldThrowExceptionWhenConvertingJsonToParametricObjectWithIssues() {
         String json = "{\"id\":\"abc\",\"data\":[{\"first\":\"test1\",\"second\":10}," +
-                "{\"firstish\":\"test2\",\"secondish\":20}]}";
+                "{\"first\":\"test2\",\"second\":\"WRONG TYPE\"}]}";
         assertThrows(CleverClientException.class,
                 () -> JsonUtil.jsonToParametricObject(json, TestGeneric.class, TestClass.class));
     }
