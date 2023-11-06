@@ -3,7 +3,6 @@ package io.github.sashirestela.cleverclient.util;
 import java.io.IOException;
 import java.util.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -15,8 +14,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 public class JsonUtil {
-    private static final ObjectMapper objectMapperStrict = new ObjectMapper()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    private static final ObjectMapper objectMapperStrict = new ObjectMapper();
     private static final ObjectReader objectReaderIgnoringUnknown = objectMapperStrict.reader()
             .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 

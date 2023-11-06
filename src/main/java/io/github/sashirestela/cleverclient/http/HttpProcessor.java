@@ -107,6 +107,7 @@ public class HttpProcessor {
         return methodMetadata.getParametersByType().get(BODY).stream()
                 .mapToInt(Metadata.Parameter::getIndex)
                 .mapToObj(index -> arguments[index])
+                .filter(arg -> !CommonUtil.isNullOrEmpty(arg))
                 .collect(Collectors.toList());
     }
 

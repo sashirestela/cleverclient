@@ -1,15 +1,40 @@
 package io.github.sashirestela.cleverclient.util;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class CommonUtilTest {
+
+    @Test
+    void shouldReturnTrueWhenObjectIsNullOrEmpty() {
+        Object[] testData = {
+                null,
+                "",
+                new Object[0],
+                new ArrayList<>(),
+                new HashMap<>(),
+        };
+        for (Object testItem : testData) {
+            assertTrue(CommonUtil.isNullOrEmpty(testItem), "Should treat `" + testItem + "` as empty");
+        }
+    }
+
+    @Test
+    void shouldReturnFalseWhenObjectIsNotEmpty() {
+        Object[] testData = {
+                1,
+                "1",
+                new Object[1],
+                List.of(1),
+                Map.of(1, 2),
+        };
+        for (Object testItem : testData) {
+            assertFalse(CommonUtil.isNullOrEmpty(testItem), "Should treat `" + testItem + "` as NOT empty");
+        }
+    }
 
     @Test
     void shouldReturnTrueWhenListIsNullOrEmpty() {
