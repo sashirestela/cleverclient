@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import io.github.sashirestela.cleverclient.annotation.BodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,12 +105,17 @@ public class HttpProcessor {
     }
 
     private List<Object> calculateBodyObjects(Metadata.Method methodMetadata, Object[] arguments) {
-        final var BODY = Body.class.getSimpleName();
-        return methodMetadata.getParametersByType().get(BODY).stream()
-                .mapToInt(Metadata.Parameter::getIndex)
-                .mapToObj(index -> arguments[index])
-                .filter(arg -> !CommonUtil.isNullOrEmpty(arg))
-                .collect(Collectors.toList());
+        final var BODY      = Body.class.getSimpleName();
+        final var BODY_PART = BodyPart.class.getSimpleName();
+
+        return Stream.concat(
+                methodMetadata.getParametersByType().get(BODY).stream()
+                        .limit(1)
+                        .map(param -> arguments[param.getIndex()]),
+                methodMetadata.getParametersByType().get(BODY_PART).stream()
+                        .map(param -> arguments[param.getIndex()])
+                        .filter(arg -> !CommonUtil.isNullOrEmpty(arg))
+        ).collect(Collectors.toList());
     }
 
     private List<String> calculateHeaderContentType(List<Object> bodyObjects, boolean isMultipart) {
