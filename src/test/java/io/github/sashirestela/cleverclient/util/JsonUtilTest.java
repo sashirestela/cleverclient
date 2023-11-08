@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -102,6 +103,35 @@ class JsonUtilTest {
                 "{\"first\":\"test2\",\"second\":\"WRONG TYPE\"}]}";
         assertThrows(CleverClientException.class,
                 () -> JsonUtil.jsonToParametricObject(json, TestGeneric.class, TestClass.class));
+    }
+
+    @Test
+    void shouldConvertObjectToMapWhenClassHasNoIssues() {
+        TestClass object = new TestClass("test", 10);
+        Map<String, ?> actualMap = JsonUtil.objectToMap(object);
+        assertEquals(object.getFirst(), actualMap.get("first"));
+        assertEquals(object.getSecond(), actualMap.get("second"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConvertingObjectToMapWithIssues() {
+        FailClass object = new FailClass("test", 10);
+        assertThrows(CleverClientException.class, () -> JsonUtil.objectToMap(object));
+    }
+
+    @Test
+    void shouldConvertJsonToObjectStrictWhenJsonHasNoIssues() {
+        String json = "{\"first\":\"test\",\"second\":10}";
+        TestClass actualObject = JsonUtil.jsonToObjectStrict(json, TestClass.class);
+        TestClass expectedObject = new TestClass("test", 10);
+        assertEquals(expectedObject.getFirst(), actualObject.getFirst());
+        assertEquals(expectedObject.getSecond(), actualObject.getSecond());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConvertingJsonToObjectStrictWithUnknownProperties() {
+        String json = "{\"first\":\"test\",\"unknown_property\":10}";
+        assertThrows(CleverClientException.class, () -> JsonUtil.jsonToObjectStrict(json, TestClass.class));
     }
 
     @NoArgsConstructor

@@ -36,7 +36,11 @@ public class JsonUtil {
     }
 
     public static <T> Map<String, Object> objectToMap(T object) {
-        return objectMapperStrict.convertValue(object, jsonPropertiesTypeRef);
+        try {
+            return objectMapperStrict.convertValue(object, jsonPropertiesTypeRef);
+        } catch (IllegalArgumentException e) {
+            throw new CleverClientException("Cannot convert object {0} to Map.", object, e);
+        }
     }
 
     public static <T> String objectToJson(T object) {

@@ -70,6 +70,17 @@ class ReflectUtilTest {
         assertEquals(expectedMapFields, actualMapFields);
     }
 
+    @Test
+    void shouldReturnEqualMapWhenGivenMapInstance() {
+        Map<String, Object> expectedMap = Map.of(
+                "integer", 10,
+                "string", "text",
+                "real", 3.1416,
+                "enumerator", "enum1");
+        Map<String, Object> actualMap = ReflectUtil.getMapFields(expectedMap);
+        assertEquals(expectedMap, actualMap);
+    }
+
     static interface TestInterface {
         @GET("/api/test/url")
         String testMethod(@Path("arg") String argument);
