@@ -5,7 +5,10 @@ import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import io.github.sashirestela.cleverclient.annotation.BodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,16 +62,16 @@ public class HttpProcessor {
         var httpMethod = methodMetadata.getHttpAnnotation().getName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
-        var bodyObject = calculateBodyObject(methodMetadata, arguments);
+        var bodyObjects = calculateBodyObjects(methodMetadata, arguments);
         var fullHeaders = new ArrayList<>(this.headers);
-        fullHeaders.addAll(calculateHeaderContentType(bodyObject, isMultipart));
+        fullHeaders.addAll(calculateHeaderContentType(bodyObjects, isMultipart));
         var fullHeadersArray = fullHeaders.toArray(new String[0]);
         var httpConnector = HttpConnector.builder()
                 .httpClient(httpClient)
                 .url(url)
                 .httpMethod(httpMethod)
                 .returnType(returnType)
-                .bodyObject(bodyObject)
+                .bodyObjects(bodyObjects)
                 .isMultipart(isMultipart)
                 .headersArray(fullHeadersArray)
                 .build();
@@ -101,16 +104,23 @@ public class HttpProcessor {
         });
     }
 
-    private Object calculateBodyObject(Metadata.Method methodMetadata, Object[] arguments) {
-        final var BODY = Body.class.getSimpleName();
-        var indexBody = methodMetadata.getParametersByType().get(BODY).stream()
-                .map(Metadata.Parameter::getIndex).findFirst().orElse(-1);
-        return indexBody >= 0 ? arguments[indexBody] : null;
+    private List<Object> calculateBodyObjects(Metadata.Method methodMetadata, Object[] arguments) {
+        final var BODY      = Body.class.getSimpleName();
+        final var BODY_PART = BodyPart.class.getSimpleName();
+
+        return Stream.concat(
+                methodMetadata.getParametersByType().get(BODY).stream()
+                        .limit(1)
+                        .map(param -> arguments[param.getIndex()]),
+                methodMetadata.getParametersByType().get(BODY_PART).stream()
+                        .map(param -> arguments[param.getIndex()])
+                        .filter(arg -> !CommonUtil.isNullOrEmpty(arg))
+        ).collect(Collectors.toList());
     }
 
-    private List<String> calculateHeaderContentType(Object bodyObject, boolean isMultipart) {
+    private List<String> calculateHeaderContentType(List<Object> bodyObjects, boolean isMultipart) {
         List<String> headerContentType = new ArrayList<>();
-        if (bodyObject != null) {
+        if (!bodyObjects.isEmpty()) {
             var contentType = isMultipart
                     ? Constant.TYPE_MULTIPART + Constant.BOUNDARY_TITLE + "\"" + Constant.BOUNDARY_VALUE + "\""
                     : Constant.TYPE_APP_JSON;

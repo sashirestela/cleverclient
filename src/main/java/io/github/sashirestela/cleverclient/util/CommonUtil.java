@@ -1,12 +1,23 @@
 package io.github.sashirestela.cleverclient.util;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CommonUtil {
     private CommonUtil() {
+    }
+
+    public static boolean isNullOrEmpty(Object obj) {
+        return obj == null
+                || (obj instanceof Map && ((Map<?,?>) obj).isEmpty())
+                || (obj instanceof Collection && ((Collection<?>) obj).isEmpty())
+                || (obj instanceof CharSequence && ((CharSequence) obj).length() == 0)
+                || (obj.getClass().isArray() && Array.getLength(obj) == 0);
     }
 
     public static boolean isNullOrEmpty(Object[] array) {

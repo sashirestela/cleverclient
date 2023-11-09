@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +24,20 @@ public class ReflectUtil {
                 handler);
     }
 
+    public static Map<String, Object> getMapFields(List<Object> objects) {
+        Map<String, Object> structure = new HashMap<>();
+        for (Object object : objects) {
+            structure.putAll(getMapFields(object));
+        }
+
+        return structure;
+    }
+
     public static Map<String, Object> getMapFields(Object object) {
+        if (object instanceof Map) {
+            return JsonUtil.objectToMap(object);
+        }
+
         final var GET_PREFIX = "get";
         Map<String, Object> structure = new HashMap<>();
         var clazz = object.getClass();
