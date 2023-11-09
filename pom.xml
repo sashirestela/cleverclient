@@ -6,7 +6,7 @@
 
   <groupId>io.github.sashirestela</groupId>
   <artifactId>cleverclient</artifactId>
-  <version>0.6.2</version>
+  <version>0.7.0</version>
   <packaging>jar</packaging>
 
   <name>cleverclient</name>
