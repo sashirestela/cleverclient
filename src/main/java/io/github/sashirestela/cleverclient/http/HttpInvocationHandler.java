@@ -5,16 +5,19 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import io.github.sashirestela.cleverclient.metadata.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpInvocationHandler implements InvocationHandler {
-    private static Logger logger = LoggerFactory.getLogger(HttpInvocationHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpInvocationHandler.class);
 
-    private HttpProcessor processor;
+    private final HttpProcessor processor;
+    private final Metadata metadata;
 
-    public HttpInvocationHandler(HttpProcessor processor) {
+    public HttpInvocationHandler(HttpProcessor processor, Metadata metadata) {
         this.processor = processor;
+        this.metadata = metadata;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class HttpInvocationHandler implements InvocationHandler {
                     .bindTo(proxy)
                     .invokeWithArguments(arguments);
         } else {
-            var responseObject = processor.resolve(method, arguments);
+            var responseObject = processor.resolve(metadata, method, arguments);
             logger.debug("Received Response");
             return responseObject;
         }

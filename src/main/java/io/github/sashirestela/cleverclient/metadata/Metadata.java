@@ -14,7 +14,7 @@ import lombok.Getter;
 public class Metadata {
 
     private String name;
-    private Map<String, Metadata.Method> methods;
+    private Map<MethodSignature, Metadata.Method> methods;
 
     @AllArgsConstructor
     @Getter
@@ -25,6 +25,7 @@ public class Metadata {
         private ReturnType returnType;
         private boolean isDefault;
         private Metadata.Annotation httpAnnotation;
+        private List<Metadata.Annotation> httpHeaders;
         private boolean isMultipart;
         private String url;
         private Map<String, List<Metadata.Parameter>> parametersByType;
@@ -48,6 +49,7 @@ public class Metadata {
 
         private String name;
         private String value;
+        private java.lang.annotation.Annotation instance;
 
     }
 }

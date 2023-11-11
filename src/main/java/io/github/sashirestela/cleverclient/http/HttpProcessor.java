@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.github.sashirestela.cleverclient.annotation.BodyPart;
+import io.github.sashirestela.cleverclient.annotation.Header;
+import io.github.sashirestela.cleverclient.metadata.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,13 +24,13 @@ import io.github.sashirestela.cleverclient.util.Constant;
 import io.github.sashirestela.cleverclient.util.ReflectUtil;
 
 public class HttpProcessor {
-    private static Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
-    private HttpClient httpClient;
-    private String urlBase;
-    private List<String> headers;
-    private Metadata metadata;
-    private URLBuilder urlBuilder;
+    private final HttpClient httpClient;
+    private final String urlBase;
+    private final List<String> headers;
+    //private Metadata metadata;
+    //private URLBuilder urlBuilder;
 
     public HttpProcessor(HttpClient httpClient, String urlBase, List<String> headers) {
         this.httpClient = httpClient;
@@ -46,25 +48,27 @@ public class HttpProcessor {
      * @return A "virtual" instance for the interface.
      */
     public <T> T createProxy(Class<T> interfaceClass) {
-        metadata = MetadataCollector.collect(interfaceClass);
-        validateMetadata();
-        urlBuilder = new URLBuilder(metadata);
-        var httpInvocationHandler = new HttpInvocationHandler(this);
+        var metadata = MetadataCollector.collect(interfaceClass);
+        validateMetadata(metadata);
+        //urlBuilder = new URLBuilder(metadata);
+        var httpInvocationHandler = new HttpInvocationHandler(this, metadata);
         var proxy = ReflectUtil.createProxy(interfaceClass, httpInvocationHandler);
         logger.debug("Created Instance : {}", interfaceClass.getSimpleName());
         return proxy;
     }
 
-    public Object resolve(Method method, Object[] arguments) {
+    public Object resolve(Metadata metadata, Method method, Object[] arguments) {
         var methodName = method.getName();
-        var methodMetadata = metadata.getMethods().get(methodName);
-        var url = urlBase + urlBuilder.build(methodName, arguments);
+        var methodSignature = MethodSignature.of(method);
+        var methodMetadata = metadata.getMethods().get(methodSignature);
+        var url = urlBase + new URLBuilder(metadata).build(methodSignature, arguments);
         var httpMethod = methodMetadata.getHttpAnnotation().getName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
         var bodyObjects = calculateBodyObjects(methodMetadata, arguments);
         var fullHeaders = new ArrayList<>(this.headers);
         fullHeaders.addAll(calculateHeaderContentType(bodyObjects, isMultipart));
+        fullHeaders.addAll(calculateExtraHeaders(methodMetadata));
         var fullHeadersArray = fullHeaders.toArray(new String[0]);
         var httpConnector = HttpConnector.builder()
                 .httpClient(httpClient)
@@ -79,7 +83,7 @@ public class HttpProcessor {
         return httpConnector.sendRequest();
     }
 
-    private void validateMetadata() {
+    private void validateMetadata(Metadata metadata) {
         metadata.getMethods().forEach((methodName, methodMetadata) -> {
             if (!methodMetadata.isDefault()) {
                 Optional.ofNullable(methodMetadata.getHttpAnnotation())
@@ -128,5 +132,19 @@ public class HttpProcessor {
             headerContentType.add(contentType);
         }
         return headerContentType;
+    }
+
+    private List<String> calculateExtraHeaders(Metadata.Method methodMetadata) {
+        List<String> extraHeaders = new ArrayList<>();
+        List<Metadata.Annotation> httpHeaders = methodMetadata.getHttpHeaders();
+        for (var httpHeader : httpHeaders) {
+            if (httpHeader.getInstance() instanceof Header) {
+                Header headerAnnotation = (Header) httpHeader.getInstance();
+
+                extraHeaders.add(headerAnnotation.name());
+                extraHeaders.add(headerAnnotation.value());
+            }
+        }
+        return extraHeaders;
     }
 }
