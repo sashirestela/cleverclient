@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.http;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -48,6 +49,9 @@ interface ITest {
         CompletableFuture<String> getDemoPlain(@Path("demoId") Integer demoId);
 
         @GET("/{demoId}")
+        CompletableFuture<InputStream> getDemoBinary(@Path("demoId") Integer demoId);
+
+        @GET("/{demoId}")
         CompletableFuture<Demo> getDemo(@Path("demoId") Integer demoId);
 
         @GET("/{genericDemoId}")
@@ -73,6 +77,9 @@ interface ITest {
 
         @GET("/{demoId}")
         String getDemoPlain(@Path("demoId") Integer demoId);
+
+        @GET("/{demoId}")
+        InputStream getDemoBinary(@Path("demoId") Integer demoId);
 
         @GET("/{demoId}")
         Demo getDemo(@Path("demoId") Integer demoId);

@@ -6,6 +6,7 @@ public class ReturnType {
     private static final String ASYNC = "java.util.concurrent.CompletableFuture";
     private static final String STREAM = "java.util.stream.Stream";
     private static final String LIST = "java.util.List";
+    private static final String INPUTSTREAM = "java.io.InputStream";
     private static final String STRING = "java.lang.String";
 
     private static final String REGEX = "[<>]";
@@ -70,6 +71,8 @@ public class ReturnType {
             return Category.ASYNC_GENERIC;
         } else if (isObject()) {
             return Category.ASYNC_OBJECT;
+        } else if (isBinary()) {
+            return Category.ASYNC_BINARY;
         } else if (isPlainText()) {
             return Category.ASYNC_PLAIN_TEXT;
         } else {
@@ -86,6 +89,8 @@ public class ReturnType {
             return Category.SYNC_GENERIC;
         } else if (isObject()) {
             return Category.SYNC_OBJECT;
+        } else if (isBinary()) {
+            return Category.SYNC_BINARY;
         } else if (isPlainText()) {
             return Category.SYNC_PLAIN_TEXT;
         } else {
@@ -111,11 +116,19 @@ public class ReturnType {
     }
 
     public boolean isObject() {
-        return !isString() && (size == 1 || (size == 2 && isAsync()));
+        return !isInputStream() && !isString() && (size == 1 || (size == 2 && isAsync()));
+    }
+
+    public boolean isBinary() {
+        return isInputStream() && (size == 1 || (size == 2 && isAsync()));
     }
 
     public boolean isPlainText() {
         return isString() && (size == 1 || (size == 2 && isAsync()));
+    }
+
+    private boolean isInputStream() {
+        return INPUTSTREAM.equals(returnTypeArray[lastIndex]);
     }
 
     private boolean isString() {
@@ -127,11 +140,13 @@ public class ReturnType {
         ASYNC_LIST,
         ASYNC_GENERIC,
         ASYNC_OBJECT,
+        ASYNC_BINARY,
         ASYNC_PLAIN_TEXT,
         SYNC_STREAM,
         SYNC_LIST,
         SYNC_GENERIC,
         SYNC_OBJECT,
+        SYNC_BINARY,
         SYNC_PLAIN_TEXT;
     }
 }

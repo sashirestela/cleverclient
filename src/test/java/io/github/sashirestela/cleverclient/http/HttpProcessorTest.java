@@ -7,7 +7,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -29,6 +33,7 @@ class HttpProcessorTest {
     HttpClient httpClient = mock(HttpClient.class);
     HttpResponse<String> httpResponse = mock(HttpResponse.class);
     HttpResponse<Stream<String>> httpResponseStream = mock(HttpResponse.class);
+    HttpResponse<InputStream> httpResponseBinary = mock(HttpResponse.class);
 
     @BeforeEach
     void init() {
@@ -81,6 +86,30 @@ class HttpProcessorTest {
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
         assertThrows(CleverClientException.class, () -> service.getDemoPlain(100));
+    }
+
+    @Test
+    void shouldshouldReturnABinarySyncWhenMethodReturnTypeIsABinary() throws IOException, InterruptedException {
+        InputStream binaryData = new FileInputStream(new File("src/test/resources/image.png"));
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenReturn(httpResponseBinary);
+        when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseBinary.body()).thenReturn(binaryData);
+
+        var service = httpProcessor.createProxy(ITest.SyncService.class);
+        var actualDemo = service.getDemoBinary(100);
+        var expectedDemo = binaryData;
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenMethodReturnTypeIsABinary() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenThrow(new InterruptedException("The operation was interrupted"));
+
+        var service = httpProcessor.createProxy(ITest.SyncService.class);
+        assertThrows(CleverClientException.class, () -> service.getDemoBinary(100));
     }
 
     @Test
@@ -189,6 +218,21 @@ class HttpProcessorTest {
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var actualDemo = service.getDemoPlain(100).join();
         var expectedDemo = "{\"id\":100,\"description\":\"Description\",\"active\":true}";
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    void shouldReturnABinaryAsyncWhenMethodReturnTypeIsABinary() throws FileNotFoundException {
+        InputStream binaryData = new FileInputStream(new File("src/test/resources/image.png"));
+        when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
+        when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseBinary.body()).thenReturn(binaryData);
+
+        var service = httpProcessor.createProxy(ITest.AsyncService.class);
+        var actualDemo = service.getDemoBinary(100).join();
+        var expectedDemo = binaryData;
 
         assertEquals(expectedDemo, actualDemo);
     }
