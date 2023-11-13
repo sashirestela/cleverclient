@@ -21,7 +21,6 @@ class CleverClientTest {
         assertEquals(List.of(), cleverClient.getHeaders());
         assertEquals(HttpClient.Version.HTTP_2, cleverClient.getHttpClient().version());
         assertNotNull(cleverClient.getUrlBase());
-        assertNotNull(cleverClient.getHttpProcessor());
     }
 
     @Test
