@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import java.io.InputStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -15,7 +16,7 @@ public class HttpAsyncBinarySender extends HttpSender {
 
         return httpResponseFuture.thenApply(response -> {
 
-            throwExceptionIfErrorIsPresent(response, false);
+            throwExceptionIfErrorIsPresent(response, InputStream.class);
 
             logger.debug("Response : {}", response.body());
 

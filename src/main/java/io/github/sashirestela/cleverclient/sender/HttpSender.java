@@ -1,9 +1,12 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,13 +23,19 @@ public abstract class HttpSender {
             Class<S> genericClass);
 
     @SuppressWarnings("unchecked")
-    protected void throwExceptionIfErrorIsPresent(HttpResponse<?> response, boolean isStream) {
+    protected void throwExceptionIfErrorIsPresent(HttpResponse<?> response, Class<?> clazz) {
         logger.debug("Response Code : {}", response.statusCode());
         if (!CommonUtil.isInHundredsOf(response.statusCode(), HttpURLConnection.HTTP_OK)) {
             var data = "";
-            if (isStream) {
+            if (Stream.class.equals(clazz)) {
                 data = ((Stream<String>) response.body())
                         .collect(Collectors.joining(System.getProperty("line.separator")));
+            } else if (InputStream.class.equals(clazz)) {
+                try {
+                    data = new String(((InputStream) response.body()).readAllBytes(), StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else {
                 data = (String) response.body();
             }

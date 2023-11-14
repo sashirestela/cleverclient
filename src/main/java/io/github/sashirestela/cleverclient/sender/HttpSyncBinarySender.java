@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.sender;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -16,7 +17,7 @@ public class HttpSyncBinarySender extends HttpSender {
 
             var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
 
-            throwExceptionIfErrorIsPresent(httpResponse, false);
+            throwExceptionIfErrorIsPresent(httpResponse, InputStream.class);
 
             var rawData = httpResponse.body();
 
