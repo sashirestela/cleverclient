@@ -17,7 +17,7 @@ public class HttpSyncListSender extends HttpSender {
 
             var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
 
-            throwExceptionIfErrorIsPresent(httpResponse, false);
+            throwExceptionIfErrorIsPresent(httpResponse, null);
 
             var rawData = httpResponse.body();
 

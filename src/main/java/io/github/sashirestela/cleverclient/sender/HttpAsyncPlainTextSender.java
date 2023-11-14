@@ -15,7 +15,7 @@ public class HttpAsyncPlainTextSender extends HttpSender {
 
         return httpResponseFuture.thenApply(response -> {
 
-            throwExceptionIfErrorIsPresent(response, false);
+            throwExceptionIfErrorIsPresent(response, null);
 
             logger.debug("Response : {}", response.body());
 

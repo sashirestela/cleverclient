@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -316,7 +317,7 @@ class HttpProcessorTest {
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponse.body()).thenReturn(
-        "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
+                "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemo(100);
@@ -335,6 +336,21 @@ class HttpProcessorTest {
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemoStream(new ITest.RequestDemo("Descr", null));
+        Exception exception = assertThrows(CompletionException.class,
+                () -> futureService.join());
+        assertTrue(exception.getMessage().contains("The resource does not exist"));
+    }
+
+    @Test
+    void shouldThrownExceptionWhenCallingBinaryMethodAndServerRespondsWithError() {
+        when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
+        when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
+        when(httpResponseBinary.body()).thenReturn(new ByteArrayInputStream(
+                "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}".getBytes()));
+
+        var service = httpProcessor.createProxy(ITest.AsyncService.class);
+        var futureService = service.getDemoBinary(100);
         Exception exception = assertThrows(CompletionException.class,
                 () -> futureService.join());
         assertTrue(exception.getMessage().contains("The resource does not exist"));
