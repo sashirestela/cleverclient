@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.stream.Stream;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
@@ -18,7 +19,7 @@ public class HttpSyncStreamSender extends HttpSender {
 
             var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofLines());
 
-            throwExceptionIfErrorIsPresent(httpResponse, true);
+            throwExceptionIfErrorIsPresent(httpResponse, Stream.class);
 
             return httpResponse.body()
                     .peek(rawData -> logger.debug("Response : {}", rawData))

@@ -23,19 +23,17 @@ public class CleverClient {
     private List<String> headers;
     private HttpClient httpClient;
 
-    private HttpProcessor httpProcessor;
-
     @Builder
     public CleverClient(String urlBase, List<String> headers, HttpClient httpClient, String endOfStream) {
         this.urlBase = urlBase;
         this.headers = Optional.ofNullable(headers).orElse(List.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
-        this.httpProcessor = new HttpProcessor(this.httpClient, this.urlBase, this.headers);
         CleverClientSSE.setEndOfStream(endOfStream);
         logger.debug("CleverClient has been created.");
     }
 
     public <T> T create(Class<T> interfaceClass) {
+        var httpProcessor = new HttpProcessor(this.httpClient, this.urlBase, this.headers);
         return httpProcessor.createProxy(interfaceClass);
     }
 }

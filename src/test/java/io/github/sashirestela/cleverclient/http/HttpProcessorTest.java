@@ -7,7 +7,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -29,6 +34,7 @@ class HttpProcessorTest {
     HttpClient httpClient = mock(HttpClient.class);
     HttpResponse<String> httpResponse = mock(HttpResponse.class);
     HttpResponse<Stream<String>> httpResponseStream = mock(HttpResponse.class);
+    HttpResponse<InputStream> httpResponseBinary = mock(HttpResponse.class);
 
     @BeforeEach
     void init() {
@@ -81,6 +87,30 @@ class HttpProcessorTest {
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
         assertThrows(CleverClientException.class, () -> service.getDemoPlain(100));
+    }
+
+    @Test
+    void shouldshouldReturnABinarySyncWhenMethodReturnTypeIsABinary() throws IOException, InterruptedException {
+        InputStream binaryData = new FileInputStream(new File("src/test/resources/image.png"));
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenReturn(httpResponseBinary);
+        when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseBinary.body()).thenReturn(binaryData);
+
+        var service = httpProcessor.createProxy(ITest.SyncService.class);
+        var actualDemo = service.getDemoBinary(100);
+        var expectedDemo = binaryData;
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenMethodReturnTypeIsABinary() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenThrow(new InterruptedException("The operation was interrupted"));
+
+        var service = httpProcessor.createProxy(ITest.SyncService.class);
+        assertThrows(CleverClientException.class, () -> service.getDemoBinary(100));
     }
 
     @Test
@@ -194,6 +224,21 @@ class HttpProcessorTest {
     }
 
     @Test
+    void shouldReturnABinaryAsyncWhenMethodReturnTypeIsABinary() throws FileNotFoundException {
+        InputStream binaryData = new FileInputStream(new File("src/test/resources/image.png"));
+        when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
+        when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseBinary.body()).thenReturn(binaryData);
+
+        var service = httpProcessor.createProxy(ITest.AsyncService.class);
+        var actualDemo = service.getDemoBinary(100).join();
+        var expectedDemo = binaryData;
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
     void shouldReturnAnObjectAsyncWhenMethodReturnTypeIsAnObject() {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
@@ -272,7 +317,7 @@ class HttpProcessorTest {
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponse.body()).thenReturn(
-        "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
+                "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemo(100);
@@ -291,6 +336,21 @@ class HttpProcessorTest {
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemoStream(new ITest.RequestDemo("Descr", null));
+        Exception exception = assertThrows(CompletionException.class,
+                () -> futureService.join());
+        assertTrue(exception.getMessage().contains("The resource does not exist"));
+    }
+
+    @Test
+    void shouldThrownExceptionWhenCallingBinaryMethodAndServerRespondsWithError() {
+        when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
+                .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
+        when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
+        when(httpResponseBinary.body()).thenReturn(new ByteArrayInputStream(
+                "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}".getBytes()));
+
+        var service = httpProcessor.createProxy(ITest.AsyncService.class);
+        var futureService = service.getDemoBinary(100);
         Exception exception = assertThrows(CompletionException.class,
                 () -> futureService.join());
         assertTrue(exception.getMessage().contains("The resource does not exist"));

@@ -3,6 +3,7 @@ package io.github.sashirestela.cleverclient.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,17 +25,19 @@ class ReturnTypeTest {
 
     @Test
     void shouldReturnCategoryAccordingToTheMethodType() throws NoSuchMethodException, SecurityException {
-        var testData = Map.of(
-                "asyncStreamMethod", ReturnType.Category.ASYNC_STREAM,
-                "asyncListMethod", ReturnType.Category.ASYNC_LIST,
-                "asyncGenericMethod", ReturnType.Category.ASYNC_GENERIC,
-                "asyncObjectMethod", ReturnType.Category.ASYNC_OBJECT,
-                "asyncStringMethod", ReturnType.Category.ASYNC_PLAIN_TEXT,
-                "syncStreamMethod", ReturnType.Category.SYNC_STREAM,
-                "syncListMethod", ReturnType.Category.SYNC_LIST,
-                "syncGenericMethod", ReturnType.Category.SYNC_GENERIC,
-                "syncObjectMethod", ReturnType.Category.SYNC_OBJECT,
-                "syncStringMethod", ReturnType.Category.SYNC_PLAIN_TEXT);
+        var testData = Map.ofEntries(
+                Map.entry("asyncStreamMethod", ReturnType.Category.ASYNC_STREAM),
+                Map.entry("asyncListMethod", ReturnType.Category.ASYNC_LIST),
+                Map.entry("asyncGenericMethod", ReturnType.Category.ASYNC_GENERIC),
+                Map.entry("asyncObjectMethod", ReturnType.Category.ASYNC_OBJECT),
+                Map.entry("asyncBinaryMethod", ReturnType.Category.ASYNC_BINARY),
+                Map.entry("asyncStringMethod", ReturnType.Category.ASYNC_PLAIN_TEXT),
+                Map.entry("syncStreamMethod", ReturnType.Category.SYNC_STREAM),
+                Map.entry("syncListMethod", ReturnType.Category.SYNC_LIST),
+                Map.entry("syncGenericMethod", ReturnType.Category.SYNC_GENERIC),
+                Map.entry("syncObjectMethod", ReturnType.Category.SYNC_OBJECT),
+                Map.entry("syncBinaryMethod", ReturnType.Category.SYNC_BINARY),
+                Map.entry("syncStringMethod", ReturnType.Category.SYNC_PLAIN_TEXT));
         for (String methodName : testData.keySet()) {
             var method = TestInterface.class.getMethod(methodName, new Class[] {});
             var returnType = new ReturnType(method);
@@ -64,6 +67,8 @@ class ReturnTypeTest {
 
         CompletableFuture<Object> asyncObjectMethod();
 
+        CompletableFuture<InputStream> asyncBinaryMethod();
+
         CompletableFuture<String> asyncStringMethod();
 
         CompletableFuture<Set<Object>> asyncSetMethod();
@@ -75,6 +80,8 @@ class ReturnTypeTest {
         Generic<Object> syncGenericMethod();
 
         Object syncObjectMethod();
+
+        InputStream syncBinaryMethod();
 
         String syncStringMethod();
 

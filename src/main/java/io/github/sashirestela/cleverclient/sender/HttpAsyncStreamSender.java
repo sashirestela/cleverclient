@@ -3,6 +3,7 @@ package io.github.sashirestela.cleverclient.sender;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.stream.Stream;
 
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
@@ -17,7 +18,7 @@ public class HttpAsyncStreamSender extends HttpSender {
 
         return httpResponseFuture.thenApply(response -> {
 
-            throwExceptionIfErrorIsPresent(response, true);
+            throwExceptionIfErrorIsPresent(response, Stream.class);
 
             return response.body()
                     .peek(rawData -> logger.debug("Response : {}", rawData))
