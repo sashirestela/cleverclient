@@ -26,11 +26,11 @@ import io.github.sashirestela.cleverclient.util.ReflectUtil;
 public class HttpProcessor {
     private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
-    private final HttpClient httpClient;
-    private final String urlBase;
-    private final List<String> headers;
-    //private Metadata metadata;
-    //private URLBuilder urlBuilder;
+    private HttpClient httpClient;
+    private String urlBase;
+    private List<String> headers;
+    private Metadata metadata;
+    private URLBuilder urlBuilder;
 
     public HttpProcessor(HttpClient httpClient, String urlBase, List<String> headers) {
         this.httpClient = httpClient;
@@ -48,20 +48,20 @@ public class HttpProcessor {
      * @return A "virtual" instance for the interface.
      */
     public <T> T createProxy(Class<T> interfaceClass) {
-        var metadata = MetadataCollector.collect(interfaceClass);
-        validateMetadata(metadata);
-        //urlBuilder = new URLBuilder(metadata);
-        var httpInvocationHandler = new HttpInvocationHandler(this, metadata);
+        metadata = MetadataCollector.collect(interfaceClass);
+        validateMetadata();
+        urlBuilder = new URLBuilder(metadata);
+        var httpInvocationHandler = new HttpInvocationHandler(this);
         var proxy = ReflectUtil.createProxy(interfaceClass, httpInvocationHandler);
         logger.debug("Created Instance : {}", interfaceClass.getSimpleName());
         return proxy;
     }
 
-    public Object resolve(Metadata metadata, Method method, Object[] arguments) {
+    public Object resolve(Method method, Object[] arguments) {
         var methodName = method.getName();
         var methodSignature = MethodSignature.of(method);
         var methodMetadata = metadata.getMethods().get(methodSignature);
-        var url = urlBase + new URLBuilder(metadata).build(methodSignature, arguments);
+        var url = urlBase + urlBuilder.build(methodSignature, arguments);
         var httpMethod = methodMetadata.getHttpAnnotation().getName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
@@ -83,7 +83,7 @@ public class HttpProcessor {
         return httpConnector.sendRequest();
     }
 
-    private void validateMetadata(Metadata metadata) {
+    private void validateMetadata() {
         metadata.getMethods().forEach((methodName, methodMetadata) -> {
             if (!methodMetadata.isDefault()) {
                 Optional.ofNullable(methodMetadata.getHttpAnnotation())
