@@ -34,7 +34,6 @@ public class StreamExample {
                 .messages(Arrays.asList(
                         new Message("user", "Write an article about AI, no more than 100 words.")))
                 .temperature(0.7)
-                .stream(true)
                 .build();
 
         showTitle("Example Create Synchronous Stream");

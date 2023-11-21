@@ -5,7 +5,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +24,12 @@ public class HttpConnector {
     private String url;
     private String httpMethod;
     private ReturnType returnType;
-    private List<Object> bodyObjects;
+    private Object bodyObject;
     private boolean isMultipart;
     private String[] headersArray;
 
     public Object sendRequest() {
-        var bodyPublisher = createBodyPublisher(bodyObjects, isMultipart);
+        var bodyPublisher = createBodyPublisher(bodyObject, isMultipart);
         var responseClass = returnType.getBaseClass();
         HttpRequest httpRequest = null;
         if (headersArray.length > 0) {
@@ -53,18 +52,18 @@ public class HttpConnector {
         }
     }
 
-    private BodyPublisher createBodyPublisher(List<Object> bodyObjects, boolean isMultipart) {
+    private BodyPublisher createBodyPublisher(Object bodyObject, boolean isMultipart) {
         BodyPublisher bodyPublisher = null;
-        if (bodyObjects.isEmpty()) {
+        if (bodyObject == null) {
             logger.debug("Body Request: (Empty)");
             bodyPublisher = BodyPublishers.noBody();
         } else if (isMultipart) {
-            var data = ReflectUtil.getMapFields(bodyObjects);
+            var data = ReflectUtil.getMapFields(bodyObject);
             var requestBytes = HttpMultipart.toByteArrays(data);
             logger.debug("Body Request: {}", data);
             bodyPublisher = BodyPublishers.ofByteArrays(requestBytes);
         } else {
-            var requestString = JsonUtil.objectsToJson(bodyObjects);
+            var requestString = JsonUtil.objectToJson(bodyObject);
             logger.debug("Body Request: {}", requestString);
             bodyPublisher = BodyPublishers.ofString(requestString);
         }
