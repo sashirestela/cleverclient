@@ -55,7 +55,6 @@ public class HttpProcessor {
     }
 
     public Object resolve(Method method, Object[] arguments) {
-        var methodName = method.getName();
         var methodSignature = MethodSignature.of(method);
         var methodMetadata = metadata.getMethods().get(methodSignature);
         var url = urlBase + urlBuilder.build(methodSignature, arguments);
