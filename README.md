@@ -152,7 +152,7 @@ var cleverClient = CleverClient.builder()
 
 ### Supported Response Types
 
-The reponse types are determined from the method responses. We don't need any annotation for that. We have five response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of objects, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of objects, Generic of object, Single object, and Plain Text, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
+The reponse types are determined from the method responses. We don't need any annotation for that. We have five response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of objects, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of objects, Generic of object, Single object, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) object, and Plain Text, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
 
 | Method Response                     | Sync/Async | Response Type                           |
 |-------------------------------------|------------|-----------------------------------------|
@@ -164,6 +164,8 @@ The reponse types are determined from the method responses. We don't need any an
 | Generic\<Object>                    | Sync       | Custom Generic Class of Object          |
 | CompletableFuture\<Object>          | Async      | Single Object                           |
 | Object                              | Sync       | Single Object                           |
+| CompletableFuture\<InputStream>     | Async      | Binary Object                           |
+| InputStream                         | Sync       | Binary Object                           |
 | CompletableFuture\<String>          | Async      | Plain Text                              |
 | String                              | Sync       | Plain Text                              |
 
@@ -172,29 +174,29 @@ The reponse types are determined from the method responses. We don't need any an
 You can create interface default methods to execute special requirements such as pre/post processing before/after calling annotated regular methods. For example in the following interface definition, we have two regular methods with POST annotation which are called from another two default methods. In those defaults methods we are making some pre processing (in this case, modifying the request object) before calling the annotated methods:
 
 ```java
-@Resource("/v1/completions")
+@Resource("/v1/chat/completions")
 interface Completions {
 
-  default CompletableFuture<CompletionResponse> create(CompletionRequest completionRequest) {
-    completionRequest.setStream(false);
-    return notUseCreate(completionRequest);
-  }
+    @POST
+    Stream<ChatResponse> __createSyncStream(@Body ChatRequest chatRequest);
 
-  @POST
-  CompletableFuture<CompletionResponse> notUseCreate(@Body CompletionRequest completionRequest);
+    default Stream<ChatResponse> createSyncStream(ChatRequest chatRequest) {
+        var request = chatRequest.withStream(true);
+        return __createSyncStream(request);
+    }
 
-  default CompletableFuture<Stream<CompletionResponse>> createStream(CompletionRequest completionRequest) {
-    completionRequest.setStream(true);
-    return notUseCreateStream(completionRequest);
-  }
+    @POST
+    CompletableFuture<Stream<ChatResponse>> __createAsyncStream(@Body ChatRequest chatRequest);
 
-  @POST
-  CompletableFuture<Stream<CompletionResponse>> notUseCreateStream(@Body CompletionRequest completionRequest);
+    default CompletableFuture<Stream<ChatResponse>> createAsyncStream(ChatRequest chatRequest) {
+        var request = chatRequest.withStream(true);
+        return __createAsyncStream(request);
+    }
 
 }
 ```
 
-Note that we have named the annotated methods with the prefix "notUse" (notUseCreate, notUseCreateStream) just to indicate that we should not call them directly but should call the default ones (create, createStream).
+Note that we have named the annotated methods with the suffix "__" just to indicate that we should not call them directly but should call the default ones (those without the suffix).
 
 ## ✳ Examples
 
@@ -223,6 +225,8 @@ Some examples have been created in the folder [example](https://github.com/sashi
 
   * ```<className>``` is mandatory and must be one of the values:
     * BasicExample
+    * FileDownloadExample
+    * MultiServiceExample
     * StreamExample (This requires you have an OpenAI account and set the env variable OPENAI_API_TOKEN)
   
   * ```[logOptions]``` are optional and you can you use them to set:
