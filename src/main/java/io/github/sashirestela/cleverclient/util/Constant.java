@@ -11,7 +11,7 @@ public class Constant {
 
     public static final List<String> HTTP_METHODS = List.of("GET", "POST", "PUT", "DELETE");
     public static final List<String> HTTP_HEADERS = List.of("Header");
-    public static final List<String> PARAMETER_TYPES = List.of("Path", "Query", "Body", "BodyPart");
+    public static final List<String> PARAMETER_TYPES = List.of("Path", "Query", "Body");
     public static final List<String> MULTIPART_AS_LIST = List.of("Multipart");
 
     public static final String JSON_EMPTY_CLASS = "{\"type\":\"object\",\"properties\":{}}";
