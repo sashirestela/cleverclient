@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.github.sashirestela.cleverclient.metadata.MethodSignature;
 import org.junit.jupiter.api.Test;
 
 import io.github.sashirestela.cleverclient.metadata.Metadata;
@@ -16,6 +17,7 @@ class URLBuilderTest {
 
     Metadata metadata = mock(Metadata.class);
     URLBuilder urlBuilder = new URLBuilder(metadata);
+    MethodSignature methodSign = MethodSignature.of("testMethod", List.of());
 
     @Test
     void shouldReturnUrlWithoutChangesWhenDoesNotContainPathOrQueryParams() {
@@ -29,11 +31,11 @@ class URLBuilderTest {
                 .url(url)
                 .parametersByType(paramsMap)
                 .build();
-        var mapMethods = Map.of(methodName, methodMetadata);
+        var mapMethods = Map.of(methodSign, methodMetadata);
 
         when(metadata.getMethods()).thenReturn(mapMethods);
 
-        var actualUrl = urlBuilder.build(methodName, null);
+        var actualUrl = urlBuilder.build(methodSign, null);
         var expectedUrl = url;
         assertEquals(expectedUrl, actualUrl);
     }
@@ -59,11 +61,11 @@ class URLBuilderTest {
                 .url(url)
                 .parametersByType(paramsMap)
                 .build();
-        var mapMethods = Map.of(methodName, methodMetadata);
+        var mapMethods = Map.of(methodSign, methodMetadata);
 
         when(metadata.getMethods()).thenReturn(mapMethods);
 
-        var actualUrl = urlBuilder.build(methodName, new Object[] { null, 101, null, 201 });
+        var actualUrl = urlBuilder.build(methodSign, new Object[] { null, 101, null, 201 });
         var expectedUrl = "/api/domain/entities/101/details/201";
         assertEquals(expectedUrl, actualUrl);
     }
@@ -93,11 +95,11 @@ class URLBuilderTest {
                 .url(url)
                 .parametersByType(paramsMap)
                 .build();
-        var mapMethods = Map.of(methodName, methodMetadata);
+        var mapMethods = Map.of(methodSign, methodMetadata);
 
         when(metadata.getMethods()).thenReturn(mapMethods);
 
-        var actualUrl = urlBuilder.build(methodName, new Object[] { null, "name", null, 20 });
+        var actualUrl = urlBuilder.build(methodSign, new Object[] { null, "name", null, 20 });
         var expectedUrl = "/api/domain/entities?sortedBy=name&rowsPerPage=20";
         assertEquals(expectedUrl, actualUrl);
     }

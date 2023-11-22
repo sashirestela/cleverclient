@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +27,13 @@ public class MetadataCollector {
         var urlFromResource = Optional
                 .ofNullable(getAnnotValue(clazz.getAnnotation(Resource.class)))
                 .orElse("");
-        Map<String, Metadata.Method> methodsMap = new HashMap<>();
+        Map<MethodSignature, Metadata.Method> methodsMap = new HashMap<>();
         var methods = clazz.getMethods();
         for (var method : methods) {
             var fullClassName = method.getGenericReturnType().getTypeName();
             var methodAnnotsList = getAnnotationsMetadata(method.getDeclaredAnnotations());
             var httpAnnotation = getAnnotIfIsInList(methodAnnotsList, Constant.HTTP_METHODS);
+            var httpHeaders = getAnnotsIfIsInList(methodAnnotsList, Constant.HTTP_HEADERS);
             var isMultipart = (getAnnotIfIsInList(methodAnnotsList, Constant.MULTIPART_AS_LIST) != null);
             var urlFromHttp = httpAnnotation != null ? httpAnnotation.getValue() : "";
             var parametersByType = getParametersByType(method.getParameters());
@@ -40,11 +42,12 @@ public class MetadataCollector {
                     .returnType(new ReturnType(fullClassName))
                     .isDefault(method.isDefault())
                     .httpAnnotation(httpAnnotation)
+                    .httpHeaders(httpHeaders)
                     .isMultipart(isMultipart)
                     .url(urlFromResource + urlFromHttp)
                     .parametersByType(parametersByType)
                     .build();
-            methodsMap.put(method.getName(), methodMetadata);
+            methodsMap.put(MethodSignature.of(method), methodMetadata);
         }
         var metadata = Metadata.builder()
                 .name(clazz.getSimpleName())
@@ -86,7 +89,7 @@ public class MetadataCollector {
         for (Annotation annotation : annotations) {
             String annotName = annotation.annotationType().getSimpleName();
             String annotValue = getAnnotValue(annotation);
-            annotationsMetadata.add(new Metadata.Annotation(annotName, annotValue));
+            annotationsMetadata.add(new Metadata.Annotation(annotName, annotValue, annotation));
         }
         return annotationsMetadata;
     }
@@ -106,14 +109,24 @@ public class MetadataCollector {
         return (String) value;
     }
 
-    private static Metadata.Annotation getAnnotIfIsInList(List<Metadata.Annotation> annotations,
-            List<String> annotationNames) {
+    private static Metadata.Annotation getAnnotIfIsInList(
+            List<Metadata.Annotation> annotations,
+            List<String> annotationNames)
+    {
+        List<Metadata.Annotation> matchingAnnotations = getAnnotsIfIsInList(annotations, annotationNames);
+        return matchingAnnotations.isEmpty() ? null : matchingAnnotations.get(0);
+    }
+
+    private static List<Metadata.Annotation> getAnnotsIfIsInList(
+            List<Metadata.Annotation> annotations,
+            List<String> annotationNames)
+    {
         if (annotations.isEmpty()) {
-            return null;
+            return List.of();
         } else {
             return annotations.stream()
                     .filter(annot -> annotationNames.contains(annot.getName()))
-                    .findFirst().orElse(null);
+                    .collect(Collectors.toList());
         }
     }
 }

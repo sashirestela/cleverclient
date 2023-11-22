@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.sashirestela.cleverclient.annotation.Header;
+import io.github.sashirestela.cleverclient.metadata.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +21,7 @@ import io.github.sashirestela.cleverclient.util.Constant;
 import io.github.sashirestela.cleverclient.util.ReflectUtil;
 
 public class HttpProcessor {
-    private static Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
     private HttpClient httpClient;
     private String urlBase;
@@ -53,15 +55,16 @@ public class HttpProcessor {
     }
 
     public Object resolve(Method method, Object[] arguments) {
-        var methodName = method.getName();
-        var methodMetadata = metadata.getMethods().get(methodName);
-        var url = urlBase + urlBuilder.build(methodName, arguments);
+        var methodSignature = MethodSignature.of(method);
+        var methodMetadata = metadata.getMethods().get(methodSignature);
+        var url = urlBase + urlBuilder.build(methodSignature, arguments);
         var httpMethod = methodMetadata.getHttpAnnotation().getName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
         var bodyObject = calculateBodyObject(methodMetadata, arguments);
         var fullHeaders = new ArrayList<>(this.headers);
         fullHeaders.addAll(calculateHeaderContentType(bodyObject, isMultipart));
+        fullHeaders.addAll(calculateExtraHeaders(methodMetadata));
         var fullHeadersArray = fullHeaders.toArray(new String[0]);
         var httpConnector = HttpConnector.builder()
                 .httpClient(httpClient)
@@ -121,5 +124,19 @@ public class HttpProcessor {
             headerContentType.add(contentType);
         }
         return headerContentType;
+    }
+
+    private List<String> calculateExtraHeaders(Metadata.Method methodMetadata) {
+        List<String> extraHeaders = new ArrayList<>();
+        List<Metadata.Annotation> httpHeaders = methodMetadata.getHttpHeaders();
+        for (var httpHeader : httpHeaders) {
+            if (httpHeader.getInstance() instanceof Header) {
+                Header headerAnnotation = (Header) httpHeader.getInstance();
+
+                extraHeaders.add(headerAnnotation.name());
+                extraHeaders.add(headerAnnotation.value());
+            }
+        }
+        return extraHeaders;
     }
 }
