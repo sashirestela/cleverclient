@@ -2,7 +2,6 @@ package io.github.sashirestela.cleverclient.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,15 +23,6 @@ public class JsonUtil {
     private static final TypeReference<Map<String, Object>> jsonPropertiesTypeRef = new TypeReference<>() { };
 
     private JsonUtil() {
-    }
-
-    public static String objectsToJson(List<?> objects) {
-        Map<String, Object> jsonProperties = new HashMap<>();
-        for (Object obj : objects) {
-            jsonProperties.putAll(objectMapperStrict.convertValue(obj, jsonPropertiesTypeRef));
-        }
-
-        return objectToJson(jsonProperties);
     }
 
     public static <T> Map<String, Object> objectToMap(T object) {

@@ -37,8 +37,7 @@ public class HttpProcessor {
 
     /**
      * Creates a generic dynamic proxy with a new {@link HttpInvocationHandler
-     * HttpInvocationHandler}
-     * object which will resolve the requests.
+     * HttpInvocationHandler} object which will resolve the requests.
      * 
      * @param <T>            A generic interface.
      * @param interfaceClass Service of a generic interface
