@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
+import io.github.sashirestela.cleverclient.annotation.Header;
 import io.github.sashirestela.cleverclient.annotation.Multipart;
 import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.Path;
@@ -58,6 +59,7 @@ interface ITest {
         CompletableFuture<Generic<Demo>> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
         @GET
+        @Header(name = "MyHeader", value = "MyValue")
         CompletableFuture<List<Demo>> getDemos();
 
         @POST
@@ -88,6 +90,7 @@ interface ITest {
         Generic<Demo> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
         @GET
+        @Header(name = "MyHeader", value = "MyValue")
         List<Demo> getDemos();
 
         @POST

@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import io.github.sashirestela.cleverclient.metadata.MethodSignature;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 import org.junit.jupiter.api.Test;
 
 import io.github.sashirestela.cleverclient.metadata.Metadata;
@@ -102,5 +105,42 @@ class URLBuilderTest {
         var actualUrl = urlBuilder.build(methodSign, new Object[] { null, "name", null, 20 });
         var expectedUrl = "/api/domain/entities?sortedBy=name&rowsPerPage=20";
         assertEquals(expectedUrl, actualUrl);
+    }
+
+    @Test
+    void shouldReturnReplacedUrlWithQueryParamsWhenMethodContainsQueryParamsForPojos() {
+        var methodName = "testMethod";
+        var url = "/api/domain/entities";
+        var paramsList = List.of(
+                Metadata.Parameter.builder()
+                        .index(0)
+                        .annotationValue("")
+                        .build(),
+                Metadata.Parameter.builder()
+                        .index(1)
+                        .annotationValue("sortedBy")
+                        .build());
+        var paramsMap = Map.of(
+                "Path", new ArrayList<Metadata.Parameter>(),
+                "Query", paramsList);
+        var methodMetadata = Metadata.Method.builder()
+                .name(methodName)
+                .url(url)
+                .parametersByType(paramsMap)
+                .build();
+        var mapMethods = Map.of(methodSign, methodMetadata);
+
+        when(metadata.getMethods()).thenReturn(mapMethods);
+
+        var actualUrl = urlBuilder.build(methodSign, new Object[] { new Pagination(10, 3), "fullname" });
+        var expectedUrl = "/api/domain/entities?size=10&page=3&sortedBy=fullname";
+        assertEquals(expectedUrl, actualUrl);
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class Pagination {
+        private Integer size;
+        private Integer page;
     }
 }
