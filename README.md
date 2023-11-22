@@ -137,22 +137,25 @@ var cleverClient = CleverClient.builder()
 | POST       | Method    | POST endpoint's url         | optional       |
 | PUT        | Method    | PUT endpoint's url          | optional       |
 | DELETE     | Method    | DELETE endpoint's url       | optional       |
+| Header     | Method    | Header's name and value     | mandatory      |
 | Multipart  | Method    | (None)                      | none           |
 | Path       | Parameter | Path parameter name in url  | mandatory      |
 | Query      | Parameter | Query parameter name in url | mandatory      |
+| Query      | Parameter | (None for Pojos)            | none           |
 | Body       | Parameter | (None)                      | none           |
 
 * ```Resource``` could be used to separate the repeated part of the endpoints' url in an interface.
 * ```GET, POST, PUT, DELETE``` are used to mark the typical http methods (endpoints).
+* ```Header``` Used to include more headers (pairs of name and value) at method level.
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
-* ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...].
+* ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for Pojos using its properties and values.
 * ```Body``` is used to mark a method parameter as the endpoint's payload request, so the request will be application/json at least the endpoint is annotated with Multipart.
 * Check the above [Description's example](#💡-description) or the [Test](https://github.com/sashirestela/cleverclient/tree/main/src/test/java/io/github/sashirestela/cleverclient) folder to see more of these interface annotations in action.
 
 ### Supported Response Types
 
-The reponse types are determined from the method responses. We don't need any annotation for that. We have five response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of objects, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of objects, Generic of object, Single object, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) object, and Plain Text, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
+The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of objects, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of objects, Generic of object, Single object, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) object, and Plain Text, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
 
 | Method Response                     | Sync/Async | Response Type                           |
 |-------------------------------------|------------|-----------------------------------------|
