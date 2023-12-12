@@ -55,16 +55,16 @@ public class HttpConnector {
     private BodyPublisher createBodyPublisher(Object bodyObject, boolean isMultipart) {
         BodyPublisher bodyPublisher = null;
         if (bodyObject == null) {
-            logger.debug("Body Request: (Empty)");
+            logger.debug("Request Body : (Empty)");
             bodyPublisher = BodyPublishers.noBody();
         } else if (isMultipart) {
             var data = ReflectUtil.getMapFields(bodyObject);
             var requestBytes = HttpMultipart.toByteArrays(data);
-            logger.debug("Body Request: {}", data);
+            logger.debug("Request Body : {}", data);
             bodyPublisher = BodyPublishers.ofByteArrays(requestBytes);
         } else {
             var requestString = JsonUtil.objectToJson(bodyObject);
-            logger.debug("Body Request: {}", requestString);
+            logger.debug("Request Body : {}", requestString);
             bodyPublisher = BodyPublishers.ofString(requestString);
         }
         return bodyPublisher;
