@@ -41,6 +41,7 @@ interface ITest {
     }
 
     @Resource("/demos")
+    @Header(name = "ClassHeader", value = "ClassValue")
     interface AsyncService {
 
         @GET
@@ -60,6 +61,7 @@ interface ITest {
 
         @GET
         @Header(name = "MyHeader", value = "MyValue")
+        @Header(name = "OtherHeader", value = "OtherValue")
         CompletableFuture<List<Demo>> getDemos();
 
         @POST
@@ -75,6 +77,7 @@ interface ITest {
     }
 
     @Resource("/demos")
+    @Header(name = "ClassHeader", value = "ClassValue")
     interface SyncService {
 
         @GET("/{demoId}")

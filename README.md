@@ -133,11 +133,12 @@ var cleverClient = CleverClient.builder()
 | Annotation | Target    | Value                       | Required Value |
 |------------|-----------|-----------------------------|----------------|
 | Resource   | Interface | Resource's url              | optional       |
+| Header     | Interface | Header's name and value     | mandatory      |
+| Header     | Method    | Header's name and value     | mandatory      |
 | GET        | Method    | GET endpoint's url          | optional       |
 | POST       | Method    | POST endpoint's url         | optional       |
 | PUT        | Method    | PUT endpoint's url          | optional       |
 | DELETE     | Method    | DELETE endpoint's url       | optional       |
-| Header     | Method    | Header's name and value     | mandatory      |
 | Multipart  | Method    | (None)                      | none           |
 | Path       | Parameter | Path parameter name in url  | mandatory      |
 | Query      | Parameter | Query parameter name in url | mandatory      |
@@ -145,13 +146,13 @@ var cleverClient = CleverClient.builder()
 | Body       | Parameter | (None)                      | none           |
 
 * ```Resource``` could be used to separate the repeated part of the endpoints' url in an interface.
+* ```Header``` Used to include more headers (pairs of name and value) at interface or method level. It is possible to have multiple Header annotations for the same target.
 * ```GET, POST, PUT, DELETE``` are used to mark the typical http methods (endpoints).
-* ```Header``` Used to include more headers (pairs of name and value) at method level.
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
-* ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for Pojos using its properties and values.
+* ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for POJOs using its properties and values.
 * ```Body``` is used to mark a method parameter as the endpoint's payload request, so the request will be application/json at least the endpoint is annotated with Multipart.
-* Check the above [Description's example](#💡-description) or the [Test](https://github.com/sashirestela/cleverclient/tree/main/src/test/java/io/github/sashirestela/cleverclient) folder to see more of these interface annotations in action.
+* Check the above [Description's example](#-description) or the [Test](https://github.com/sashirestela/cleverclient/tree/main/src/test/java/io/github/sashirestela/cleverclient) folder to see more of these interface annotations in action.
 
 ### Supported Response Types
 
@@ -229,6 +230,7 @@ Some examples have been created in the folder [example](https://github.com/sashi
   * ```<className>``` is mandatory and must be one of the values:
     * BasicExample
     * FileDownloadExample
+    * HeaderExample
     * MultiServiceExample
     * StreamExample (This requires you have an OpenAI account and set the env variable OPENAI_API_TOKEN)
   

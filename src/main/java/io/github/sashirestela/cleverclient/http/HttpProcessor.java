@@ -75,6 +75,7 @@ public class HttpProcessor {
                 .headersArray(fullHeadersArray)
                 .build();
         logger.debug("Http Call : {} {}", httpMethod, url);
+        logger.debug("Request Headers : {}", printHeaders(fullHeaders));
         return httpConnector.sendRequest();
     }
 
@@ -131,11 +132,24 @@ public class HttpProcessor {
         for (var httpHeader : httpHeaders) {
             if (httpHeader.getInstance() instanceof Header) {
                 Header headerAnnotation = (Header) httpHeader.getInstance();
-
                 extraHeaders.add(headerAnnotation.name());
                 extraHeaders.add(headerAnnotation.value());
             }
         }
         return extraHeaders;
+    }
+
+    private String printHeaders(List<String> headers) {
+        var print = "{";
+        for(var i = 0; i < headers.size(); i++) {
+            if (i > 1) {
+                print += ", ";
+            }
+            var headerKey = headers.get(i++);
+            var headerVal = headerKey.equals("Authorization") ? "*".repeat(10) : headers.get(i);
+            print += headerKey + " = " + headerVal;
+        }
+        print += "}";
+        return print;
     }
 }
