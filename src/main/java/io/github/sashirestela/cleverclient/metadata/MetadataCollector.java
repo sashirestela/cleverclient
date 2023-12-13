@@ -91,9 +91,7 @@ public class MetadataCollector {
         for (var annotation : annotations) {
             var annotName = annotation.annotationType().getSimpleName();
             var annotValue = getAnnotValue(annotation);
-            if (annotValue != null) {
-                annotationsMetadata.add(new Metadata.Annotation(annotName, annotValue, annotation));
-            }
+            annotationsMetadata.add(new Metadata.Annotation(annotName, annotValue, annotation));
         }
         return annotationsMetadata;
     }
