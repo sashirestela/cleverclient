@@ -1,33 +1,28 @@
 package io.github.sashirestela.cleverclient.http;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import io.github.sashirestela.cleverclient.annotation.Header;
-import io.github.sashirestela.cleverclient.metadata.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.sashirestela.cleverclient.annotation.Body;
-import io.github.sashirestela.cleverclient.annotation.Path;
-import io.github.sashirestela.cleverclient.metadata.Metadata;
-import io.github.sashirestela.cleverclient.metadata.MetadataCollector;
-import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.util.CommonUtil;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadataStore;
 import io.github.sashirestela.cleverclient.util.Constant;
 import io.github.sashirestela.cleverclient.util.ReflectUtil;
 
-public class HttpProcessor {
+public class HttpProcessor implements InvocationHandler {
     private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
     private HttpClient httpClient;
     private String urlBase;
     private List<String> headers;
-    private Metadata metadata;
-    private URLBuilder urlBuilder;
 
     public HttpProcessor(HttpClient httpClient, String urlBase, List<String> headers) {
         this.httpClient = httpClient;
@@ -44,26 +39,45 @@ public class HttpProcessor {
      * @return A "virtual" instance for the interface.
      */
     public <T> T createProxy(Class<T> interfaceClass) {
-        metadata = MetadataCollector.collect(interfaceClass);
-        validateMetadata();
-        urlBuilder = new URLBuilder(metadata);
-        var httpInvocationHandler = new HttpInvocationHandler(this);
-        var proxy = ReflectUtil.createProxy(interfaceClass, httpInvocationHandler);
+        InterfaceMetadataStore.one().save(interfaceClass);
+        var proxy = ReflectUtil.createProxy(interfaceClass, this);
         logger.debug("Created Instance : {}", interfaceClass.getSimpleName());
         return proxy;
     }
 
-    public Object resolve(Method method, Object[] arguments) {
-        var methodSignature = MethodSignature.of(method);
-        var methodMetadata = metadata.getMethods().get(methodSignature);
-        var url = urlBase + urlBuilder.build(methodSignature, arguments);
-        var httpMethod = methodMetadata.getHttpAnnotation().getName();
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
+        logger.debug("Invoked Method : {}.{}()", method.getDeclaringClass().getSimpleName(), method.getName());
+        if (method.isDefault()) {
+            return MethodHandles.lookup()
+                    .findSpecial(
+                            method.getDeclaringClass(),
+                            method.getName(),
+                            MethodType.methodType(
+                                    method.getReturnType(),
+                                    method.getParameterTypes()),
+                            method.getDeclaringClass())
+                    .bindTo(proxy)
+                    .invokeWithArguments(arguments);
+        } else {
+            var responseObject = resolve(method, arguments);
+            logger.debug("Received Response");
+            return responseObject;
+        }
+    }
+
+    private Object resolve(Method method, Object[] arguments) {
+        var interfaceMetadata = InterfaceMetadataStore.one().get(method.getDeclaringClass());
+        var methodMetadata = interfaceMetadata.getMethodBySignature().get(method.toString());
+        var urlMethod = interfaceMetadata.getFullUrlByMethod(methodMetadata);
+        var url = urlBase + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
+        var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
         var bodyObject = calculateBodyObject(methodMetadata, arguments);
         var fullHeaders = new ArrayList<>(this.headers);
         fullHeaders.addAll(calculateHeaderContentType(bodyObject, isMultipart));
-        fullHeaders.addAll(calculateExtraHeaders(methodMetadata));
+        fullHeaders.addAll(interfaceMetadata.getFullHeadersByMethod(methodMetadata));
         var fullHeadersArray = fullHeaders.toArray(new String[0]);
         var httpConnector = HttpConnector.builder()
                 .httpClient(httpClient)
@@ -79,64 +93,21 @@ public class HttpProcessor {
         return httpConnector.sendRequest();
     }
 
-    private void validateMetadata() {
-        metadata.getMethods().forEach((methodName, methodMetadata) -> {
-            if (!methodMetadata.isDefault()) {
-                Optional.ofNullable(methodMetadata.getHttpAnnotation())
-                        .orElseThrow(
-                                () -> new CleverClientException("Missing HTTP anotation for the method {0}.",
-                                        methodName, null));
-            }
-        });
-
-        final var PATH = Path.class.getSimpleName();
-        metadata.getMethods().forEach((methodName, methodMetadata) -> {
-            var url = methodMetadata.getUrl();
-            var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
-            if (!CommonUtil.isNullOrEmpty(listPathParams)) {
-                listPathParams.forEach(pathParam -> methodMetadata.getParametersByType().get(PATH).stream()
-                        .filter(paramMetadata -> pathParam.equals(paramMetadata.getAnnotationValue())).findFirst()
-                        .orElseThrow(() -> new CleverClientException(
-                                "Path param {0} in the url cannot find an annotated argument in the method {1}.",
-                                pathParam, methodName,
-                                null)));
-            }
-        });
-    }
-
-    private Object calculateBodyObject(Metadata.Method methodMetadata, Object[] arguments) {
-        final var BODY = Body.class.getSimpleName();
-        var indexBody = methodMetadata.getParametersByType().get(BODY)
-                .stream()
-                .map(Metadata.Parameter::getIndex)
-                .findFirst()
-                .orElse(-1);
+    private Object calculateBodyObject(MethodMetadata methodMetadata, Object[] arguments) {
+        var indexBody = methodMetadata.getBodyIndex();
         return indexBody >= 0 ? arguments[indexBody] : null;
     }
 
     private List<String> calculateHeaderContentType(Object bodyObject, boolean isMultipart) {
         List<String> headerContentType = new ArrayList<>();
         if (bodyObject != null) {
+            headerContentType.add(Constant.HEADER_CONTENT_TYPE);
             var contentType = isMultipart
                     ? Constant.TYPE_MULTIPART + Constant.BOUNDARY_TITLE + "\"" + Constant.BOUNDARY_VALUE + "\""
                     : Constant.TYPE_APP_JSON;
-            headerContentType.add(Constant.HEADER_CONTENT_TYPE);
             headerContentType.add(contentType);
         }
         return headerContentType;
-    }
-
-    private List<String> calculateExtraHeaders(Metadata.Method methodMetadata) {
-        List<String> extraHeaders = new ArrayList<>();
-        List<Metadata.Annotation> httpHeaders = methodMetadata.getHttpHeaders();
-        for (var httpHeader : httpHeaders) {
-            if (httpHeader.getInstance() instanceof Header) {
-                Header headerAnnotation = (Header) httpHeader.getInstance();
-                extraHeaders.add(headerAnnotation.name());
-                extraHeaders.add(headerAnnotation.value());
-            }
-        }
-        return extraHeaders;
     }
 
     private String printHeaders(List<String> headers) {
