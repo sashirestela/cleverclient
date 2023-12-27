@@ -2,9 +2,11 @@ package io.github.sashirestela.cleverclient.http;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class URLBuilder {
@@ -33,24 +35,24 @@ public class URLBuilder {
         return url;
     }
 
-    private String replacePathParams(String url, Map<Integer, String> pathParameters, Object[] arguments) {
-        for (var paramEntry : pathParameters.entrySet()) {
-            var index = paramEntry.getKey();
-            var pathParam = "{" + paramEntry.getValue() + "}";
+    private String replacePathParams(String url, List<ParameterMetadata> pathParameters, Object[] arguments) {
+        for (var parameter : pathParameters) {
+            var index = parameter.getIndex();
+            var pathParam = "{" + parameter.getAnnotation().getValue() + "}";
             url = url.replace(pathParam, arguments[index].toString());
         }
         return url;
     }
 
-    private String includeQueryParams(String url, Map<Integer, String> queryParameters, Object[] arguments) {
+    private String includeQueryParams(String url, List<ParameterMetadata> queryParameters, Object[] arguments) {
         var queryParamBuilder = new StringBuilder();
-        for (var paramEntry : queryParameters.entrySet()) {
-            var index = paramEntry.getKey();
+        for (var parameter : queryParameters) {
+            var index = parameter.getIndex();
             var value = arguments[index];
             if (value == null) {
                 continue;
             }
-            var queryParam = paramEntry.getValue();
+            var queryParam = parameter.getAnnotation().getValue();
             if (queryParam == null || queryParam.isEmpty())
                 appendQueryParams(JsonUtil.objectToMap(value), queryParamBuilder);
             else

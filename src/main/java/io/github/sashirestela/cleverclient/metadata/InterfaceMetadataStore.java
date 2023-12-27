@@ -114,7 +114,6 @@ public class InterfaceMetadataStore {
             var annotations = getAnnotations(javaParameter.getDeclaredAnnotations());
             var parameterMetadata = ParameterMetadata.builder()
                     .index(index++)
-                    .type(javaParameter.getType())
                     .annotation(annotations.size() > 0 ? annotations.get(0) : null)
                     .build();
             parameters.add(parameterMetadata);
@@ -133,7 +132,8 @@ public class InterfaceMetadataStore {
             var url = interfaceMetadata.getFullUrlByMethod(methodMetadata);
             var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
             if (!CommonUtil.isNullOrEmpty(listPathParams)) {
-                listPathParams.forEach(pathParam -> methodMetadata.getPathParameters().values().stream()
+                listPathParams.forEach(pathParam -> methodMetadata.getPathParameters().stream()
+                        .map(parameter -> parameter.getAnnotation().getValue())
                         .filter(paramAnnotValue -> pathParam.equals(paramAnnotValue)).findFirst()
                         .orElseThrow(() -> new CleverClientException(
                                 "Path param {0} in the url cannot find an annotated argument in the method {1}.",

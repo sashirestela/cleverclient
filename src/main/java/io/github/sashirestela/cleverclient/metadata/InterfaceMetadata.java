@@ -1,7 +1,6 @@
 package io.github.sashirestela.cleverclient.metadata;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -88,23 +87,19 @@ public class InterfaceMetadata {
             return bodyParam.isPresent() ? bodyParam.get().getIndex() : -1;
         }
 
-        public Map<Integer, String> getPathParameters() {
+        public List<ParameterMetadata> getPathParameters() {
             return getParametersFilteredBy(ANNOT_PARAM_PATH);
         }
 
-        public Map<Integer, String> getQueryParameters() {
+        public List<ParameterMetadata> getQueryParameters() {
             return getParametersFilteredBy(ANNOT_PARAM_QUERY);
         }
 
-        private Map<Integer, String> getParametersFilteredBy(String annotationName) {
-            var filteredParameters = parameters.stream()
+        private List<ParameterMetadata> getParametersFilteredBy(String annotationName) {
+            return parameters.stream()
                     .filter(param -> param.getAnnotation() != null)
                     .filter(param -> param.getAnnotation().getName().equals(annotationName))
                     .collect(Collectors.toList());
-            return filteredParameters.stream().count() > 0
-                    ? filteredParameters.stream()
-                            .collect(Collectors.toMap(p -> p.getIndex(), p -> p.getAnnotation().getValue()))
-                    : new HashMap<>();
         }
     }
 
@@ -112,7 +107,6 @@ public class InterfaceMetadata {
     @Builder
     public static class ParameterMetadata {
         int index;
-        Class<?> type;
         AnnotationMetadata annotation;
     }
 
