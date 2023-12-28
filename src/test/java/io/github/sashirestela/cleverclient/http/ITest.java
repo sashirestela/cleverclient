@@ -12,6 +12,7 @@ import io.github.sashirestela.cleverclient.annotation.Header;
 import io.github.sashirestela.cleverclient.annotation.Multipart;
 import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.Path;
+import io.github.sashirestela.cleverclient.annotation.Query;
 import io.github.sashirestela.cleverclient.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -19,7 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-interface ITest {
+public interface ITest {
 
     interface NotAnnotatedService {
 
@@ -37,6 +38,21 @@ interface ITest {
 
         @POST("/demos/{demoId}")
         CompletableFuture<Demo> unmatchedPathParamMethod(@Path("demo_id") int demoId);
+
+    }
+
+    @Resource("/api")
+    @Header(name = "FirstKey", value = "FirstVal")
+    @Header(name = "SecondKey", value = "SecondVal")
+    interface GoodService {
+
+        @POST("/demos/{demoId}")
+        @Multipart
+        @Header(name = "ThirdKey", value = "ThirdVal")
+        Demo demoPostMethod(@Body RequestDemo request, @Path("demoId") Long demoId);
+
+        @GET("/demos/{demoId}/subdemos")
+        List<Demo> demoGetMethod(@Path("demoId") Long demoId, @Query("size") Integer size, @Query("page") Integer page);
 
     }
 

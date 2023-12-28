@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommonUtilTest {
@@ -151,6 +152,26 @@ class CommonUtilTest {
             var actualResult = CommonUtil.isInHundredsOf((int) data[0], (int) data[1]);
             var expectedResult = (boolean) data[2];
             assertEquals(expectedResult, actualResult);
+        }
+    }
+
+    @Test
+    void shouldCreateMapStringWhenAStringListIsPassed() {
+        var expectedMap = new HashMap<String, String>();
+        expectedMap.put("key1", "val1");
+        expectedMap.put("key2", "val2");
+        var actualMap = CommonUtil.createMapString("key1", "val1", "key2", "val2");
+        assertEquals(expectedMap, actualMap);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenCreatingMapStringAndExistsWrongCondition() {
+        String[][] testData = {
+                { "key1", "val1", "key2" },
+                { "key1", "val1", null, "val2" }
+        };
+        for (String[] data : testData) {
+            assertThrows(IllegalArgumentException.class, () -> CommonUtil.createMapString(data));
         }
     }
 }
