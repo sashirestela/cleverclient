@@ -68,7 +68,7 @@ public class InterfaceMetadataStore {
         if (interfacesByFullName.containsKey(interfaceClass.getName())) {
             return interfacesByFullName.get(interfaceClass.getName());
         } else {
-            throw new CleverClientException("The interaface {0} has not been saved yet", interfaceClass.getSimpleName(),
+            throw new CleverClientException("The interaface {0} has not been saved yet.", interfaceClass.getSimpleName(),
                     null);
         }
     }

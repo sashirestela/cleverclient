@@ -3,6 +3,7 @@ package io.github.sashirestela.cleverclient.util;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -51,5 +52,21 @@ public class CommonUtil {
 
     public static boolean isInHundredsOf(int value, int range) {
         return Math.floor(value / 100.0) * 100 == range;
+    }
+
+    public static Map<String, String> createMapString(String... keyValPairs) {
+        if (keyValPairs.length % 2 > 0) {
+            throw new IllegalArgumentException("It is expected an even number of elements.");
+        }
+        Map<String, String> map = new HashMap<>();
+        for (var i = 0; i < keyValPairs.length; i++) {
+            var key = keyValPairs[i];
+            if (key == null) {
+                throw new IllegalArgumentException("Unexpected null element for key in position " + i + ".");
+            }
+            var val = keyValPairs[++i];
+            map.put(key, val);
+        }
+        return map;
     }
 }
