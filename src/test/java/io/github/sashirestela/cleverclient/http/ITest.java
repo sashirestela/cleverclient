@@ -57,7 +57,6 @@ public interface ITest {
     }
 
     @Resource("/demos")
-    @Header(name = "ClassHeader", value = "ClassValue")
     interface AsyncService {
 
         @GET
@@ -93,7 +92,6 @@ public interface ITest {
     }
 
     @Resource("/demos")
-    @Header(name = "ClassHeader", value = "ClassValue")
     interface SyncService {
 
         @GET("/{demoId}")
