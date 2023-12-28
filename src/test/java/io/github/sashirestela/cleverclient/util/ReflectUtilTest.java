@@ -4,19 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Path;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 class ReflectUtilTest {
 
@@ -33,87 +25,8 @@ class ReflectUtilTest {
         assertEquals(expectedValue, actualValue);
     }
 
-    @Test
-    void shouldReturnMapOfAllFieldsWhenObjectHasNotNullFields() {
-        TestClass object = TestClass.builder()
-                .integerField(10)
-                .stringField("text")
-                .doubleField(3.1416)
-                .property(20)
-                .testEnumField(TestEnum.ENUM1)
-                .build();
-        Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
-        Map<String, Object> expectedMapFields = Map.of(
-                "integer", 10,
-                "string", "text",
-                "real", 3.1416,
-                "property", 20,
-                "enumerator", "enum1");
-        assertEquals(expectedMapFields, actualMapFields);
-    }
-
-    @Test
-    void shouldReturnMapOfNotNullFieldsWhenObjectHasNullFields() {
-        TestClass object = TestClass.builder()
-                .integerField(10)
-                .stringField("text")
-                .doubleField(3.1416)
-                .property(null)
-                .testEnumField(TestEnum.ENUM1)
-                .build();
-        Map<String, Object> actualMapFields = ReflectUtil.getMapFields(object);
-        Map<String, Object> expectedMapFields = Map.of(
-                "integer", 10,
-                "string", "text",
-                "real", 3.1416,
-                "enumerator", "enum1");
-        assertEquals(expectedMapFields, actualMapFields);
-    }
-
-    @Test
-    void shouldReturnEqualMapWhenGivenMapInstance() {
-        Map<String, Object> expectedMap = Map.of(
-                "integer", 10,
-                "string", "text",
-                "real", 3.1416,
-                "enumerator", "enum1");
-        Map<String, Object> actualMap = ReflectUtil.getMapFields(expectedMap);
-        assertEquals(expectedMap, actualMap);
-    }
-
     static interface TestInterface {
         @GET("/api/test/url")
         String testMethod(@Path("arg") String argument);
-    }
-
-    static enum TestEnum {
-        @JsonProperty("enum1")
-        ENUM1,
-        @JsonProperty("enum2")
-        ENUM2;
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @SuperBuilder
-    @Getter
-    static class SuperTestClass {
-        @JsonProperty("integer")
-        protected Integer integerField;
-        @JsonProperty("string")
-        protected String stringField;
-        @JsonProperty("real")
-        protected Double doubleField;
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @SuperBuilder
-    @Getter
-    @Setter
-    static class TestClass extends SuperTestClass {
-        private Integer property;
-        @JsonProperty("enumerator")
-        private TestEnum testEnumField;
     }
 }

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.sender.HttpSenderFactory;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
-import io.github.sashirestela.cleverclient.util.ReflectUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
@@ -58,7 +57,7 @@ public class HttpConnector {
             logger.debug("Request Body : (Empty)");
             bodyPublisher = BodyPublishers.noBody();
         } else if (isMultipart) {
-            var data = ReflectUtil.getMapFields(bodyObject);
+            var data = JsonUtil.objectToMap(bodyObject);
             var requestBytes = HttpMultipart.toByteArrays(data);
             logger.debug("Request Body : {}", data);
             bodyPublisher = BodyPublishers.ofByteArrays(requestBytes);

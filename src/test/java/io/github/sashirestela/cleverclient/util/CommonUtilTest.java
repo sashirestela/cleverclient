@@ -21,6 +21,7 @@ class CommonUtilTest {
         Object[] testData = {
                 null,
                 "",
+                "  ",
                 new Object[0],
                 new ArrayList<>(),
                 new HashMap<>(),
@@ -42,57 +43,6 @@ class CommonUtilTest {
         for (Object testItem : testData) {
             assertFalse(CommonUtil.isNullOrEmpty(testItem), "Should treat `" + testItem + "` as NOT empty");
         }
-    }
-
-    @Test
-    void shouldReturnTrueWhenListIsNullOrEmpty() {
-        List<?>[] testData = { null, new ArrayList<>() };
-        for (List<?> data : testData) {
-            boolean actualCondition = CommonUtil.isNullOrEmpty(data);
-            boolean expectedCondition = true;
-            assertEquals(expectedCondition, actualCondition);
-        }
-    }
-
-    @Test
-    void shouldReturnFalseWhenListIsNotEmpty() {
-        boolean actualCondition = CommonUtil.isNullOrEmpty(Arrays.asList("one", "two"));
-        boolean expectedCondition = false;
-        assertEquals(expectedCondition, actualCondition);
-    }
-
-    @Test
-    void shouldReturnTrueWhenArrayIsNullOrEmpty() {
-        Object[][] testData = { null, new String[] {} };
-        for (Object[] data : testData) {
-            boolean actualCondition = CommonUtil.isNullOrEmpty(data);
-            boolean expectedCondition = true;
-            assertEquals(expectedCondition, actualCondition);
-        }
-    }
-
-    @Test
-    void shouldReturnFalseWhenArrayIsNotEmpty() {
-        boolean actualCondition = CommonUtil.isNullOrEmpty(new String[] { "one", "two" });
-        boolean expectedCondition = false;
-        assertEquals(expectedCondition, actualCondition);
-    }
-
-    @Test
-    void shouldReturnTrueWhenStringIsNullOrEmptyOrBlank() {
-        String[] testData = { null, "", " " };
-        for (String data : testData) {
-            boolean actualCondition = CommonUtil.isNullOrEmpty(data);
-            boolean expectedCondition = true;
-            assertEquals(expectedCondition, actualCondition);
-        }
-    }
-
-    @Test
-    void shouldReturnFalseWhenStringIsNotEmpty() {
-        boolean actualCondition = CommonUtil.isNullOrEmpty("text");
-        boolean expectedCondition = false;
-        assertEquals(expectedCondition, actualCondition);
     }
 
     @Test

@@ -15,22 +15,11 @@ public class CommonUtil {
 
     public static boolean isNullOrEmpty(Object obj) {
         return obj == null
-                || (obj instanceof Map && ((Map<?,?>) obj).isEmpty())
+                || (obj instanceof Map && ((Map<?, ?>) obj).isEmpty())
                 || (obj instanceof Collection && ((Collection<?>) obj).isEmpty())
                 || (obj instanceof CharSequence && ((CharSequence) obj).length() == 0)
+                || (obj instanceof String && ((String) obj).isBlank())
                 || (obj.getClass().isArray() && Array.getLength(obj) == 0);
-    }
-
-    public static boolean isNullOrEmpty(Object[] array) {
-        return array == null || array.length == 0;
-    }
-
-    public static boolean isNullOrEmpty(List<?> list) {
-        return list == null || list.isEmpty();
-    }
-
-    public static boolean isNullOrEmpty(String text) {
-        return text == null || text.isBlank();
     }
 
     public static List<String> findFullMatches(String text, String regex) {
