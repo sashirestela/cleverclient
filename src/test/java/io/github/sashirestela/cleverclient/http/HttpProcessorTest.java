@@ -45,20 +45,6 @@ class HttpProcessorTest {
     }
 
     @Test
-    void shouldThownExceptionWhenCallingCreateMethodForNoAnnotedMethod() {
-        Exception exception = assertThrows(CleverClientException.class,
-                () -> httpProcessor.createProxy(ITest.NotAnnotatedService.class));
-        assertTrue(exception.getMessage().contains("Missing HTTP anotation for the method"));
-    }
-
-    @Test
-    void shouldThownExceptionWhenCallingCreateMethodForBadPathParamMethod() {
-        Exception exception = assertThrows(CleverClientException.class,
-                () -> httpProcessor.createProxy(ITest.BadPathParamService.class));
-        assertTrue(exception.getMessage().contains("Path param demoId in the url cannot find"));
-    }
-
-    @Test
     void shouldThownExceptionWhenCallingMethodReturnTypeIsUnsupported() {
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         Exception exception = assertThrows(CleverClientException.class,

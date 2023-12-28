@@ -32,6 +32,10 @@ public class ReturnType {
         this(method.getGenericReturnType().getTypeName());
     }
 
+    public String toString() {
+        return fullClassName;
+    }
+
     public String getFullClassName() {
         return fullClassName;
     }

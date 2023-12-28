@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommonUtilTest {
@@ -20,6 +21,7 @@ class CommonUtilTest {
         Object[] testData = {
                 null,
                 "",
+                "  ",
                 new Object[0],
                 new ArrayList<>(),
                 new HashMap<>(),
@@ -41,57 +43,6 @@ class CommonUtilTest {
         for (Object testItem : testData) {
             assertFalse(CommonUtil.isNullOrEmpty(testItem), "Should treat `" + testItem + "` as NOT empty");
         }
-    }
-
-    @Test
-    void shouldReturnTrueWhenListIsNullOrEmpty() {
-        List<?>[] testData = { null, new ArrayList<>() };
-        for (List<?> data : testData) {
-            boolean actualCondition = CommonUtil.isNullOrEmpty(data);
-            boolean expectedCondition = true;
-            assertEquals(expectedCondition, actualCondition);
-        }
-    }
-
-    @Test
-    void shouldReturnFalseWhenListIsNotEmpty() {
-        boolean actualCondition = CommonUtil.isNullOrEmpty(Arrays.asList("one", "two"));
-        boolean expectedCondition = false;
-        assertEquals(expectedCondition, actualCondition);
-    }
-
-    @Test
-    void shouldReturnTrueWhenArrayIsNullOrEmpty() {
-        Object[][] testData = { null, new String[] {} };
-        for (Object[] data : testData) {
-            boolean actualCondition = CommonUtil.isNullOrEmpty(data);
-            boolean expectedCondition = true;
-            assertEquals(expectedCondition, actualCondition);
-        }
-    }
-
-    @Test
-    void shouldReturnFalseWhenArrayIsNotEmpty() {
-        boolean actualCondition = CommonUtil.isNullOrEmpty(new String[] { "one", "two" });
-        boolean expectedCondition = false;
-        assertEquals(expectedCondition, actualCondition);
-    }
-
-    @Test
-    void shouldReturnTrueWhenStringIsNullOrEmptyOrBlank() {
-        String[] testData = { null, "", " " };
-        for (String data : testData) {
-            boolean actualCondition = CommonUtil.isNullOrEmpty(data);
-            boolean expectedCondition = true;
-            assertEquals(expectedCondition, actualCondition);
-        }
-    }
-
-    @Test
-    void shouldReturnFalseWhenStringIsNotEmpty() {
-        boolean actualCondition = CommonUtil.isNullOrEmpty("text");
-        boolean expectedCondition = false;
-        assertEquals(expectedCondition, actualCondition);
     }
 
     @Test
@@ -151,6 +102,26 @@ class CommonUtilTest {
             var actualResult = CommonUtil.isInHundredsOf((int) data[0], (int) data[1]);
             var expectedResult = (boolean) data[2];
             assertEquals(expectedResult, actualResult);
+        }
+    }
+
+    @Test
+    void shouldCreateMapStringWhenAStringListIsPassed() {
+        var expectedMap = new HashMap<String, String>();
+        expectedMap.put("key1", "val1");
+        expectedMap.put("key2", "val2");
+        var actualMap = CommonUtil.createMapString("key1", "val1", "key2", "val2");
+        assertEquals(expectedMap, actualMap);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenCreatingMapStringAndExistsWrongCondition() {
+        String[][] testData = {
+                { "key1", "val1", "key2" },
+                { "key1", "val1", null, "val2" }
+        };
+        for (String[] data : testData) {
+            assertThrows(IllegalArgumentException.class, () -> CommonUtil.createMapString(data));
         }
     }
 }

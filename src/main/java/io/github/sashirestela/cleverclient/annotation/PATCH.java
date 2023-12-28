@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @HttpMethod
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface PUT {
+public @interface PATCH {
     String value() default "";
 }

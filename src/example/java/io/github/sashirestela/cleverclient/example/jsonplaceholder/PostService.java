@@ -5,6 +5,7 @@ import java.util.List;
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.DELETE;
 import io.github.sashirestela.cleverclient.annotation.GET;
+import io.github.sashirestela.cleverclient.annotation.PATCH;
 import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.PUT;
 import io.github.sashirestela.cleverclient.annotation.Path;
@@ -25,6 +26,9 @@ public interface PostService {
 
     @PUT("/{postId}")
     Post updatePost(@Path("postId") Integer postId, @Body Post post);
+
+    @PATCH("/{postId}")
+    Post patchPost(@Path("postId") Integer postId, @Body Post post);
 
     @DELETE("/{postId}")
     Post deletePost(@Path("postId") Integer postId);

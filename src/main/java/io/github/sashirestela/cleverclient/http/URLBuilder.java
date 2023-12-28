@@ -5,54 +5,54 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import io.github.sashirestela.cleverclient.annotation.Path;
-import io.github.sashirestela.cleverclient.annotation.Query;
-import io.github.sashirestela.cleverclient.metadata.Metadata;
-import io.github.sashirestela.cleverclient.metadata.MethodSignature;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class URLBuilder {
 
-    private final Metadata metadata;
+    private static URLBuilder urlBuilder = null;
 
-    public URLBuilder(Metadata metadata) {
-        this.metadata = metadata;
+    private URLBuilder() {
     }
 
-    public String build(MethodSignature method, Object[] arguments) {
-        final var PATH = Path.class.getSimpleName();
-        final var QUERY = Query.class.getSimpleName();
+    public static URLBuilder one() {
+        if (urlBuilder == null) {
+            urlBuilder = new URLBuilder();
+        }
+        return urlBuilder;
+    }
 
-        var methodMetadata = metadata.getMethods().get(method);
-        var url = methodMetadata.getUrl();
-        var pathParamList = methodMetadata.getParametersByType().get(PATH);
-        var queryParamList = methodMetadata.getParametersByType().get(QUERY);
-        if (pathParamList.isEmpty() && queryParamList.isEmpty()) {
+    public String build(String urlMethod, MethodMetadata methodMetadata, Object[] arguments) {
+        var url = urlMethod;
+        var pathParameters = methodMetadata.getPathParameters();
+        var queryParameters = methodMetadata.getQueryParameters();
+        if (pathParameters.isEmpty() && queryParameters.isEmpty()) {
             return url;
         }
-        url = replacePathParams(url, pathParamList, arguments);
-        url = includeQueryParams(url, queryParamList, arguments);
+        url = replacePathParams(url, pathParameters, arguments);
+        url = includeQueryParams(url, queryParameters, arguments);
         return url;
     }
 
-    private String replacePathParams(String url, List<Metadata.Parameter> paramList, Object[] arguments) {
-        for (var paramMetadata : paramList) {
-            var index = paramMetadata.getIndex();
-            var pathParam = "{" + paramMetadata.getAnnotationValue() + "}";
+    private String replacePathParams(String url, List<ParameterMetadata> pathParameters, Object[] arguments) {
+        for (var parameter : pathParameters) {
+            var index = parameter.getIndex();
+            var pathParam = "{" + parameter.getAnnotation().getValue() + "}";
             url = url.replace(pathParam, arguments[index].toString());
         }
         return url;
     }
 
-    private String includeQueryParams(String url, List<Metadata.Parameter> paramList, Object[] arguments) {
+    private String includeQueryParams(String url, List<ParameterMetadata> queryParameters, Object[] arguments) {
         var queryParamBuilder = new StringBuilder();
-        for (var paramMetadata : paramList) {
-            var index = paramMetadata.getIndex();
+        for (var parameter : queryParameters) {
+            var index = parameter.getIndex();
             var value = arguments[index];
             if (value == null) {
                 continue;
             }
-            var queryParam = paramMetadata.getAnnotationValue();
+            var queryParam = parameter.getAnnotation().getValue();
             if (queryParam == null || queryParam.isEmpty())
                 appendQueryParams(JsonUtil.objectToMap(value), queryParamBuilder);
             else
@@ -61,11 +61,11 @@ public class URLBuilder {
         return url + queryParamBuilder;
     }
 
-    protected void appendQueryParams(Map<String, ?> queryParams, StringBuilder queryParamBuilder) {
+    private void appendQueryParams(Map<String, ?> queryParams, StringBuilder queryParamBuilder) {
         queryParams.forEach((k, v) -> appendQueryParam(k, v, queryParamBuilder));
     }
 
-    protected void appendQueryParam(String name, Object value, StringBuilder queryParamBuilder) {
+    private void appendQueryParam(String name, Object value, StringBuilder queryParamBuilder) {
         if (value != null) {
             queryParamBuilder.append(queryParamBuilder.length() == 0 ? '?' : '&')
                     .append(URLEncoder.encode(name, StandardCharsets.UTF_8))

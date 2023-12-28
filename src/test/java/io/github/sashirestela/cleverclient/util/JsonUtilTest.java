@@ -15,6 +15,8 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 class JsonUtilTest {
 
@@ -107,31 +109,27 @@ class JsonUtilTest {
 
     @Test
     void shouldConvertObjectToMapWhenClassHasNoIssues() {
-        TestClass object = new TestClass("test", 10);
-        Map<String, ?> actualMap = JsonUtil.objectToMap(object);
-        assertEquals(object.getFirst(), actualMap.get("first"));
-        assertEquals(object.getSecond(), actualMap.get("second"));
+        ChildTestClass object = ChildTestClass.builder()
+                .integerField(10)
+                .stringField("text")
+                .doubleField(3.1416)
+                .property(20)
+                .testEnumField(TestEnum.ENUM1)
+                .build();
+        Map<String, Object> actualMapFields = JsonUtil.objectToMap(object);
+        Map<String, Object> expectedMapFields = Map.of(
+                "integer", 10,
+                "string", "text",
+                "real", 3.1416,
+                "property", 20,
+                "enumerator", "enum1");
+        assertEquals(expectedMapFields, actualMapFields);
     }
 
     @Test
     void shouldThrowExceptionWhenConvertingObjectToMapWithIssues() {
         FailClass object = new FailClass("test", 10);
         assertThrows(CleverClientException.class, () -> JsonUtil.objectToMap(object));
-    }
-
-    @Test
-    void shouldConvertJsonToObjectStrictWhenJsonHasNoIssues() {
-        String json = "{\"first\":\"test\",\"second\":10}";
-        TestClass actualObject = JsonUtil.jsonToObjectStrict(json, TestClass.class);
-        TestClass expectedObject = new TestClass("test", 10);
-        assertEquals(expectedObject.getFirst(), actualObject.getFirst());
-        assertEquals(expectedObject.getSecond(), actualObject.getSecond());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenConvertingJsonToObjectStrictWithUnknownProperties() {
-        String json = "{\"first\":\"test\",\"unknown_property\":10}";
-        assertThrows(CleverClientException.class, () -> JsonUtil.jsonToObjectStrict(json, TestClass.class));
     }
 
     @NoArgsConstructor
@@ -155,6 +153,37 @@ class JsonUtilTest {
 
         private List<T> data;
 
+    }
+
+    static enum TestEnum {
+        @JsonProperty("enum1")
+        ENUM1,
+        @JsonProperty("enum2")
+        ENUM2;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    @Getter
+    static class SuperTestClass {
+        @JsonProperty("integer")
+        protected Integer integerField;
+        @JsonProperty("string")
+        protected String stringField;
+        @JsonProperty("real")
+        protected Double doubleField;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    @Getter
+    @Setter
+    static class ChildTestClass extends SuperTestClass {
+        private Integer property;
+        @JsonProperty("enumerator")
+        private TestEnum testEnumField;
     }
 
     @NoArgsConstructor

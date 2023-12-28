@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,12 +30,12 @@ public class HttpMultipart {
             byteArrays.add(toBytes(DASH + Constant.BOUNDARY_VALUE + NL));
             byteArrays.add(toBytes(DISPOSITION));
             var fieldName = entry.getKey();
-            if (entry.getValue() instanceof Path) {
+            if (isFile(entry.getValue())) {
                 String fileName = null;
                 String mimeType = null;
                 byte[] fileContent = null;
                 try {
-                    var path = (Path) entry.getValue();
+                    var path = Path.of(new URL((String) entry.getValue()).getPath());
                     fileName = path.toString();
                     mimeType = Files.probeContentType(path);
                     fileContent = Files.readAllBytes(path);
@@ -59,5 +60,11 @@ public class HttpMultipart {
 
     private static byte[] toBytes(String text) {
         return text.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static boolean isFile(Object value) {
+        final String FILE_PROTOCOL = "file:";
+        return value instanceof String
+                && ((String) value).startsWith(FILE_PROTOCOL);
     }
 }

@@ -43,6 +43,12 @@ public class BasicExample {
                 .build());
         System.out.println(editPost);
 
+        showTitle("Example Patch Post");
+        var patchPost = postService.patchPost(postId, Post.builder()
+                .title("Godbye")
+                .build());
+        System.out.println(patchPost);
+
         showTitle("Example Delete Post");
         postService.deletePost(postId);
         System.out.println("Post was deleted");
