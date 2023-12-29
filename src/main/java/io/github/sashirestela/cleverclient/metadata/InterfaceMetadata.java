@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.github.sashirestela.cleverclient.http.ReturnType;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 import lombok.Builder;
 import lombok.Value;
 

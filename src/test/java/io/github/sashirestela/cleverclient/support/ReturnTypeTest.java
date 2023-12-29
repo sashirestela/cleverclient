@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient.http;
+package io.github.sashirestela.cleverclient.support;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

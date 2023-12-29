@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient.http;
+package io.github.sashirestela.cleverclient.support;
 
 import java.io.IOException;
 import java.net.URL;
@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.util.Constant;
 
 public class HttpMultipart {

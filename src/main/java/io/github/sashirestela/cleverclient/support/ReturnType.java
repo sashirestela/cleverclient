@@ -1,4 +1,4 @@
-package io.github.sashirestela.cleverclient.http;
+package io.github.sashirestela.cleverclient.support;
 
 import java.lang.reflect.Method;
 
@@ -44,8 +44,8 @@ public class ReturnType {
         return getClass(lastIndex);
     }
 
-    public Class<?> getGenericClass() {
-        return getClass(prevLastIndex);
+    public Class<?> getGenericClassIfExists() {
+        return isGeneric() ? getClass(prevLastIndex) : null;
     }
 
     private Class<?> getClass(int index) {

@@ -6,10 +6,13 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.sashirestela.cleverclient.http.ReturnType;
-import io.github.sashirestela.cleverclient.http.ReturnType.Category;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.ReturnType;
+import io.github.sashirestela.cleverclient.support.ReturnType.Category;
 
+/**
+ * Factory for the abstrac class HttpSender.
+ */
 public class HttpSenderFactory {
     private static Logger logger = LoggerFactory.getLogger(HttpSenderFactory.class);
 
@@ -40,6 +43,12 @@ public class HttpSenderFactory {
         return factory;
     }
 
+    /**
+     * Instances a HttpSender concrete class based on the return type.
+     * 
+     * @param returnType The method return type.
+     * @return A HttpSender concrete class.
+     */
     public HttpSender createSender(ReturnType returnType) {
         HttpSender sender = null;
         var category = returnType.category();
