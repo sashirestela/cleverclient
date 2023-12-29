@@ -10,11 +10,11 @@ import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 
 import io.github.sashirestela.cleverclient.http.ITest;
-import io.github.sashirestela.cleverclient.http.ReturnType;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.AnnotationMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 
 public class InterfaceMetadataStoreTest {

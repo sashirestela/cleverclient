@@ -18,6 +18,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
@@ -38,10 +39,7 @@ class HttpProcessorTest {
 
     @BeforeEach
     void init() {
-        httpProcessor = new HttpProcessor(
-                httpClient,
-                "https://api.demmo",
-                null);
+        httpProcessor = new HttpProcessor("https://api.demmo", List.of(), httpClient);
     }
 
     @Test
@@ -127,7 +125,8 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(httpResponse);
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
-        when(httpResponse.body()).thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
+        when(httpResponse.body())
+                .thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
         var actualGenericDemo = service.getGenericDemo(1);
@@ -175,7 +174,8 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(httpResponseStream);
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
-        when(httpResponseStream.body()).thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
+        when(httpResponseStream.body())
+                .thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
         var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr", null));
@@ -243,7 +243,8 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
-        when(httpResponse.body()).thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
+        when(httpResponse.body())
+                .thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var actualGenericDemo = service.getGenericDemo(1).join();
@@ -273,7 +274,8 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
-        when(httpResponseStream.body()).thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
+        when(httpResponseStream.body())
+                .thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var actualStreamDemo = service.getDemoStream(new ITest.RequestDemo("Descr", null)).join();
@@ -291,7 +293,8 @@ class HttpProcessorTest {
         when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
-        var actualDemo = service.getFile(new ITest.RequestDemo("Descr", Paths.get("src/test/resources/image.png"))).join();
+        var actualDemo = service.getFile(new ITest.RequestDemo("Descr", Paths.get("src/test/resources/image.png")))
+                .join();
         var expectedDemo = new ITest.Demo(100, "Description", true);
 
         assertEquals(expectedDemo, actualDemo);
@@ -333,7 +336,8 @@ class HttpProcessorTest {
                 .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
         when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponseBinary.body()).thenReturn(new ByteArrayInputStream(
-                "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}".getBytes()));
+                "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}"
+                        .getBytes()));
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemoBinary(100);

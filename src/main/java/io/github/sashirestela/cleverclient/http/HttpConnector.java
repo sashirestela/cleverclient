@@ -10,10 +10,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.sender.HttpSenderFactory;
+import io.github.sashirestela.cleverclient.support.HttpMultipart;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
+/**
+ * HttpConnector prepares the request and receives the response to/from the
+ * Java's HttpClient component.
+ */
 @AllArgsConstructor
 @Builder
 public class HttpConnector {
@@ -27,9 +33,16 @@ public class HttpConnector {
     private boolean isMultipart;
     private String[] headersArray;
 
+    /**
+     * Prepares the request to call Java's HttpClient and delegates it to a
+     * specialized HttpSender based on the method's return type.
+     * 
+     * @return The response coming from the HttpSender's sendRequest method.
+     */
     public Object sendRequest() {
         var bodyPublisher = createBodyPublisher(bodyObject, isMultipart);
         var responseClass = returnType.getBaseClass();
+        var genericClass = returnType.getGenericClassIfExists();
         HttpRequest httpRequest = null;
         if (headersArray.length > 0) {
             httpRequest = HttpRequest.newBuilder()
@@ -44,11 +57,7 @@ public class HttpConnector {
                     .build();
         }
         var httpSender = HttpSenderFactory.get().createSender(returnType);
-        if (returnType.isGeneric()) {
-            return httpSender.sendRequest(httpClient, httpRequest, responseClass, returnType.getGenericClass());
-        } else {
-            return httpSender.sendRequest(httpClient, httpRequest, responseClass, null);
-        }
+        return httpSender.sendRequest(httpClient, httpRequest, responseClass, genericClass);
     }
 
     private BodyPublisher createBodyPublisher(Object bodyObject, boolean isMultipart) {
