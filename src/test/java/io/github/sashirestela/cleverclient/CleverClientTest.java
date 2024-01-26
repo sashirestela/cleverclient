@@ -41,14 +41,14 @@ class CleverClientTest {
     }
 
     @Test
-    void shouldThrownExceptionWhenTryingToPassAnEmptyUrlBase() {
+    void shouldThrownExceptionWhenTryingToPassAnEmptyBaseUrl() {
         var cleverClientBuilder = CleverClient.builder()
                 .header("headerName")
                 .header("headerValue")
                 .httpClient(HttpClient.newHttpClient())
                 .endOfStream("[DONE]");
         assertThrows(NullPointerException.class,
-                () -> cleverClientBuilder.build());
+            cleverClientBuilder::build);
     }
 
     @Test
@@ -57,8 +57,9 @@ class CleverClientTest {
                 .baseUrl("http://test")
                 .header("oneHeader");
         Exception exception = assertThrows(CleverClientException.class,
-                () -> cleverClientBuilder.build());
-        assertTrue(exception.getMessage().equals("Headers must be entered as pair of values in the list."));
+            cleverClientBuilder::build);
+        assertEquals("Headers must be entered as pair of values in the list.",
+          exception.getMessage());
     }
 
     interface TestCleverClient {
