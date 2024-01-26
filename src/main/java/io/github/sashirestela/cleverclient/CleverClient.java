@@ -22,17 +22,17 @@ import lombok.Singular;
  */
 @Getter
 public class CleverClient {
-    private static Logger logger = LoggerFactory.getLogger(CleverClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(CleverClient.class);
 
-    private String urlBase;
-    private List<String> headers;
-    private HttpClient httpClient;
-    private HttpProcessor httpProcessor;
+    private final String baseUrl;
+    private final List<String> headers;
+    private final HttpClient httpClient;
+    private final HttpProcessor httpProcessor;
 
     /**
      * Constructor to create an instance of CleverClient.
      * 
-     * @param urlBase     Root of the url of the API service to call. Mandatory.
+     * @param baseUrl     Root of the url of the API service to call. Mandatory.
      * @param headers     Http headers for all the API service. Header's name and
      *                    value must be individual entries in the list. Optional.
      * @param httpClient  Custom Java's HttpClient component. One is created by
@@ -41,16 +41,16 @@ public class CleverClient {
      *                    server sent events (SSE). Optional.
      */
     @Builder
-    public CleverClient(@NonNull String urlBase, @Singular List<String> headers, HttpClient httpClient,
+    public CleverClient(@NonNull String baseUrl, @Singular List<String> headers, HttpClient httpClient,
             String endOfStream) {
-        this.urlBase = urlBase;
+        this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(List.of());
         if (this.headers.size() % 2 > 0) {
             throw new CleverClientException("Headers must be entered as pair of values in the list.", null, null);
         }
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
         CleverClientSSE.setEndOfStream(endOfStream);
-        this.httpProcessor = new HttpProcessor(this.urlBase, this.headers, this.httpClient);
+        this.httpProcessor = new HttpProcessor(this.baseUrl, this.headers, this.httpClient);
         logger.debug("CleverClient has been created.");
     }
 

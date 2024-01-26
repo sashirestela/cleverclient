@@ -17,10 +17,10 @@ public class FileDownloadExample {
     }
 
     public static void main(String[] args) throws IOException {
-        final var URL_BASE = "https://via.placeholder.com";
+        final var BASE_URL = "https://via.placeholder.com";
 
         var cleverClient = CleverClient.builder()
-                .urlBase(URL_BASE)
+                .baseUrl(BASE_URL)
                 .build();
 
         var imageService = cleverClient.create(ImageService.class);

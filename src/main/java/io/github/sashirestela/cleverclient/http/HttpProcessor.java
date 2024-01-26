@@ -22,19 +22,19 @@ import io.github.sashirestela.cleverclient.util.ReflectUtil;
 public class HttpProcessor implements InvocationHandler {
     private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
-    private HttpClient httpClient;
-    private String urlBase;
-    private List<String> headers;
+    private final HttpClient httpClient;
+    private final String baseUrl;
+    private final List<String> headers;
 
     /**
      * Constructor to create an instance of HttpProcessor.
      * 
      * @param httpClient Java's HttpClient component that solves the http calling.
-     * @param urlBase    Root of the url of the API service to call.
+     * @param baseUrl    Root of the url of the API service to call.
      * @param headers    Http headers for all the API service.
      */
-    public HttpProcessor(String urlBase, List<String> headers, HttpClient httpClient) {
-        this.urlBase = urlBase;
+    public HttpProcessor(String baseUrl, List<String> headers, HttpClient httpClient) {
+        this.baseUrl = baseUrl;
         this.headers = headers;
         this.httpClient = httpClient;
     }
@@ -93,7 +93,7 @@ public class HttpProcessor implements InvocationHandler {
     /**
      * Reads the interface method metadata from memory and uses them to prepare an
      * HttpConnector object that will resend the request to the Java's HttpClient
-     * and will receive the response. This method is called from the invoke mehod.
+     * and will receive the response. This method is called from the invoke method.
      * 
      * @param method    The Method instance corresponding to the interface method
      *                  invoked on the proxy instance.
@@ -106,7 +106,7 @@ public class HttpProcessor implements InvocationHandler {
         var interfaceMetadata = InterfaceMetadataStore.one().get(method.getDeclaringClass());
         var methodMetadata = interfaceMetadata.getMethodBySignature().get(method.toString());
         var urlMethod = interfaceMetadata.getFullUrlByMethod(methodMetadata);
-        var url = urlBase + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
+        var url = baseUrl + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
         var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();

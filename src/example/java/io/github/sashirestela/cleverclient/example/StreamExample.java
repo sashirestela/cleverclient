@@ -17,13 +17,13 @@ import io.github.sashirestela.cleverclient.example.openai.Message;
 public class StreamExample {
 
     public static void main(String[] args) {
-        final var URL_BASE = "https://api.openai.com";
+        final var BASE_URL = "https://api.openai.com";
         final var AUTHORIZATION_HEADER = "Authorization";
         final var BEARER_AUTHORIZATION = "Bearer " + System.getenv("OPENAI_API_KEY");
         final var END_OF_STREAM = "[DONE]";
 
         var cleverClient = CleverClient.builder()
-                .urlBase(URL_BASE)
+                .baseUrl(BASE_URL)
                 .headers(Arrays.asList(AUTHORIZATION_HEADER, BEARER_AUTHORIZATION))
                 .endOfStream(END_OF_STREAM)
                 .build();

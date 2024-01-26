@@ -19,18 +19,18 @@ class CleverClientTest {
     @Test
     void shouldSetPropertiesToDefaultValuesWhenBuilderIsCalledWithoutThoseProperties() {
         var cleverClient = CleverClient.builder()
-                .urlBase("https://test")
+                .baseUrl("https://test")
                 .build();
         assertEquals(List.of(), cleverClient.getHeaders());
         assertEquals(HttpClient.Version.HTTP_2, cleverClient.getHttpClient().version());
-        assertNotNull(cleverClient.getUrlBase());
+        assertNotNull(cleverClient.getBaseUrl());
         assertNotNull(cleverClient.getHttpProcessor());
     }
 
     @Test
     void shouldImplementInterfaceWhenCallingCreate() {
         var cleverClient = CleverClient.builder()
-                .urlBase("https://test")
+                .baseUrl("https://test")
                 .header("headerName")
                 .header("headerValue")
                 .httpClient(HttpClient.newHttpClient())
@@ -54,7 +54,7 @@ class CleverClientTest {
     @Test
     void shouldThrownExceptionWhenTryingToPassAnOddNumbersOfHeaders() {
         var cleverClientBuilder = CleverClient.builder()
-                .urlBase("http://test")
+                .baseUrl("http://test")
                 .header("oneHeader");
         Exception exception = assertThrows(CleverClientException.class,
                 () -> cleverClientBuilder.build());

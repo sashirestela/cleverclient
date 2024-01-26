@@ -27,10 +27,10 @@ public class HeaderExample {
     }
 
     public static void main(String[] args) {
-        final var URL_BASE = "https://httpbin.org";
+        final var BASE_URL = "https://httpbin.org";
 
         var cleverClient = CleverClient.builder()
-                .urlBase(URL_BASE)
+                .baseUrl(BASE_URL)
                 .build();
 
         var classHeaderService = cleverClient.create(ClassHeaderService.class);

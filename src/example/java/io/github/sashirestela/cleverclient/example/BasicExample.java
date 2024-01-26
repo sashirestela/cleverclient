@@ -7,10 +7,10 @@ import io.github.sashirestela.cleverclient.example.jsonplaceholder.PostService;
 public class BasicExample {
 
     public static void main(String[] args) {
-        final var URL_BASE = "https://jsonplaceholder.typicode.com";
+        final var BASE_URL = "https://jsonplaceholder.typicode.com";
 
         var cleverClient = CleverClient.builder()
-                .urlBase(URL_BASE)
+                .baseUrl(BASE_URL)
                 .build();
         var postService = cleverClient.create(PostService.class);
 
