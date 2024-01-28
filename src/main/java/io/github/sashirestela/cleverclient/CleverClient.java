@@ -56,7 +56,7 @@ public class CleverClient {
         if (isNullOrEmpty(baseUrl)  && isNullOrEmpty(urlBase)) {
             throw new CleverClientException("At least one of baseUrl and urlBase is mandatory.", null, null);
         }
-        if (isNullOrEmpty( baseUrl)) {
+        if (!isNullOrEmpty(baseUrl)) {
             this.baseUrl = baseUrl;
         } else {
             this.baseUrl = urlBase;
