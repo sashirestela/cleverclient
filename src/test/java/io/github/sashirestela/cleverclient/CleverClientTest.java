@@ -28,6 +28,19 @@ class CleverClientTest {
     }
 
     @Test
+    void shouldSetPropertiesToDefaultValuesWhenBuilderIsCalledWithoutThoseProperties2() {
+        var baseUrl = "https://test";
+        var cleverClient = CleverClient.builder()
+            .urlBase(baseUrl)
+            .build();
+        assertEquals(List.of(), cleverClient.getHeaders());
+        assertEquals(HttpClient.Version.HTTP_2, cleverClient.getHttpClient().version());
+        // verify that baseUrl is set when building with the deprecated urlBase() method
+        assertEquals(cleverClient.getBaseUrl(), baseUrl);
+        assertNotNull(cleverClient.getHttpProcessor());
+    }
+
+    @Test
     void shouldImplementInterfaceWhenCallingCreate() {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
