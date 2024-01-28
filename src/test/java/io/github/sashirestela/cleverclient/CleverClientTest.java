@@ -60,7 +60,7 @@ class CleverClientTest {
                 .header("headerValue")
                 .httpClient(HttpClient.newHttpClient())
                 .endOfStream("[DONE]");
-        assertThrows(NullPointerException.class,
+        assertThrows(CleverClientException.class,
             cleverClientBuilder::build);
     }
 
