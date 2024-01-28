@@ -1,5 +1,7 @@
 package io.github.sashirestela.cleverclient;
 
+import static io.github.sashirestela.cleverclient.util.CommonUtil.isNullOrEmpty;
+
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +28,7 @@ public class CleverClient {
 
     private final String baseUrl;
     @Deprecated
-    private final String urlBase = ""; // never need to use this deprecated
+    private final String urlBase = null;
     private final List<String> headers;
     private final HttpClient httpClient;
     private final HttpProcessor httpProcessor;
@@ -39,6 +41,8 @@ public class CleverClient {
      *                    in case both are specified and different baseUrl takes precedence
      *
      * @param urlBase     [[ Deprecated ]] Root of the url of the API service to call.
+     *                    it is here for backward compatibility only. It will be removed in
+     *                    a future version. use `baseUrl()` instead.
      * @param headers     Http headers for all the API service. Header's name and
      *                    value must be individual entries in the list. Optional.
      * @param httpClient  Custom Java's HttpClient component. One is created by
@@ -49,7 +53,7 @@ public class CleverClient {
     @Builder
     public CleverClient(String baseUrl, String urlBase, @Singular List<String> headers, HttpClient httpClient,
             String endOfStream) {
-        if ((baseUrl == null || baseUrl.isEmpty()) && (urlBase == null || urlBase.isEmpty())) {
+        if (isNullOrEmpty(baseUrl)  && isNullOrEmpty(urlBase)) {
             throw new CleverClientException("At least one of baseUrl and urlBase is mandatory.", null, null);
         }
         if (baseUrl != null && !baseUrl.isEmpty()) {
