@@ -150,7 +150,7 @@ public class InterfaceMetadataStoreTest {
     void shouldThrownExceptionWhenUrlPathParamAtMethodUnmatchesAnnotatedArguments() {
         Exception exception = assertThrows(CleverClientException.class,
                 () -> store.save(ITest.BadPathParamService.class));
-        assertTrue(exception.getMessage().equals(
-                "Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod."));
+        assertEquals(exception.getMessage(),
+                "Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.");
     }
 }
