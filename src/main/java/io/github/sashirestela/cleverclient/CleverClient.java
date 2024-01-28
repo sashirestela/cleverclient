@@ -56,11 +56,7 @@ public class CleverClient {
         if (isNullOrEmpty(baseUrl)  && isNullOrEmpty(urlBase)) {
             throw new CleverClientException("At least one of baseUrl and urlBase is mandatory.", null, null);
         }
-        if (!isNullOrEmpty(baseUrl)) {
-            this.baseUrl = baseUrl;
-        } else {
-            this.baseUrl = urlBase;
-        }
+        this.baseUrl = isNullOrEmpty(baseUrl) ? urlBase : baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(List.of());
         if (this.headers.size() % 2 > 0) {
             throw new CleverClientException("Headers must be entered as pair of values in the list.", null, null);
