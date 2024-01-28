@@ -135,16 +135,15 @@ public class InterfaceMetadataStoreTest {
     void shouldThrownExceptionWhenTryingToGetNotPreviouslySavedInterface() {
         Exception exception = assertThrows(CleverClientException.class,
                 () -> store.get(ITest.SyncService.class));
-        assertTrue(exception.getMessage().equals(
-                "The interaface SyncService has not been saved yet."));
+      assertEquals("The interface SyncService has not been saved yet.", exception.getMessage());
     }
 
     @Test
     void shouldThrownExceptionWhenMethodHasNotHttpAnnotation() {
         Exception exception = assertThrows(CleverClientException.class,
                 () -> store.save(ITest.NotAnnotatedService.class));
-        assertTrue(exception.getMessage().equals(
-                "Missing HTTP anotation for the method unannotatedMethod."));
+      assertEquals("Missing HTTP annotation for the method unannotatedMethod.",
+          exception.getMessage());
     }
 
     @Test

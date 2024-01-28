@@ -68,7 +68,7 @@ public class InterfaceMetadataStore {
         if (interfacesByFullName.containsKey(interfaceClass.getName())) {
             return interfacesByFullName.get(interfaceClass.getName());
         } else {
-            throw new CleverClientException("The interaface {0} has not been saved yet.", interfaceClass.getSimpleName(),
+            throw new CleverClientException("The interface {0} has not been saved yet.", interfaceClass.getSimpleName(),
                     null);
         }
     }
@@ -125,7 +125,7 @@ public class InterfaceMetadataStore {
         interfaceMetadata.getMethodBySignature().forEach((methodSignature, methodMetadata) -> {
             if (!methodMetadata.isDefault()) {
                 if (!methodMetadata.hasHttpAnnotation()) {
-                    throw new CleverClientException("Missing HTTP anotation for the method {0}.",
+                    throw new CleverClientException("Missing HTTP annotation for the method {0}.",
                             methodMetadata.getName(), null);
                 }
             }
