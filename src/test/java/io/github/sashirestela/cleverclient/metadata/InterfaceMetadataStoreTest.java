@@ -134,8 +134,8 @@ public class InterfaceMetadataStoreTest {
     @Test
     void shouldThrownExceptionWhenTryingToGetNotPreviouslySavedInterface() {
         Exception exception = assertThrows(CleverClientException.class,
-                () -> store.get(ITest.SyncService.class));
-      assertEquals("The interface SyncService has not been saved yet.", exception.getMessage());
+                () -> store.get(ITest.NotSavedService.class));
+      assertEquals("The interface NotSavedService has not been saved yet.", exception.getMessage());
     }
 
     @Test
@@ -149,8 +149,8 @@ public class InterfaceMetadataStoreTest {
     @Test
     void shouldThrownExceptionWhenUrlPathParamAtMethodUnmatchesAnnotatedArguments() {
         Exception exception = assertThrows(CleverClientException.class,
-                () -> store.save(ITest.BadPathParamService.class));
-        assertEquals(exception.getMessage(),
-                "Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.");
+            () -> store.save(ITest.BadPathParamService.class));
+        assertEquals("Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.",
+            exception.getMessage());
     }
 }

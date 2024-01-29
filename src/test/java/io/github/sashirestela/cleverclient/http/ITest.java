@@ -114,6 +114,13 @@ public interface ITest {
         Stream<Demo> getDemoStream(@Body RequestDemo request);
     }
 
+    interface NotSavedService {
+
+        @GET("/demos")
+        CompletableFuture<List<Demo>> goodMethod();
+
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
