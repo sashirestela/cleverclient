@@ -40,7 +40,7 @@ public interface PostService {
 
 // Use CleverClient to call the API
 var cleverClient = CleverClient.builder()
-    .urlBase("https://jsonplaceholder.typicode.com/")
+    .baseUrl("https://jsonplaceholder.typicode.com/")
     .build();
 
 var postService = cleverClient.create(PostService.class);
@@ -97,7 +97,7 @@ We have the following attributes to create a CleverClient object:
 
 | Attribute   | Description                            | Required  |
 | ----------- |----------------------------------------|-----------|
-| urlBase     | Api's url                              | mandatory |
+| baseUrl     | Api's url                              | mandatory |
 | headers     | Pairs of headers name/value            | optional  |
 | httpClient  | Java HttpClient object                 | optional  |
 | endOfStream | Text used to mark the final of streams | optional  |
@@ -107,7 +107,7 @@ The attribute ```endOfStream``` is required when you have endpoints sending back
 Example:
 
 ```java
-final var URL_BASE = "https://api.example.com";
+final var BASE_URL = "https://api.example.com";
 final var HEADER_NAME = "Authorization";
 final var HEADER_VALUE = "Bearer qwertyasdfghzxcvb";
 final var END_OF_STREAM = "[DONE]";
@@ -121,7 +121,7 @@ var httpClient = HttpClient.newBuilder()
     .build();
 
 var cleverClient = CleverClient.builder()
-    .urlBase(URL_BASE)
+    .baseUrl(BASE_URL)
     .headers(Arrays.asList(HEADER_NAME, HEADER_VALUE))
     .httpClient(httpClient)
     .endOfStream(END_OF_STREAM)
