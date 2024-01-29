@@ -134,9 +134,9 @@ public class InterfaceMetadataStoreTest {
     @Test
     void shouldThrownExceptionWhenTryingToGetNotPreviouslySavedInterface() {
         Exception exception = assertThrows(CleverClientException.class,
-                () -> store.get(ITest.SyncService.class));
+                () -> store.get(ITest.NotSavedService.class));
         assertTrue(exception.getMessage().equals(
-                "The interaface SyncService has not been saved yet."));
+                "The interaface NotSavedService has not been saved yet."));
     }
 
     @Test
