@@ -115,7 +115,6 @@ class CleverClientTest {
         var actualUrl = requestCaptor.getValue().uri().toString();
         var expectedUrl = "https://test/api/text?prefix=geo&api-version=2024-01-31";
         assertEquals(expectedUrl, actualUrl);
-
     }
 
     @Resource("/v1.2/api")
