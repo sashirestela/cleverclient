@@ -110,8 +110,9 @@ public class HttpProcessor implements InvocationHandler {
         var interfaceMetadata = InterfaceMetadataStore.one().get(method.getDeclaringClass());
         var methodMetadata = interfaceMetadata.getMethodBySignature().get(method.toString());
         var urlMethod = interfaceMetadata.getFullUrlByMethod(methodMetadata);
-        var url = baseUrl + URLBuilder
-            .one().build(urlMethod, methodMetadata, arguments, this.defaultQueryParams);
+        var url = baseUrl + URLBuilder.one().build(
+            urlMethod, methodMetadata, arguments, this.defaultQueryParams);
+
         var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
