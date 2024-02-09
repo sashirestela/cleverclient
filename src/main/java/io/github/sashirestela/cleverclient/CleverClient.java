@@ -1,7 +1,5 @@
 package io.github.sashirestela.cleverclient;
 
-import static io.github.sashirestela.cleverclient.util.CommonUtil.isNullOrEmpty;
-
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +13,7 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Singular;
 
 /**
@@ -26,9 +25,7 @@ import lombok.Singular;
 public class CleverClient {
     private static final Logger logger = LoggerFactory.getLogger(CleverClient.class);
 
-    private final String baseUrl;
-    @Deprecated
-    private final String urlBase = null;
+    @NonNull private final String baseUrl;
     private final List<String> headers;
     private final HttpClient httpClient;
     private final Function<String, String> urlInterceptor;
@@ -37,14 +34,7 @@ public class CleverClient {
     /**
      * Constructor to create an instance of CleverClient.
      * 
-     * @param baseUrl        Root of the url of the API service to call. At least
-     *                       one of baseUrl and the deprecated urlBase is mandatory.
-     *                       In case both are specified and different baseUrl takes
-     *                       precedence.
-     * @param urlBase        [[ Deprecated ]] Root of the url of the API service to
-     *                       call. it is here for backward compatibility only. It
-     *                       will be removed in a future version. use `baseUrl()`
-     *                       instead.
+     * @param baseUrl        Root of the url of the API service to call. Mandatory.
      * @param headers        Http headers for all the API service. Header's name and
      *                       value must be individual entries in the list. Optional.
      * @param httpClient     Custom Java's HttpClient component. One is created by
@@ -54,12 +44,9 @@ public class CleverClient {
      *                       server sent events (SSE). Optional.
      */
     @Builder
-    public CleverClient(String baseUrl, String urlBase, @Singular List<String> headers, HttpClient httpClient,
+    public CleverClient(@NonNull String baseUrl, @Singular List<String> headers, HttpClient httpClient,
             Function<String, String> urlInterceptor, String endOfStream) {
-        if (isNullOrEmpty(baseUrl) && isNullOrEmpty(urlBase)) {
-            throw new CleverClientException("At least one of baseUrl and urlBase is mandatory.", null, null);
-        }
-        this.baseUrl = isNullOrEmpty(baseUrl) ? urlBase : baseUrl;
+        this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(List.of());
         if (this.headers.size() % 2 > 0) {
             throw new CleverClientException("Headers must be entered as pair of values in the list.", null, null);
