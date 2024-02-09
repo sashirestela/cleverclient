@@ -95,12 +95,13 @@ Take in account that you need to use **Java 11 or greater**.
 
 We have the following attributes to create a CleverClient object:
 
-| Attribute   | Description                            | Required  |
-| ----------- |----------------------------------------|-----------|
-| baseUrl     | Api's url                              | mandatory |
-| headers     | Pairs of headers name/value            | optional  |
-| httpClient  | Java HttpClient object                 | optional  |
-| endOfStream | Text used to mark the final of streams | optional  |
+| Attribute      | Description                              | Required  |
+| -------------- |------------------------------------------|-----------|
+| baseUrl        | Api's url                                | mandatory |
+| headers        | Pairs of headers name/value              | optional  |
+| httpClient     | Java HttpClient object                   | optional  |
+| urlInterceptor | Function to modify the url once is built | optional  |
+| endOfStream    | Text used to mark the final of streams   | optional  |
 
 The attribute ```endOfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 
@@ -124,6 +125,7 @@ var cleverClient = CleverClient.builder()
     .baseUrl(BASE_URL)
     .headers(Arrays.asList(HEADER_NAME, HEADER_VALUE))
     .httpClient(httpClient)
+    .urlInterceptor(url -> url + (url.contains("?") ? "&" : "?") + "env=testing")
     .endOfStream(END_OF_STREAM)
     .build();
 ```

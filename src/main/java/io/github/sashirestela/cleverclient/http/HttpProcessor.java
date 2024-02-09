@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,29 +16,19 @@ import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMeta
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadataStore;
 import io.github.sashirestela.cleverclient.util.Constant;
 import io.github.sashirestela.cleverclient.util.ReflectUtil;
+import lombok.Builder;
 
 /**
  * HttpProcessor orchestrates all the http interaction.
  */
+@Builder
 public class HttpProcessor implements InvocationHandler {
     private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
-    private final HttpClient httpClient;
     private final String baseUrl;
     private final List<String> headers;
-
-    /**
-     * Constructor to create an instance of HttpProcessor.
-     * 
-     * @param httpClient Java's HttpClient component that solves the http calling.
-     * @param baseUrl    Root of the url of the API service to call.
-     * @param headers    Http headers for all the API service.
-     */
-    public HttpProcessor(String baseUrl, List<String> headers, HttpClient httpClient) {
-        this.baseUrl = baseUrl;
-        this.headers = headers;
-        this.httpClient = httpClient;
-    }
+    private final HttpClient httpClient;
+    private final Function<String, String> urlInterceptor;
 
     /**
      * Creates a generic dynamic proxy with this HttpProcessor object acting as an
@@ -107,6 +98,9 @@ public class HttpProcessor implements InvocationHandler {
         var methodMetadata = interfaceMetadata.getMethodBySignature().get(method.toString());
         var urlMethod = interfaceMetadata.getFullUrlByMethod(methodMetadata);
         var url = baseUrl + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
+        if (urlInterceptor != null) {
+            url = urlInterceptor.apply(url);
+        }
         var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();

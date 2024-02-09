@@ -39,7 +39,11 @@ class HttpProcessorTest {
 
     @BeforeEach
     void init() {
-        httpProcessor = new HttpProcessor("https://api.demmo", List.of(), httpClient);
+        httpProcessor = HttpProcessor.builder()
+                .baseUrl("https://api.demo")
+                .headers(List.of())
+                .httpClient(httpClient)
+                .build();
     }
 
     @Test
