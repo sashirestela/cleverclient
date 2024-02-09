@@ -23,15 +23,28 @@ public class URLBuilder {
         return urlBuilder;
     }
 
-    public String build(String urlMethod, MethodMetadata methodMetadata, Object[] arguments) {
+    public String build(String urlMethod, MethodMetadata methodMetadata, Object[] arguments,
+                        Map<String, ?> defaultQueryParams
+    ) {
         var url = urlMethod;
         var pathParameters = methodMetadata.getPathParameters();
         var queryParameters = methodMetadata.getQueryParameters();
-        if (pathParameters.isEmpty() && queryParameters.isEmpty()) {
+        if (pathParameters.isEmpty() && queryParameters.isEmpty() && defaultQueryParams.isEmpty()) {
             return url;
         }
         url = replacePathParams(url, pathParameters, arguments);
         url = includeQueryParams(url, queryParameters, arguments);
+        if (defaultQueryParams.isEmpty()) {
+            return url;
+        }
+
+        // append default query params
+        var questionMarkIndex = url.indexOf('?');
+        var queryParams = questionMarkIndex != -1 ? url.substring(questionMarkIndex) : "";
+        url = questionMarkIndex != -1 ? url.substring(0, questionMarkIndex) : url;
+        var sb = new StringBuilder(queryParams);
+        appendQueryParams(defaultQueryParams, sb);
+        url += sb.toString();
         return url;
     }
 

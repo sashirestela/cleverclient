@@ -19,6 +19,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ class HttpProcessorTest {
 
     @BeforeEach
     void init() {
-        httpProcessor = new HttpProcessor("https://api.demmo", List.of(), httpClient);
+        httpProcessor = new HttpProcessor("https://api.demmo", List.of(), httpClient, Map.of());
     }
 
     @Test

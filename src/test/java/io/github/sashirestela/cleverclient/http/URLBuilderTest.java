@@ -27,8 +27,24 @@ class URLBuilderTest {
         when(methodMetadata.getPathParameters()).thenReturn(List.of());
         when(methodMetadata.getQueryParameters()).thenReturn(List.of());
 
-        var actualUrl = urlBuilder.build(url, methodMetadata, null);
+        var actualUrl = urlBuilder.build(url, methodMetadata, null, Map.of());
         var expectedUrl = url;
+        assertEquals(expectedUrl, actualUrl);
+    }
+
+    @Test
+    void shouldReturnUrlWithoutChangesWhenDoesNotContainPathOrQueryParamsWithDefaultQueryParams() {
+        var url = "/api/domain/entities";
+
+        when(methodMetadata.getPathParameters()).thenReturn(List.of());
+        when(methodMetadata.getQueryParameters()).thenReturn(List.of());
+
+        when(methodMetadata.getPathParameters()).thenReturn(List.of());
+        when(methodMetadata.getQueryParameters()).thenReturn(List.of());
+
+        var defaultQueryParams = Map.of("api-version", "2023-05-15");
+        var actualUrl = urlBuilder.build(url, methodMetadata, null, defaultQueryParams);
+        var expectedUrl = url + "?api-version=2023-05-15";
         assertEquals(expectedUrl, actualUrl);
     }
 
@@ -56,7 +72,8 @@ class URLBuilderTest {
         when(methodMetadata.getPathParameters()).thenReturn(paramsList);
         when(methodMetadata.getQueryParameters()).thenReturn(List.of());
 
-        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { null, 101, null, 201 });
+        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { null, 101, null, 201 },
+            Map.of());
         var expectedUrl = "/api/domain/entities/101/details/201";
         assertEquals(expectedUrl, actualUrl);
     }
@@ -93,8 +110,49 @@ class URLBuilderTest {
         when(methodMetadata.getPathParameters()).thenReturn(List.of());
         when(methodMetadata.getQueryParameters()).thenReturn(paramsList);
 
-        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { null, "name", null, 20 });
+        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { null, "name", null, 20 },
+            Map.of());
         var expectedUrl = "/api/domain/entities?sortedBy=name&rowsPerPage=20";
+        assertEquals(expectedUrl, actualUrl);
+    }
+
+    @Test
+    void shouldReturnReplacedUrlWithQueryParamsWhenMethodContainsQueryParamsAndDefaultQueryParameters() {
+        var url = "/api/domain/entities";
+        var paramsList = List.of(
+            ParameterMetadata.builder()
+                .index(1)
+                .annotation(AnnotationMetadata.builder()
+                    .name("Query")
+                    .isHttpMethod(false)
+                    .valueByField(Map.of("value", "sortedBy"))
+                    .build())
+                .build(),
+            ParameterMetadata.builder()
+                .index(2)
+                .annotation(AnnotationMetadata.builder()
+                    .name("Query")
+                    .isHttpMethod(false)
+                    .valueByField(Map.of("value", "filterBy"))
+                    .build())
+                .build(),
+            ParameterMetadata.builder()
+                .index(3)
+                .annotation(AnnotationMetadata.builder()
+                    .name("Query")
+                    .isHttpMethod(false)
+                    .valueByField(Map.of("value", "rowsPerPage"))
+                    .build())
+                .build());
+
+        when(methodMetadata.getPathParameters()).thenReturn(List.of());
+        when(methodMetadata.getQueryParameters()).thenReturn(paramsList);
+
+        var defaultQueryParams = Map.of("api-version", "2023-05-15");
+
+        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { null, "name", null, 20 },
+            defaultQueryParams);
+        var expectedUrl = "/api/domain/entities?sortedBy=name&rowsPerPage=20&api-version=2023-05-15";
         assertEquals(expectedUrl, actualUrl);
     }
 
@@ -122,7 +180,8 @@ class URLBuilderTest {
         when(methodMetadata.getPathParameters()).thenReturn(List.of());
         when(methodMetadata.getQueryParameters()).thenReturn(paramsList);
 
-        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { new Pagination(10, 3), "fullname" });
+        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { new Pagination(10, 3), "fullname" },
+            Map.of());
         var expectedUrl = "/api/domain/entities?size=10&page=3&sortedBy=fullname";
         assertEquals(expectedUrl, actualUrl);
     }

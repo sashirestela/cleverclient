@@ -8,6 +8,7 @@ import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,8 @@ public class HttpProcessor implements InvocationHandler {
     private final HttpClient httpClient;
     private final String baseUrl;
     private final List<String> headers;
+    private final Map<String, ?> defaultQueryParams;
+
 
     /**
      * Constructor to create an instance of HttpProcessor.
@@ -33,10 +36,11 @@ public class HttpProcessor implements InvocationHandler {
      * @param baseUrl    Root of the url of the API service to call.
      * @param headers    Http headers for all the API service.
      */
-    public HttpProcessor(String baseUrl, List<String> headers, HttpClient httpClient) {
+    public HttpProcessor(String baseUrl, List<String> headers, HttpClient httpClient, Map<String, ?> defaultQueryParams) {
         this.baseUrl = baseUrl;
         this.headers = headers;
         this.httpClient = httpClient;
+        this.defaultQueryParams = defaultQueryParams;
     }
 
     /**
@@ -106,7 +110,8 @@ public class HttpProcessor implements InvocationHandler {
         var interfaceMetadata = InterfaceMetadataStore.one().get(method.getDeclaringClass());
         var methodMetadata = interfaceMetadata.getMethodBySignature().get(method.toString());
         var urlMethod = interfaceMetadata.getFullUrlByMethod(methodMetadata);
-        var url = baseUrl + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
+        var url = baseUrl + URLBuilder
+            .one().build(urlMethod, methodMetadata, arguments, this.defaultQueryParams);
         var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
         var isMultipart = methodMetadata.isMultipart();
