@@ -40,19 +40,6 @@ class CleverClientTest {
     }
 
     @Test
-    void shouldBuildSuccessfullyUsingDeprecatedUrlBase() {
-        var baseUrl = "https://test";
-        var cleverClient = CleverClient.builder()
-                .urlBase(baseUrl)
-                .build();
-        assertEquals(List.of(), cleverClient.getHeaders());
-        assertEquals(HttpClient.Version.HTTP_2, cleverClient.getHttpClient().version());
-        // verify that baseUrl is set when building with the deprecated urlBase() method
-        assertEquals(cleverClient.getBaseUrl(), baseUrl);
-        assertNotNull(cleverClient.getHttpProcessor());
-    }
-
-    @Test
     void shouldImplementInterfaceWhenCallingCreate() {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
@@ -66,13 +53,13 @@ class CleverClientTest {
     }
 
     @Test
-    void shouldThrownExceptionWhenTryingToPassAnEmptyBaseUrlAndUrlBase() {
+    void shouldThrownExceptionWhenTryingToPassAnEmptyBaseUrl() {
         var cleverClientBuilder = CleverClient.builder()
                 .header("headerName")
                 .header("headerValue")
                 .httpClient(HttpClient.newHttpClient())
                 .endOfStream("[DONE]");
-        assertThrows(CleverClientException.class,
+        assertThrows(NullPointerException.class,
                 cleverClientBuilder::build);
     }
 
