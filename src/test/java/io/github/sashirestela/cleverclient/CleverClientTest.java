@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -23,7 +23,6 @@ import org.mockito.ArgumentCaptor;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Query;
 import io.github.sashirestela.cleverclient.annotation.Resource;
-import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 class CleverClientTest {
 
@@ -32,7 +31,7 @@ class CleverClientTest {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
                 .build();
-        assertEquals(List.of(), cleverClient.getHeaders());
+        assertEquals(Map.of(), cleverClient.getHeaders());
         assertEquals(HttpClient.Version.HTTP_2, cleverClient.getHttpClient().version());
         assertNotNull(cleverClient.getBaseUrl());
         assertNotNull(cleverClient.getHttpProcessor());
@@ -43,8 +42,7 @@ class CleverClientTest {
     void shouldImplementInterfaceWhenCallingCreate() {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
-                .header("headerName")
-                .header("headerValue")
+                .header("headerName", "headerValue")
                 .httpClient(HttpClient.newHttpClient())
                 .endOfStream("[DONE]")
                 .build();
@@ -55,23 +53,11 @@ class CleverClientTest {
     @Test
     void shouldThrownExceptionWhenTryingToPassAnEmptyBaseUrl() {
         var cleverClientBuilder = CleverClient.builder()
-                .header("headerName")
-                .header("headerValue")
+                .header("headerName", "headerValue")
                 .httpClient(HttpClient.newHttpClient())
                 .endOfStream("[DONE]");
         assertThrows(NullPointerException.class,
                 cleverClientBuilder::build);
-    }
-
-    @Test
-    void shouldThrownExceptionWhenTryingToPassAnOddNumbersOfHeaders() {
-        var cleverClientBuilder = CleverClient.builder()
-                .baseUrl("http://test")
-                .header("oneHeader");
-        Exception exception = assertThrows(CleverClientException.class,
-                cleverClientBuilder::build);
-        assertEquals("Headers must be entered as pair of values in the list.",
-                exception.getMessage());
     }
 
     @SuppressWarnings("unchecked")
