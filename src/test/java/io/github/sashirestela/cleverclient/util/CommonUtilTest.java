@@ -3,6 +3,7 @@ package io.github.sashirestela.cleverclient.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -123,5 +125,23 @@ class CommonUtilTest {
         for (String[] data : testData) {
             assertThrows(IllegalArgumentException.class, () -> CommonUtil.createMapString(data));
         }
+    }
+
+    @Test
+    void shouldConvertMapToListOfStringWhenAMapIsPassed() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("key1", "val1");
+        map.put("key2", "val2");
+        List<String> expectedList = List.of("key1", "val1", "key2", "val2");
+        List<String> actualList = CommonUtil.mapToListOfString(map);
+        assertLinesMatch(expectedList, actualList);
+    }
+
+    @Test
+    void shouldReturnAnEmptyListWhenCallingMapToListAnEmptyMapIsPassed() {
+        Map<String, String> map = Map.of();
+        List<String> expectedList = List.of();
+        List<String> actualList = CommonUtil.mapToListOfString(map);
+        assertLinesMatch(expectedList, actualList);
     }
 }

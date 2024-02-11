@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,5 +58,14 @@ public class CommonUtil {
             map.put(key, val);
         }
         return map;
+    }
+
+    public static List<String> mapToListOfString(Map<String, String> map) {
+        List<String> list = new ArrayList<>();
+        map.entrySet().stream().peek(e -> {
+            list.add(e.getKey());
+            list.add(e.getValue());
+        }).collect(Collectors.counting());
+        return list;
     }
 }

@@ -98,7 +98,8 @@ We have the following attributes to create a CleverClient object:
 | Attribute      | Description                              | Required  |
 | -------------- |------------------------------------------|-----------|
 | baseUrl        | Api's url                                | mandatory |
-| headers        | Pairs of headers name/value              | optional  |
+| headers        | Map of headers (name/value)              | optional  |
+| header         | Single header (alternative to headers)   | optional  |
 | httpClient     | Java HttpClient object                   | optional  |
 | urlInterceptor | Function to modify the url once is built | optional  |
 | endOfStream    | Text used to mark the final of streams   | optional  |
@@ -123,7 +124,7 @@ var httpClient = HttpClient.newBuilder()
 
 var cleverClient = CleverClient.builder()
     .baseUrl(BASE_URL)
-    .headers(Arrays.asList(HEADER_NAME, HEADER_VALUE))
+    .header(HEADER_NAME, HEADER_VALUE)
     .httpClient(httpClient)
     .urlInterceptor(url -> url + (url.contains("?") ? "&" : "?") + "env=testing")
     .endOfStream(END_OF_STREAM)

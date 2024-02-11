@@ -24,7 +24,7 @@ public class StreamExample {
 
         var cleverClient = CleverClient.builder()
                 .baseUrl(BASE_URL)
-                .headers(Arrays.asList(AUTHORIZATION_HEADER, BEARER_AUTHORIZATION))
+                .header(AUTHORIZATION_HEADER, BEARER_AUTHORIZATION)
                 .endOfStream(END_OF_STREAM)
                 .build();
         var chatService = cleverClient.create(ChatService.class);

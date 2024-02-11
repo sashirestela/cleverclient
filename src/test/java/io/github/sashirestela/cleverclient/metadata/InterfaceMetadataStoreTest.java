@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.metadata;
 
+import static io.github.sashirestela.cleverclient.util.CommonUtil.createMapString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -13,8 +14,7 @@ import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.Annotation
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.support.ReturnType;
-import io.github.sashirestela.cleverclient.util.CommonUtil;
+import io.github.sashirestela.cleverclient.support.ReturnType;;
 
 public class InterfaceMetadataStoreTest {
 
@@ -33,18 +33,17 @@ public class InterfaceMetadataStoreTest {
                                 AnnotationMetadata.builder()
                                         .name("POST")
                                         .isHttpMethod(true)
-                                        .valueByField(CommonUtil.createMapString("value", "/demos/{demoId}"))
+                                        .valueByField(createMapString("value", "/demos/{demoId}"))
                                         .build(),
                                 AnnotationMetadata.builder()
                                         .name("Multipart")
                                         .isHttpMethod(false)
-                                        .valueByField(CommonUtil.createMapString())
+                                        .valueByField(createMapString())
                                         .build(),
                                 AnnotationMetadata.builder()
                                         .name("Header")
                                         .isHttpMethod(false)
-                                        .valueByField(
-                                                CommonUtil.createMapString("name", "ThirdKey", "value", "ThirdVal"))
+                                        .valueByField(createMapString("name", "ThirdKey", "value", "ThirdVal"))
                                         .build()))
                         .parameters(Arrays.asList(
                                 ParameterMetadata.builder()
@@ -52,7 +51,7 @@ public class InterfaceMetadataStoreTest {
                                         .annotation(AnnotationMetadata.builder()
                                                 .name("Body")
                                                 .isHttpMethod(false)
-                                                .valueByField(CommonUtil.createMapString())
+                                                .valueByField(createMapString())
                                                 .build())
                                         .build(),
                                 ParameterMetadata.builder()
@@ -60,7 +59,7 @@ public class InterfaceMetadataStoreTest {
                                         .annotation(AnnotationMetadata.builder()
                                                 .name("Path")
                                                 .isHttpMethod(false)
-                                                .valueByField(CommonUtil.createMapString("value", "demoId"))
+                                                .valueByField(createMapString("value", "demoId"))
                                                 .build())
                                         .build()))
                         .build());
@@ -75,8 +74,7 @@ public class InterfaceMetadataStoreTest {
                                 AnnotationMetadata.builder()
                                         .name("GET")
                                         .isHttpMethod(true)
-                                        .valueByField(
-                                                CommonUtil.createMapString("value", "/demos/{demoId}/subdemos"))
+                                        .valueByField(createMapString("value", "/demos/{demoId}/subdemos"))
                                         .build()))
                         .parameters(Arrays.asList(
                                 ParameterMetadata.builder()
@@ -84,7 +82,7 @@ public class InterfaceMetadataStoreTest {
                                         .annotation(AnnotationMetadata.builder()
                                                 .name("Path")
                                                 .isHttpMethod(false)
-                                                .valueByField(CommonUtil.createMapString("value", "demoId"))
+                                                .valueByField(createMapString("value", "demoId"))
                                                 .build())
                                         .build(),
                                 ParameterMetadata.builder()
@@ -92,7 +90,7 @@ public class InterfaceMetadataStoreTest {
                                         .annotation(AnnotationMetadata.builder()
                                                 .name("Query")
                                                 .isHttpMethod(false)
-                                                .valueByField(CommonUtil.createMapString("value", "size"))
+                                                .valueByField(createMapString("value", "size"))
                                                 .build())
                                         .build(),
                                 ParameterMetadata.builder()
@@ -100,7 +98,7 @@ public class InterfaceMetadataStoreTest {
                                         .annotation(AnnotationMetadata.builder()
                                                 .name("Query")
                                                 .isHttpMethod(false)
-                                                .valueByField(CommonUtil.createMapString("value", "page"))
+                                                .valueByField(createMapString("value", "page"))
                                                 .build())
                                         .build()))
                         .build());
@@ -110,17 +108,17 @@ public class InterfaceMetadataStoreTest {
                         AnnotationMetadata.builder()
                                 .name("Resource")
                                 .isHttpMethod(false)
-                                .valueByField(CommonUtil.createMapString("value", "/api"))
+                                .valueByField(createMapString("value", "/api"))
                                 .build(),
                         AnnotationMetadata.builder()
                                 .name("Header")
                                 .isHttpMethod(false)
-                                .valueByField(CommonUtil.createMapString("name", "FirstKey", "value", "FirstVal"))
+                                .valueByField(createMapString("name", "FirstKey", "value", "FirstVal"))
                                 .build(),
                         AnnotationMetadata.builder()
                                 .name("Header")
                                 .isHttpMethod(false)
-                                .valueByField(CommonUtil.createMapString("name", "SecondKey", "value", "SecondVal"))
+                                .valueByField(createMapString("name", "SecondKey", "value", "SecondVal"))
                                 .build()))
                 .methodBySignature(methodBySignature)
                 .build();
@@ -142,14 +140,15 @@ public class InterfaceMetadataStoreTest {
         Exception exception = assertThrows(CleverClientException.class,
                 () -> store.save(ITest.NotAnnotatedService.class));
         assertEquals("Missing HTTP annotation for the method unannotatedMethod.",
-            exception.getMessage());
+                exception.getMessage());
     }
 
     @Test
     void shouldThrownExceptionWhenUrlPathParamAtMethodUnmatchesAnnotatedArguments() {
         Exception exception = assertThrows(CleverClientException.class,
-            () -> store.save(ITest.BadPathParamService.class));
-        assertEquals("Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.",
-            exception.getMessage());
+                () -> store.save(ITest.BadPathParamService.class));
+        assertEquals(
+                "Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.",
+                exception.getMessage());
     }
 }

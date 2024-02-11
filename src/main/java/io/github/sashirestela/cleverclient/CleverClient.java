@@ -1,7 +1,7 @@
 package io.github.sashirestela.cleverclient;
 
 import java.net.http.HttpClient;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
-import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
+import io.github.sashirestela.cleverclient.util.CommonUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,8 +25,9 @@ import lombok.Singular;
 public class CleverClient {
     private static final Logger logger = LoggerFactory.getLogger(CleverClient.class);
 
-    @NonNull private final String baseUrl;
-    private final List<String> headers;
+    @NonNull
+    private final String baseUrl;
+    private final Map<String, String> headers;
     private final HttpClient httpClient;
     private final Function<String, String> urlInterceptor;
     private final HttpProcessor httpProcessor;
@@ -35,8 +36,7 @@ public class CleverClient {
      * Constructor to create an instance of CleverClient.
      * 
      * @param baseUrl        Root of the url of the API service to call. Mandatory.
-     * @param headers        Http headers for all the API service. Header's name and
-     *                       value must be individual entries in the list. Optional.
+     * @param headers        Http headers for all the API service. Optional.
      * @param httpClient     Custom Java's HttpClient component. One is created by
      *                       default if none is passed. Optional.
      * @param urlInterceptor Function to modify the url once it has been built.
@@ -44,19 +44,16 @@ public class CleverClient {
      *                       server sent events (SSE). Optional.
      */
     @Builder
-    public CleverClient(@NonNull String baseUrl, @Singular List<String> headers, HttpClient httpClient,
+    public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
             Function<String, String> urlInterceptor, String endOfStream) {
         this.baseUrl = baseUrl;
-        this.headers = Optional.ofNullable(headers).orElse(List.of());
-        if (this.headers.size() % 2 > 0) {
-            throw new CleverClientException("Headers must be entered as pair of values in the list.", null, null);
-        }
+        this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
         this.urlInterceptor = urlInterceptor;
         CleverClientSSE.setEndOfStream(endOfStream);
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
-                .headers(this.headers)
+                .headers(CommonUtil.mapToListOfString(this.headers))
                 .httpClient(this.httpClient)
                 .urlInterceptor(this.urlInterceptor)
                 .build();
