@@ -3,12 +3,13 @@ package io.github.sashirestela.cleverclient;
 import java.net.http.HttpClient;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
+import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import lombok.Builder;
@@ -29,33 +30,35 @@ public class CleverClient {
     private final String baseUrl;
     private final Map<String, String> headers;
     private final HttpClient httpClient;
-    private final Function<String, String> urlInterceptor;
+    private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final HttpProcessor httpProcessor;
 
     /**
      * Constructor to create an instance of CleverClient.
      * 
-     * @param baseUrl        Root of the url of the API service to call. Mandatory.
-     * @param headers        Http headers for all the API service. Optional.
-     * @param httpClient     Custom Java's HttpClient component. One is created by
-     *                       default if none is passed. Optional.
-     * @param urlInterceptor Function to modify the url once it has been built.
-     * @param endOfStream    Text used to mark the final of streams when handling
-     *                       server sent events (SSE). Optional.
+     * @param baseUrl            Root of the url of the API service to call.
+     *                           Mandatory.
+     * @param headers            Http headers for all the API service. Optional.
+     * @param httpClient         Custom Java's HttpClient component. One is created
+     *                           by default if none is passed. Optional.
+     * @param requestInterceptor Function to modify the request once it has been
+     *                           built.
+     * @param endOfStream        Text used to mark the final of streams when
+     *                           handling server sent events (SSE). Optional.
      */
     @Builder
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
-            Function<String, String> urlInterceptor, String endOfStream) {
+            UnaryOperator<HttpRequestData> requestInterceptor, String endOfStream) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
-        this.urlInterceptor = urlInterceptor;
+        this.requestInterceptor = requestInterceptor;
         CleverClientSSE.setEndOfStream(endOfStream);
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
                 .headers(CommonUtil.mapToListOfString(this.headers))
                 .httpClient(this.httpClient)
-                .urlInterceptor(this.urlInterceptor)
+                .requestInterceptor(this.requestInterceptor)
                 .build();
         logger.debug("CleverClient has been created.");
     }

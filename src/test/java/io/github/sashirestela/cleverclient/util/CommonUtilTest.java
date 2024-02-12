@@ -144,4 +144,14 @@ class CommonUtilTest {
         List<String> actualList = CommonUtil.mapToListOfString(map);
         assertLinesMatch(expectedList, actualList);
     }
+
+    @Test
+    void shouldConvertListToMapOfStringWhenAListIsPassed() {
+        List<String> list = List.of("key1", "val1", "key2", "val2");
+        Map<String, String> expectedMap = new HashMap<>();
+        expectedMap.put("key1", "val1");
+        expectedMap.put("key2", "val2");
+        Map<String, String> actualMap = CommonUtil.listToMapOfString(list);
+        assertEquals(expectedMap, actualMap);
+    }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import lombok.Builder;
 import lombok.Value;
@@ -75,7 +76,15 @@ public class InterfaceMetadata {
                     .getName();
         }
 
-        public boolean isMultipart() {
+        public ContentType getContentType() {
+            return getBodyIndex() == -1
+                    ? null
+                    : isMultipart()
+                            ? ContentType.MULTIPART_FORMDATA
+                            : ContentType.APPLICATION_JSON;
+        }
+
+        private boolean isMultipart() {
             return annotations.stream()
                     .anyMatch(annot -> annot.getName().equals(ANNOT_MULTIPART));
         }
