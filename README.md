@@ -95,14 +95,14 @@ Take in account that you need to use **Java 11 or greater**.
 
 We have the following attributes to create a CleverClient object:
 
-| Attribute      | Description                              | Required  |
-| -------------- |------------------------------------------|-----------|
-| baseUrl        | Api's url                                | mandatory |
-| headers        | Map of headers (name/value)              | optional  |
-| header         | Single header (alternative to headers)   | optional  |
-| httpClient     | Java HttpClient object                   | optional  |
-| urlInterceptor | Function to modify the url once is built | optional  |
-| endOfStream    | Text used to mark the final of streams   | optional  |
+| Attribute          | Description                                  | Required  |
+| -------------------|----------------------------------------------|-----------|
+| baseUrl            | Api's url                                    | mandatory |
+| headers            | Map of headers (name/value)                  | optional  |
+| header             | Single header (alternative to headers)       | optional  |
+| httpClient         | Java HttpClient object                       | optional  |
+| requestInterceptor | Function to modify the request once is built | optional  |
+| endOfStream        | Text used to mark the final of streams       | optional  |
 
 The attribute ```endOfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 
@@ -126,7 +126,12 @@ var cleverClient = CleverClient.builder()
     .baseUrl(BASE_URL)
     .header(HEADER_NAME, HEADER_VALUE)
     .httpClient(httpClient)
-    .urlInterceptor(url -> url + (url.contains("?") ? "&" : "?") + "env=testing")
+    .requestInterceptor(request -> {
+        var url = request.getUrl();
+        url + (url.contains("?") ? "&" : "?") + "env=testing";
+        request.setUrl(url);
+        return request;
+    })
     .endOfStream(END_OF_STREAM)
     .build();
 ```
@@ -159,22 +164,22 @@ var cleverClient = CleverClient.builder()
 
 ### Supported Response Types
 
-The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of objects, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of objects, Generic of object, Single object, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) object, and Plain Text, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
+The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Single Class, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) object, and [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) object, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
 
-| Method Response                     | Sync/Async | Response Type                           |
-|-------------------------------------|------------|-----------------------------------------|
-| CompletableFuture<Stream\<Object>>  | Async      | Server sent events as Stream of Objects |
-| Stream\<Object>                     | Sync       | Server sent events as Stream of Objects |
-| CompletableFuture<List\<Object>>    | Async      | Collection of Objects                   |
-| List\<Object>                       | Sync       | Collection of Objects                   |
-| CompletableFuture<Generic\<Object>> | Async      | Custom Generic Class of Object          |
-| Generic\<Object>                    | Sync       | Custom Generic Class of Object          |
-| CompletableFuture\<Object>          | Async      | Single Object                           |
-| Object                              | Sync       | Single Object                           |
-| CompletableFuture\<InputStream>     | Async      | Binary Object                           |
-| InputStream                         | Sync       | Binary Object                           |
-| CompletableFuture\<String>          | Async      | Plain Text                              |
-| String                              | Sync       | Plain Text                              |
+| Method Response                 | Sync/Async | Response Type                          |
+|---------------------------------|------------|----------------------------------------|
+| CompletableFuture<Stream\<T>>   | Async      | Server sent events as Stream of type T |
+| Stream\<T>                      | Sync       | Server sent events as Stream of type T |
+| CompletableFuture<List\<T>>     | Async      | List of type T                         |
+| List\<T>                        | Sync       | List of type T                         |
+| CompletableFuture<Generic\<T>>  | Async      | Generic class of type T                |
+| Generic\<T>                     | Sync       | Generic class of type T                |
+| CompletableFuture\<T>           | Async      | Single class T                         |
+| T                               | Sync       | Single class T                         |
+| CompletableFuture\<InputStream> | Async      | Binary Object                          |
+| InputStream                     | Sync       | Binary Object                          |
+| CompletableFuture\<String>      | Async      | String Object                          |
+| String                          | Sync       | String Object                          |
 
 ### Interface Default Methods
 
