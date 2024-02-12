@@ -68,4 +68,9 @@ public class CommonUtil {
         }).collect(Collectors.counting());
         return list;
     }
+
+    public static Map<String, String> listToMapOfString(List<String> list) {
+        var array = list.toArray(new String[0]);
+        return createMapString(array);
+    }
 }

@@ -7,14 +7,15 @@ import java.lang.reflect.Method;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
+import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadataStore;
-import io.github.sashirestela.cleverclient.util.Constant;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
 import io.github.sashirestela.cleverclient.util.ReflectUtil;
 import lombok.Builder;
 
@@ -28,7 +29,7 @@ public class HttpProcessor implements InvocationHandler {
     private final String baseUrl;
     private final List<String> headers;
     private final HttpClient httpClient;
-    private final Function<String, String> urlInterceptor;
+    private final UnaryOperator<HttpRequestData> requestInterceptor;
 
     /**
      * Creates a generic dynamic proxy with this HttpProcessor object acting as an
@@ -98,59 +99,49 @@ public class HttpProcessor implements InvocationHandler {
         var methodMetadata = interfaceMetadata.getMethodBySignature().get(method.toString());
         var urlMethod = interfaceMetadata.getFullUrlByMethod(methodMetadata);
         var url = baseUrl + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
-        if (urlInterceptor != null) {
-            url = urlInterceptor.apply(url);
-        }
         var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
-        var isMultipart = methodMetadata.isMultipart();
         var bodyObject = calculateBodyObject(methodMetadata, arguments);
+        var contentType = methodMetadata.getContentType();
         var fullHeaders = new ArrayList<>(this.headers);
-        fullHeaders.addAll(calculateHeaderContentType(bodyObject, isMultipart));
+        fullHeaders.addAll(calculateHeaderContentType(contentType));
         fullHeaders.addAll(interfaceMetadata.getFullHeadersByMethod(methodMetadata));
-        var fullHeadersArray = fullHeaders.toArray(new String[0]);
         var httpConnector = HttpConnector.builder()
                 .httpClient(httpClient)
                 .url(url)
                 .httpMethod(httpMethod)
                 .returnType(returnType)
                 .bodyObject(bodyObject)
-                .isMultipart(isMultipart)
-                .headersArray(fullHeadersArray)
+                .contentType(contentType)
+                .headers(fullHeaders)
+                .requestInterceptor(requestInterceptor)
                 .build();
-        logger.debug("Http Call : {} {}", httpMethod, url);
-        logger.debug("Request Headers : {}", printHeaders(fullHeaders));
         return httpConnector.sendRequest();
     }
 
     private Object calculateBodyObject(MethodMetadata methodMetadata, Object[] arguments) {
-        var indexBody = methodMetadata.getBodyIndex();
-        return indexBody >= 0 ? arguments[indexBody] : null;
+        var bodyIndex = methodMetadata.getBodyIndex();
+        var bodyObject = bodyIndex >= 0 ? arguments[bodyIndex] : null;
+        if (bodyObject != null) {
+            switch (methodMetadata.getContentType()) {
+                case MULTIPART_FORMDATA:
+                    bodyObject = JsonUtil.objectToMap(bodyObject);
+                    break;
+                case APPLICATION_JSON:
+                    bodyObject = JsonUtil.objectToJson(bodyObject);
+                    break;
+            }
+        }
+        return bodyObject;
     }
 
-    private List<String> calculateHeaderContentType(Object bodyObject, boolean isMultipart) {
+    private List<String> calculateHeaderContentType(ContentType contentType) {
+        final String HEADER_CONTENT_TYPE = "Content-Type";
         List<String> headerContentType = new ArrayList<>();
-        if (bodyObject != null) {
-            headerContentType.add(Constant.HEADER_CONTENT_TYPE);
-            var contentType = isMultipart
-                    ? Constant.TYPE_MULTIPART + Constant.BOUNDARY_TITLE + "\"" + Constant.BOUNDARY_VALUE + "\""
-                    : Constant.TYPE_APP_JSON;
-            headerContentType.add(contentType);
+        if (contentType != null) {
+            headerContentType.add(HEADER_CONTENT_TYPE);
+            headerContentType.add(contentType.getMimeType() + contentType.getDetails());
         }
         return headerContentType;
-    }
-
-    private String printHeaders(List<String> headers) {
-        var print = "{";
-        for (var i = 0; i < headers.size(); i++) {
-            if (i > 1) {
-                print += ", ";
-            }
-            var headerKey = headers.get(i++);
-            var headerVal = headerKey.equals("Authorization") ? "*".repeat(10) : headers.get(i);
-            print += headerKey + " = " + headerVal;
-        }
-        print += "}";
-        return print;
     }
 }
