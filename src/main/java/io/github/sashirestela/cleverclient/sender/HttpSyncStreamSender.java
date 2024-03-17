@@ -21,11 +21,14 @@ public class HttpSyncStreamSender extends HttpSender {
 
             throwExceptionIfErrorIsPresent(httpResponse, Stream.class);
 
+            final var record = new CleverClientSSE.LineRecord();
+
             return httpResponse.body()
-                    .peek(rawData -> logger.debug("Response : {}", rawData))
-                    .map(CleverClientSSE::new)
+                    .peek(line -> logger.debug("Response : {}", line))
+                    .peek(line -> record.updateWith(line))
+                    .map(line -> new CleverClientSSE(record))
                     .filter(CleverClientSSE::isActualData)
-                    .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
+                    .map(item -> JsonUtil.jsonToObject(item.getActualData(), responseClass));
 
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
