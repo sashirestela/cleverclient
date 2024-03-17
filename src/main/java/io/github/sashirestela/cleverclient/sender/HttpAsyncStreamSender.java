@@ -20,11 +20,14 @@ public class HttpAsyncStreamSender extends HttpSender {
 
             throwExceptionIfErrorIsPresent(response, Stream.class);
 
+            final var record = new CleverClientSSE.LineRecord();
+
             return response.body()
-                    .peek(rawData -> logger.debug("Response : {}", rawData))
-                    .map(CleverClientSSE::new)
+                    .peek(line -> logger.debug("Response : {}", line))
+                    .peek(line -> record.updateWith(line))
+                    .map(line -> new CleverClientSSE(record))
                     .filter(CleverClientSSE::isActualData)
-                    .map(event -> JsonUtil.jsonToObject(event.getActualData(), responseClass));
+                    .map(item -> JsonUtil.jsonToObject(item.getActualData(), responseClass));
         });
     }
 

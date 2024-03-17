@@ -1,6 +1,8 @@
 package io.github.sashirestela.cleverclient;
 
 import java.net.http.HttpClient;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -10,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
-import io.github.sashirestela.cleverclient.support.CleverClientSSE;
+import io.github.sashirestela.cleverclient.support.Configurator;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +28,6 @@ import lombok.Singular;
 public class CleverClient {
     private static final Logger logger = LoggerFactory.getLogger(CleverClient.class);
 
-    @NonNull
     private final String baseUrl;
     private final Map<String, String> headers;
     private final HttpClient httpClient;
@@ -48,17 +49,21 @@ public class CleverClient {
      */
     @Builder
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
-            UnaryOperator<HttpRequestData> requestInterceptor, String endOfStream) {
+            UnaryOperator<HttpRequestData> requestInterceptor, @Singular("eventToRead") List<String> eventsToRead,
+            @Singular("endOfStream") List<String> endsOfStream) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
         this.requestInterceptor = requestInterceptor;
-        CleverClientSSE.setEndOfStream(endOfStream);
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
                 .headers(CommonUtil.mapToListOfString(this.headers))
                 .httpClient(this.httpClient)
                 .requestInterceptor(this.requestInterceptor)
+                .build();
+        Configurator.builder()
+                .eventsToRead(Optional.ofNullable(eventsToRead).orElse(Arrays.asList()))
+                .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
                 .build();
         logger.debug("CleverClient has been created.");
     }
