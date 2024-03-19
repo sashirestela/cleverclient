@@ -2,9 +2,22 @@
 
 Java library that makes it easier to use the Java's HttpClient to perform http operations, using interfaces.
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sashirestela_cleverclient&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sashirestela_cleverclient)
 [![codecov](https://codecov.io/gh/sashirestela/cleverclient/graph/badge.svg?token=PEYAFW3EWD)](https://codecov.io/gh/sashirestela/cleverclient)
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.sashirestela/cleverclient)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sashirestela/cleverclient/maven.yml)
+
+### Table of Contents
+- [Description](#-description)
+- [Installation](#-installation)
+- [Features](#-features)
+  - [CleverClient Builder](#cleverclient-builder)
+  - [Interface Annotations](#interface-annotations)
+  - [Supported Response Types](#supported-response-types)
+  - [Interface Default Methods](#interface-default-methods)
+- [Examples](#-examples)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 💡 Description
 
@@ -253,8 +266,10 @@ Some examples have been created in the folder [example](https://github.com/sashi
   * For example, to run the BasicExample with all the log options:
     * ```mvn exec:java -Dexec.mainClass=io.github.sashirestela.cleverclient.example.BasicExample -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.logFile=example.log```
 
-## 📄 License
+## 💼 Contributing
+Please read our [Contributing](CONTRIBUTING.md) guide to learn and understand how to contribute to this project.
 
+## 📄 License
 CleverClient is licensed under the MIT License. See the
 [LICENSE](https://github.com/sashirestela/cleverclient/blob/main/LICENSE) file
 for more information.
