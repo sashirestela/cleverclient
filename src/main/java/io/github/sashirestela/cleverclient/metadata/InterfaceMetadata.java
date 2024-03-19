@@ -13,14 +13,14 @@ import lombok.Value;
 @Value
 @Builder
 public class InterfaceMetadata {
-    private final static String ANNOT_RESOURCE = "Resource";
-    private final static String ANNOT_HEADER = "Header";
-    private final static String ANNOT_MULTIPART = "Multipart";
-    private final static String ANNOT_PARAM_BODY = "Body";
-    private final static String ANNOT_PARAM_PATH = "Path";
-    private final static String ANNOT_PARAM_QUERY = "Query";
-    private final static String ANNOT_FIELD_NAME = "name";
-    private final static String ANNOT_FIELD_VALUE = "value";
+    private static final String ANNOT_RESOURCE = "Resource";
+    private static final String ANNOT_HEADER = "Header";
+    private static final String ANNOT_MULTIPART = "Multipart";
+    private static final String ANNOT_PARAM_BODY = "Body";
+    private static final String ANNOT_PARAM_PATH = "Path";
+    private static final String ANNOT_PARAM_QUERY = "Query";
+    private static final String ANNOT_FIELD_NAME = "name";
+    private static final String ANNOT_FIELD_VALUE = "value";
 
     String name;
     List<AnnotationMetadata> annotations;
@@ -77,11 +77,11 @@ public class InterfaceMetadata {
         }
 
         public ContentType getContentType() {
-            return getBodyIndex() == -1
-                    ? null
-                    : isMultipart()
-                            ? ContentType.MULTIPART_FORMDATA
-                            : ContentType.APPLICATION_JSON;
+            if (getBodyIndex() == -1) {
+                return null;
+            } else {
+                return isMultipart() ? ContentType.MULTIPART_FORMDATA : ContentType.APPLICATION_JSON;
+            }
         }
 
         private boolean isMultipart() {

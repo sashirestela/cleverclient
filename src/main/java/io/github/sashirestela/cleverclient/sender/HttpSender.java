@@ -57,7 +57,7 @@ public abstract class HttpSender {
                 try {
                     data = new String(((InputStream) response.body()).readAllBytes(), StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Cannot read input stream. {}", e.getMessage());
                 }
             } else {
                 data = (String) response.body();

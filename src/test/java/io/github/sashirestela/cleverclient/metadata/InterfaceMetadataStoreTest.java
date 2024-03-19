@@ -16,7 +16,7 @@ import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterM
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.ReturnType;;
 
-public class InterfaceMetadataStoreTest {
+class InterfaceMetadataStoreTest {
 
     InterfaceMetadataStore store = InterfaceMetadataStore.one();
 

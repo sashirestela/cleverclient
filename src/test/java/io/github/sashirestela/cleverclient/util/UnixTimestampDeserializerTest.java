@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class UnixTimestampDeserializerTest {
+class UnixTimestampDeserializerTest {
 
     @Test
     void testDeserialize() {

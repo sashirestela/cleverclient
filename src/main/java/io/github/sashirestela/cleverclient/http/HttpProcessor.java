@@ -123,13 +123,10 @@ public class HttpProcessor implements InvocationHandler {
         var bodyIndex = methodMetadata.getBodyIndex();
         var bodyObject = bodyIndex >= 0 ? arguments[bodyIndex] : null;
         if (bodyObject != null) {
-            switch (methodMetadata.getContentType()) {
-                case MULTIPART_FORMDATA:
-                    bodyObject = JsonUtil.objectToMap(bodyObject);
-                    break;
-                case APPLICATION_JSON:
-                    bodyObject = JsonUtil.objectToJson(bodyObject);
-                    break;
+            if (methodMetadata.getContentType() == ContentType.MULTIPART_FORMDATA) {
+                bodyObject = JsonUtil.objectToMap(bodyObject);
+            } else if (methodMetadata.getContentType() == ContentType.APPLICATION_JSON) {
+                bodyObject = JsonUtil.objectToJson(bodyObject);
             }
         }
         return bodyObject;

@@ -42,7 +42,7 @@ class CleverClientSSETest {
     @SuppressWarnings("unused")
     void shouldReturnTheActualDataWhenRawDataMeetsConditions() {
         CleverClientSSE event = new CleverClientSSE(new LineRecord("event: process", "data:   This is the actual data.  "));
-        var rawData = event.getRecord();
+        var rawData = event.getLineRecord();
         var actualData = event.getActualData();
         var expectedData = "This is the actual data.";
         assertEquals(expectedData, actualData);

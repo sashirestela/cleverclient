@@ -48,8 +48,9 @@ public class HttpConnector {
         if (requestInterceptor != null) {
             interceptRequest();
         }
+        var formattedHeaders = printHeaders(headers);
         logger.debug("Http Call : {} {}", httpMethod, url);
-        logger.debug("Request Headers : {}", printHeaders(headers));
+        logger.debug("Request Headers : {}", formattedHeaders);
 
         var bodyPublisher = createBodyPublisher(bodyObject, contentType);
         var responseClass = returnType.getBaseClass();
@@ -94,34 +95,28 @@ public class HttpConnector {
         if (contentType == null) {
             logger.debug("Request Body : (Empty)");
             bodyPublisher = BodyPublishers.noBody();
-        } else {
-            switch (contentType) {
-                case MULTIPART_FORMDATA:
-                    logger.debug("Request Body : {}", (Map<String, Object>) bodyObject);
-                    var bodyBytes = HttpMultipart.toByteArrays((Map<String, Object>) bodyObject);
-                    bodyPublisher = BodyPublishers.ofByteArrays(bodyBytes);
-                    break;
-
-                case APPLICATION_JSON:
-                    logger.debug("Request Body : {}", (String) bodyObject);
-                    bodyPublisher = BodyPublishers.ofString((String) bodyObject);
-                    break;
-            }
+        } else if (contentType == ContentType.MULTIPART_FORMDATA) {
+            logger.debug("Request Body : {}", bodyObject);
+            var bodyBytes = HttpMultipart.toByteArrays((Map<String, Object>) bodyObject);
+            bodyPublisher = BodyPublishers.ofByteArrays(bodyBytes);
+        } else if (contentType == ContentType.APPLICATION_JSON) {
+            logger.debug("Request Body : {}", bodyObject);
+            bodyPublisher = BodyPublishers.ofString((String) bodyObject);
         }
         return bodyPublisher;
     }
 
     private String printHeaders(List<String> headers) {
-        var print = "{";
-        for (var i = 0; i < headers.size(); i++) {
+        var print = new StringBuilder("{");
+        for (var i = 0; i < headers.size(); i += 2) {
             if (i > 1) {
-                print += ", ";
+                print.append(", ");
             }
-            var headerKey = headers.get(i++);
-            var headerVal = headerKey.equals("Authorization") ? "*".repeat(10) : headers.get(i);
-            print += headerKey + " = " + headerVal;
+            var headerKey = headers.get(i);
+            var headerVal = headerKey.equals("Authorization") ? "*".repeat(10) : headers.get(i + 1);
+            print.append(headerKey + " = " + headerVal);
         }
-        print += "}";
-        return print;
+        print.append("}");
+        return print.toString();
     }
 }

@@ -114,7 +114,7 @@ public class InterfaceMetadataStore {
             var annotations = getAnnotations(javaParameter.getDeclaredAnnotations());
             var parameterMetadata = ParameterMetadata.builder()
                     .index(index++)
-                    .annotation(annotations.size() > 0 ? annotations.get(0) : null)
+                    .annotation(!annotations.isEmpty() ? annotations.get(0) : null)
                     .build();
             parameters.add(parameterMetadata);
         }
@@ -123,11 +123,9 @@ public class InterfaceMetadataStore {
 
     private void validate(InterfaceMetadata interfaceMetadata) {
         interfaceMetadata.getMethodBySignature().forEach((methodSignature, methodMetadata) -> {
-            if (!methodMetadata.isDefault()) {
-                if (!methodMetadata.hasHttpAnnotation()) {
-                    throw new CleverClientException("Missing HTTP annotation for the method {0}.",
-                            methodMetadata.getName(), null);
-                }
+            if (!methodMetadata.isDefault() && !methodMetadata.hasHttpAnnotation()) {
+                throw new CleverClientException("Missing HTTP annotation for the method {0}.",
+                        methodMetadata.getName(), null);
             }
             var url = interfaceMetadata.getFullUrlByMethod(methodMetadata);
             var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
