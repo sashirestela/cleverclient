@@ -41,8 +41,10 @@ public class CleverClient {
      * @param httpClient         Custom Java's HttpClient component. One is created by default if none
      *                           is passed. Optional.
      * @param requestInterceptor Function to modify the request once it has been built.
-     * @param endOfStream        Text used to mark the final of streams when handling server sent events
+     * @param eventsToRead       List of events's name that we want to read from server sent events
      *                           (SSE). Optional.
+     * @param endsOfStream       Texts used to mark the final of streams when handling server sent
+     *                           events (SSE). Optional.
      */
     @Builder
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
