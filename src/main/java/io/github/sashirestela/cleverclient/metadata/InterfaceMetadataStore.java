@@ -1,15 +1,5 @@
 package io.github.sashirestela.cleverclient.metadata;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.github.sashirestela.cleverclient.annotation.HttpMethod;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.AnnotationMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
@@ -18,8 +8,18 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import io.github.sashirestela.cleverclient.util.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InterfaceMetadataStore {
+
     private static Logger logger = LoggerFactory.getLogger(InterfaceMetadataStore.class);
 
     private static InterfaceMetadataStore store = null;
@@ -114,7 +114,7 @@ public class InterfaceMetadataStore {
             var annotations = getAnnotations(javaParameter.getDeclaredAnnotations());
             var parameterMetadata = ParameterMetadata.builder()
                     .index(index++)
-                    .annotation(annotations.size() > 0 ? annotations.get(0) : null)
+                    .annotation(!annotations.isEmpty() ? annotations.get(0) : null)
                     .build();
             parameters.add(parameterMetadata);
         }
@@ -123,22 +123,23 @@ public class InterfaceMetadataStore {
 
     private void validate(InterfaceMetadata interfaceMetadata) {
         interfaceMetadata.getMethodBySignature().forEach((methodSignature, methodMetadata) -> {
-            if (!methodMetadata.isDefault()) {
-                if (!methodMetadata.hasHttpAnnotation()) {
-                    throw new CleverClientException("Missing HTTP annotation for the method {0}.",
-                            methodMetadata.getName(), null);
-                }
+            if (!methodMetadata.isDefault() && !methodMetadata.hasHttpAnnotation()) {
+                throw new CleverClientException("Missing HTTP annotation for the method {0}.",
+                        methodMetadata.getName(), null);
             }
             var url = interfaceMetadata.getFullUrlByMethod(methodMetadata);
             var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
             if (!CommonUtil.isNullOrEmpty(listPathParams)) {
-                listPathParams.forEach(pathParam -> methodMetadata.getPathParameters().stream()
+                listPathParams.forEach(pathParam -> methodMetadata.getPathParameters()
+                        .stream()
                         .map(parameter -> parameter.getAnnotation().getValue())
-                        .filter(paramAnnotValue -> pathParam.equals(paramAnnotValue)).findFirst()
+                        .filter(paramAnnotValue -> pathParam.equals(paramAnnotValue))
+                        .findFirst()
                         .orElseThrow(() -> new CleverClientException(
                                 "Path param {0} in the url cannot find an annotated argument in the method {1}.",
                                 pathParam, methodMetadata.getName(), null)));
             }
         });
     }
+
 }

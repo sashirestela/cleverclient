@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class Album {
+
     private Integer id;
     private String title;
     private Integer userId;
+
 }

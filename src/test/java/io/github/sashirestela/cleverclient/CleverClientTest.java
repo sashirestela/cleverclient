@@ -1,25 +1,5 @@
 package io.github.sashirestela.cleverclient;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
-
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Query;
@@ -29,6 +9,25 @@ import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.util.HttpRequestBodyTestUtility;
 import lombok.Builder;
 import lombok.Value;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.UnaryOperator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class CleverClientTest {
 
@@ -126,9 +125,11 @@ class CleverClientTest {
     @Value
     @Builder
     static class Sample {
+
         String id;
         String model;
         String description;
+
     }
 
     @Resource("/v1.2/api")
@@ -136,5 +137,7 @@ class CleverClientTest {
 
         @GET("/text")
         CompletableFuture<String> getText(@Body Sample sample, @Query("prefix") String prefix);
+
     }
+
 }

@@ -1,11 +1,5 @@
 package io.github.sashirestela.cleverclient.http;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Header;
@@ -19,6 +13,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 public interface ITest {
 
@@ -89,6 +89,7 @@ public interface ITest {
         default String defaultMethod(String name) {
             return "Hello " + name;
         }
+
     }
 
     @Resource("/demos")
@@ -112,6 +113,7 @@ public interface ITest {
 
         @POST
         Stream<Demo> getDemoStream(@Body RequestDemo request);
+
     }
 
     interface NotSavedService {
@@ -155,5 +157,7 @@ public interface ITest {
         private Integer id;
 
         private List<T> listDemo;
+
     }
+
 }

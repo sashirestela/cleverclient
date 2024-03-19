@@ -3,6 +3,7 @@ package io.github.sashirestela.cleverclient.support;
 import java.lang.reflect.Method;
 
 public class ReturnType {
+
     private static final String ASYNC = "java.util.concurrent.CompletableFuture";
     private static final String STREAM = "java.util.stream.Stream";
     private static final String LIST = "java.util.List";
@@ -153,4 +154,5 @@ public class ReturnType {
         SYNC_BINARY,
         SYNC_PLAIN_TEXT;
     }
+
 }

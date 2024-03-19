@@ -1,5 +1,7 @@
 package io.github.sashirestela.cleverclient.support;
 
+import io.github.sashirestela.cleverclient.util.Constant;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -9,9 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.github.sashirestela.cleverclient.util.Constant;
-
 public class HttpMultipart {
+
     private static final String DASH = "--";
     private static final String DQ = "\"";
     private static final String NL = "\r\n";
@@ -66,4 +67,5 @@ public class HttpMultipart {
         return value instanceof String
                 && ((String) value).startsWith(FILE_PROTOCOL);
     }
+
 }

@@ -19,6 +19,7 @@ public class HttpRequestBodyTestUtility {
     }
 
     static final class StringSubscriber implements Flow.Subscriber<ByteBuffer> {
+
         final HttpResponse.BodySubscriber<String> wrapped;
 
         StringSubscriber(HttpResponse.BodySubscriber<String> wrapped) {
@@ -44,5 +45,7 @@ public class HttpRequestBodyTestUtility {
         public void onComplete() {
             wrapped.onComplete();
         }
+
     }
+
 }

@@ -1,12 +1,12 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
+
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
-
-import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class HttpSyncGenericSender extends HttpSender {
 

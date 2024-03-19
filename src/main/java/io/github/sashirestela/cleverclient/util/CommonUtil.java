@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CommonUtil {
+
     private CommonUtil() {
     }
 
@@ -49,12 +50,12 @@ public class CommonUtil {
             throw new IllegalArgumentException("It is expected an even number of elements.");
         }
         Map<String, String> map = new HashMap<>();
-        for (var i = 0; i < keyValPairs.length; i++) {
+        for (var i = 0; i < keyValPairs.length; i += 2) {
             var key = keyValPairs[i];
             if (key == null) {
                 throw new IllegalArgumentException("Unexpected null element for key in position " + i + ".");
             }
-            var val = keyValPairs[++i];
+            var val = keyValPairs[i + 1];
             map.put(key, val);
         }
         return map;
@@ -62,10 +63,10 @@ public class CommonUtil {
 
     public static List<String> mapToListOfString(Map<String, String> map) {
         List<String> list = new ArrayList<>();
-        map.entrySet().stream().peek(e -> {
-            list.add(e.getKey());
-            list.add(e.getValue());
-        }).collect(Collectors.counting());
+        for (var entry : map.entrySet()) {
+            list.add(entry.getKey());
+            list.add(entry.getValue());
+        }
         return list;
     }
 
@@ -73,4 +74,5 @@ public class CommonUtil {
         var array = list.toArray(new String[0]);
         return createMapString(array);
     }
+
 }

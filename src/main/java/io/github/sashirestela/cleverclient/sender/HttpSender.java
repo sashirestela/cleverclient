@@ -1,5 +1,10 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.util.CommonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -10,23 +15,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.util.CommonUtil;
-
 /**
- * HttpSender is an abstract class for a set of concrete classes that implement
- * different interactions with the Java's HttpClient based on the method's
- * return type.
+ * HttpSender is an abstract class for a set of concrete classes that implement different
+ * interactions with the Java's HttpClient based on the method's return type.
  */
 public abstract class HttpSender {
+
     protected static Logger logger = LoggerFactory.getLogger(HttpSender.class);
 
     /**
-     * Method to be implementd for concrete classes to send request to the Java's
-     * HttpClient and receive response.
+     * Method to be implementd for concrete classes to send request to the Java's HttpClient and receive
+     * response.
      * 
      * @param <S>           Type of a generic class if exists.
      * @param <T>           Type of the response.
@@ -57,7 +56,7 @@ public abstract class HttpSender {
                 try {
                     data = new String(((InputStream) response.body()).readAllBytes(), StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Cannot read input stream. {}", e.getMessage());
                 }
             } else {
                 data = (String) response.body();
@@ -66,4 +65,5 @@ public abstract class HttpSender {
             throw new CleverClientException("ERROR : {0}", data, null);
         }
     }
+
 }

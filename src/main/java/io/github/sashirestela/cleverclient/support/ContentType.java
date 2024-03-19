@@ -3,6 +3,7 @@ package io.github.sashirestela.cleverclient.support;
 import io.github.sashirestela.cleverclient.util.Constant;
 
 public enum ContentType {
+
     MULTIPART_FORMDATA(
             "multipart/form-data",
             "; boundary=\"" + Constant.BOUNDARY_VALUE + "\""),
@@ -25,4 +26,5 @@ public enum ContentType {
     public String getDetails() {
         return this.details;
     }
+
 }

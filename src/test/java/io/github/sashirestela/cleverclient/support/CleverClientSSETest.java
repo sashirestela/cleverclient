@@ -1,11 +1,10 @@
 package io.github.sashirestela.cleverclient.support;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import io.github.sashirestela.cleverclient.support.CleverClientSSE.LineRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.github.sashirestela.cleverclient.support.CleverClientSSE.LineRecord;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CleverClientSSETest {
 
@@ -41,10 +40,12 @@ class CleverClientSSETest {
     @Test
     @SuppressWarnings("unused")
     void shouldReturnTheActualDataWhenRawDataMeetsConditions() {
-        CleverClientSSE event = new CleverClientSSE(new LineRecord("event: process", "data:   This is the actual data.  "));
-        var rawData = event.getRecord();
+        CleverClientSSE event = new CleverClientSSE(
+                new LineRecord("event: process", "data:   This is the actual data.  "));
+        var rawData = event.getLineRecord();
         var actualData = event.getActualData();
         var expectedData = "This is the actual data.";
         assertEquals(expectedData, actualData);
     }
+
 }

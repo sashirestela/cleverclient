@@ -1,13 +1,13 @@
 package io.github.sashirestela.cleverclient.util;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,4 +154,5 @@ class CommonUtilTest {
         Map<String, String> actualMap = CommonUtil.listToMapOfString(list);
         assertEquals(expectedMap, actualMap);
     }
+
 }

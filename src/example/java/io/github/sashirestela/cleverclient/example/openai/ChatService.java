@@ -1,11 +1,11 @@
 package io.github.sashirestela.cleverclient.example.openai;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.Resource;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 @Resource("/v1/chat/completions")
 public interface ChatService {

@@ -1,7 +1,6 @@
 package io.github.sashirestela.cleverclient.example.openai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -10,6 +9,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Usage {
+
     @JsonProperty("prompt_tokens")
     private Integer promptTokens;
 
@@ -18,4 +18,5 @@ public class Usage {
 
     @JsonProperty("total_tokens")
     private Integer totalTokens;
+
 }

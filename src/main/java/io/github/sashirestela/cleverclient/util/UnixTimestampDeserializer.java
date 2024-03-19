@@ -16,4 +16,5 @@ public class UnixTimestampDeserializer extends JsonDeserializer<ZonedDateTime> {
         long timestamp = jp.getLongValue();
         return ZonedDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
     }
+
 }

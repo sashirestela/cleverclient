@@ -1,12 +1,12 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import io.github.sashirestela.cleverclient.support.CleverClientSSE;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
+
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.stream.Stream;
-
-import io.github.sashirestela.cleverclient.support.CleverClientSSE;
-import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class HttpAsyncStreamSender extends HttpSender {
 
@@ -20,12 +20,14 @@ public class HttpAsyncStreamSender extends HttpSender {
 
             throwExceptionIfErrorIsPresent(response, Stream.class);
 
-            final var record = new CleverClientSSE.LineRecord();
+            final var lineRecord = new CleverClientSSE.LineRecord();
 
             return response.body()
-                    .peek(line -> logger.debug("Response : {}", line))
-                    .peek(line -> record.updateWith(line))
-                    .map(line -> new CleverClientSSE(record))
+                    .peek(line -> {
+                        logger.debug("Response : {}", line);
+                        lineRecord.updateWith(line);
+                    })
+                    .map(line -> new CleverClientSSE(lineRecord))
                     .filter(CleverClientSSE::isActualData)
                     .map(item -> JsonUtil.jsonToObject(item.getActualData(), responseClass));
         });

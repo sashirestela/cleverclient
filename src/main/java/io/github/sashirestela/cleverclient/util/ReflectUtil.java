@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
 public class ReflectUtil {
+
     private ReflectUtil() {
     }
 
@@ -14,4 +15,5 @@ public class ReflectUtil {
                 new Class<?>[] { interfaceClass },
                 handler);
     }
+
 }

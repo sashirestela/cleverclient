@@ -1,13 +1,13 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-
-import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
-import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
-import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 public class URLBuilder {
 
@@ -73,4 +73,5 @@ public class URLBuilder {
                     .append(URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));
         }
     }
+
 }
