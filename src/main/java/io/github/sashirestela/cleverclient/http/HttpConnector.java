@@ -1,5 +1,15 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.sender.HttpSenderFactory;
+import io.github.sashirestela.cleverclient.support.ContentType;
+import io.github.sashirestela.cleverclient.support.HttpMultipart;
+import io.github.sashirestela.cleverclient.support.ReturnType;
+import io.github.sashirestela.cleverclient.util.CommonUtil;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,24 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.github.sashirestela.cleverclient.sender.HttpSenderFactory;
-import io.github.sashirestela.cleverclient.support.ContentType;
-import io.github.sashirestela.cleverclient.support.HttpMultipart;
-import io.github.sashirestela.cleverclient.support.ReturnType;
-import io.github.sashirestela.cleverclient.util.CommonUtil;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
 /**
- * HttpConnector prepares the request and receives the response to/from the
- * Java's HttpClient component.
+ * HttpConnector prepares the request and receives the response to/from the Java's HttpClient
+ * component.
  */
 @AllArgsConstructor
 @Builder
 public class HttpConnector {
+
     private static final Logger logger = LoggerFactory.getLogger(HttpConnector.class);
 
     private HttpClient httpClient;
@@ -39,8 +39,8 @@ public class HttpConnector {
     private UnaryOperator<HttpRequestData> requestInterceptor;
 
     /**
-     * Prepares the request to call Java's HttpClient and delegates it to a
-     * specialized HttpSender based on the method's return type.
+     * Prepares the request to call Java's HttpClient and delegates it to a specialized HttpSender based
+     * on the method's return type.
      * 
      * @return The response coming from the HttpSender's sendRequest method.
      */
@@ -119,4 +119,5 @@ public class HttpConnector {
         print.append("}");
         return print.toString();
     }
+
 }

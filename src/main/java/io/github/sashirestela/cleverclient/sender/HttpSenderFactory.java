@@ -1,19 +1,19 @@
 package io.github.sashirestela.cleverclient.sender;
 
-import java.util.EnumMap;
-import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.support.ReturnType.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.EnumMap;
+import java.util.function.Supplier;
 
 /**
  * Factory for the abstrac class HttpSender.
  */
 public class HttpSenderFactory {
+
     private static Logger logger = LoggerFactory.getLogger(HttpSenderFactory.class);
 
     private static HttpSenderFactory factory = null;
@@ -60,4 +60,5 @@ public class HttpSenderFactory {
         }
         return sender;
     }
+
 }

@@ -1,16 +1,16 @@
 package io.github.sashirestela.cleverclient.example;
 
-import java.util.Arrays;
-
 import io.github.sashirestela.cleverclient.CleverClient;
 import io.github.sashirestela.cleverclient.example.openai.ChatRequest;
 import io.github.sashirestela.cleverclient.example.openai.ChatResponse;
 import io.github.sashirestela.cleverclient.example.openai.ChatService;
 import io.github.sashirestela.cleverclient.example.openai.Message;
 
+import java.util.Arrays;
+
 /**
- * Before running this example you must have an OpenAI account and keep your Api
- * Key in an environment variable called OPENAI_API_KEY.
+ * Before running this example you must have an OpenAI account and keep your Api Key in an
+ * environment variable called OPENAI_API_KEY.
  * 
  * @see https://platform.openai.com/docs/api-reference/authentication
  */
@@ -59,4 +59,5 @@ public class StreamExample {
         System.out.println(title);
         System.out.println("-".repeat(times));
     }
+
 }

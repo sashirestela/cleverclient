@@ -1,20 +1,19 @@
 package io.github.sashirestela.cleverclient.metadata;
 
-import static io.github.sashirestela.cleverclient.util.CommonUtil.createMapString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.Arrays;
-import java.util.HashMap;
-
-import org.junit.jupiter.api.Test;
-
 import io.github.sashirestela.cleverclient.http.ITest;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.AnnotationMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.support.ReturnType;;
+import io.github.sashirestela.cleverclient.support.ReturnType;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.HashMap;
+
+import static io.github.sashirestela.cleverclient.util.CommonUtil.createMapString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class InterfaceMetadataStoreTest {
 
@@ -151,4 +150,5 @@ class InterfaceMetadataStoreTest {
                 "Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.",
                 exception.getMessage());
     }
+
 }

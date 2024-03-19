@@ -1,18 +1,19 @@
 package io.github.sashirestela.cleverclient.metadata;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Value
 @Builder
 public class InterfaceMetadata {
+
     private static final String ANNOT_RESOURCE = "Resource";
     private static final String ANNOT_HEADER = "Header";
     private static final String ANNOT_MULTIPART = "Multipart";
@@ -31,7 +32,8 @@ public class InterfaceMetadata {
                 .filter(annot -> annot.getName().equals(ANNOT_RESOURCE))
                 .findFirst();
         var resourceUrl = resourceAnnot.isPresent() ? resourceAnnot.get().getValue() : "";
-        var httpMethodAnnot = methodMetadata.getAnnotations().stream()
+        var httpMethodAnnot = methodMetadata.getAnnotations()
+                .stream()
                 .filter(AnnotationMetadata::isHttpMethod)
                 .findFirst();
         var httpMethodUrl = httpMethodAnnot.isPresent() ? httpMethodAnnot.get().getValue() : "";
@@ -42,7 +44,8 @@ public class InterfaceMetadata {
         var fullHeaderAnnots = annotations.stream()
                 .filter(annot -> annot.getName().equals(ANNOT_HEADER))
                 .collect(Collectors.toList());
-        var methodHeaderAnnots = methodMetadata.getAnnotations().stream()
+        var methodHeaderAnnots = methodMetadata.getAnnotations()
+                .stream()
                 .filter(annot -> annot.getName().equals(ANNOT_HEADER))
                 .collect(Collectors.toList());
         fullHeaderAnnots.addAll(methodHeaderAnnots);
@@ -57,6 +60,7 @@ public class InterfaceMetadata {
     @Value
     @Builder
     public static class MethodMetadata {
+
         String name;
         ReturnType returnType;
         boolean isDefault;
@@ -110,18 +114,22 @@ public class InterfaceMetadata {
                     .filter(param -> param.getAnnotation().getName().equals(annotationName))
                     .collect(Collectors.toList());
         }
+
     }
 
     @Value
     @Builder
     public static class ParameterMetadata {
+
         int index;
         AnnotationMetadata annotation;
+
     }
 
     @Value
     @Builder
     public static class AnnotationMetadata {
+
         String name;
         boolean isHttpMethod;
         Map<String, String> valueByField;
@@ -129,5 +137,7 @@ public class InterfaceMetadata {
         public String getValue() {
             return valueByField.get(ANNOT_FIELD_VALUE);
         }
+
     }
+
 }

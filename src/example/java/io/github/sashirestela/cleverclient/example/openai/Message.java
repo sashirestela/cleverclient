@@ -10,6 +10,8 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Message {
+
     private String role;
     private String content;
+
 }

@@ -1,11 +1,11 @@
 package io.github.sashirestela.cleverclient.support;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Configurator {
 
@@ -45,7 +45,9 @@ public class Configurator {
 
     public List<String> getLinesToCheck() {
         if (linesToCheck == null) {
-            linesToCheck = eventsToRead.stream().filter(etr -> !etr.isEmpty()).map(etr -> (EVENT_HEADER + etr))
+            linesToCheck = eventsToRead.stream()
+                    .filter(etr -> !etr.isEmpty())
+                    .map(etr -> (EVENT_HEADER + etr))
                     .collect(Collectors.toList());
             linesToCheck.add(SEPARATOR);
         }

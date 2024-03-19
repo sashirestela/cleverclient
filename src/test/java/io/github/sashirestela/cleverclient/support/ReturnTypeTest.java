@@ -1,7 +1,6 @@
 package io.github.sashirestela.cleverclient.support;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.util.List;
@@ -10,7 +9,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ReturnTypeTest {
 
@@ -86,9 +86,11 @@ class ReturnTypeTest {
         String syncStringMethod();
 
         Set<Object> syncSetMethod();
+
     }
 
     static interface Generic<T> {
 
     }
+
 }

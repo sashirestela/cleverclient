@@ -1,18 +1,16 @@
 package io.github.sashirestela.cleverclient.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UnixTimestampDeserializerTest {
 
@@ -37,4 +35,5 @@ class UnixTimestampDeserializerTest {
         private ZonedDateTime time;
 
     }
+
 }

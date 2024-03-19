@@ -1,12 +1,12 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import io.github.sashirestela.cleverclient.support.CleverClientException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
-
-import io.github.sashirestela.cleverclient.support.CleverClientException;
 
 public class HttpSyncBinarySender extends HttpSender {
 

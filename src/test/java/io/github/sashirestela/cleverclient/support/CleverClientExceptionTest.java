@@ -1,9 +1,9 @@
 package io.github.sashirestela.cleverclient.support;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import org.junit.jupiter.api.Test;
 
 class CleverClientExceptionTest {
 

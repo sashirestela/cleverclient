@@ -1,5 +1,14 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
+import io.github.sashirestela.cleverclient.metadata.InterfaceMetadataStore;
+import io.github.sashirestela.cleverclient.support.ContentType;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
+import io.github.sashirestela.cleverclient.util.ReflectUtil;
+import lombok.Builder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
@@ -9,21 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
-import io.github.sashirestela.cleverclient.support.ContentType;
-import io.github.sashirestela.cleverclient.metadata.InterfaceMetadataStore;
-import io.github.sashirestela.cleverclient.util.JsonUtil;
-import io.github.sashirestela.cleverclient.util.ReflectUtil;
-import lombok.Builder;
-
 /**
  * HttpProcessor orchestrates all the http interaction.
  */
 @Builder
 public class HttpProcessor implements InvocationHandler {
+
     private static final Logger logger = LoggerFactory.getLogger(HttpProcessor.class);
 
     private final String baseUrl;
@@ -32,10 +32,9 @@ public class HttpProcessor implements InvocationHandler {
     private final UnaryOperator<HttpRequestData> requestInterceptor;
 
     /**
-     * Creates a generic dynamic proxy with this HttpProcessor object acting as an
-     * InvocationHandler to resolve the requests arriving to the proxy. Previously,
-     * the interface metadata is collected and stored in memory to be used later and
-     * avoid to use Reflection calls.
+     * Creates a generic dynamic proxy with this HttpProcessor object acting as an InvocationHandler to
+     * resolve the requests arriving to the proxy. Previously, the interface metadata is collected and
+     * stored in memory to be used later and avoid to use Reflection calls.
      * 
      * @param <T>            Type of the interface.
      * @param interfaceClass The interface to be instanced.
@@ -49,16 +48,15 @@ public class HttpProcessor implements InvocationHandler {
     }
 
     /**
-     * Method automatically called whenever an interface's method is called. It
-     * handles default methods directly. Non-default methods are solved by calling
-     * HttpConnector.
+     * Method automatically called whenever an interface's method is called. It handles default methods
+     * directly. Non-default methods are solved by calling HttpConnector.
      * 
      * @param proxy     The proxy instance that the method was invoked on.
-     * @param method    The Method instance corresponding to the interface method
-     *                  invoked on the proxy instance.
-     * @param arguments An array of objects containing the values of the arguments
-     *                  passed in the method invocation on the proxy instance, or
-     *                  null if interface method takes no arguments.
+     * @param method    The Method instance corresponding to the interface method invoked on the proxy
+     *                  instance.
+     * @param arguments An array of objects containing the values of the arguments passed in the method
+     *                  invocation on the proxy instance, or null if interface method takes no
+     *                  arguments.
      * @return The value to return from the method invocation on the proxy instance.
      */
     @Override
@@ -83,15 +81,15 @@ public class HttpProcessor implements InvocationHandler {
     }
 
     /**
-     * Reads the interface method metadata from memory and uses them to prepare an
-     * HttpConnector object that will resend the request to the Java's HttpClient
-     * and will receive the response. This method is called from the invoke method.
+     * Reads the interface method metadata from memory and uses them to prepare an HttpConnector object
+     * that will resend the request to the Java's HttpClient and will receive the response. This method
+     * is called from the invoke method.
      * 
-     * @param method    The Method instance corresponding to the interface method
-     *                  invoked on the proxy instance.
-     * @param arguments An array of objects containing the values of the arguments
-     *                  passed in the method invocation on the proxy instance, or
-     *                  null if interface method takes no arguments.
+     * @param method    The Method instance corresponding to the interface method invoked on the proxy
+     *                  instance.
+     * @param arguments An array of objects containing the values of the arguments passed in the method
+     *                  invocation on the proxy instance, or null if interface method takes no
+     *                  arguments.
      * @return The response coming from the HttpConnector's sendRequest method.
      */
     private Object resolve(Method method, Object[] arguments) {
@@ -141,4 +139,5 @@ public class HttpProcessor implements InvocationHandler {
         }
         return headerContentType;
     }
+
 }

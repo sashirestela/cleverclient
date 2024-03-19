@@ -1,19 +1,18 @@
 package io.github.sashirestela.cleverclient.http;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.AnnotationMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class URLBuilderTest {
 
@@ -130,7 +129,10 @@ class URLBuilderTest {
     @Data
     @AllArgsConstructor
     static class Pagination {
+
         private Integer size;
         private Integer page;
+
     }
+
 }

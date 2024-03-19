@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CommonUtil {
+
     private CommonUtil() {
     }
 
@@ -73,4 +74,5 @@ public class CommonUtil {
         var array = list.toArray(new String[0]);
         return createMapString(array);
     }
+
 }

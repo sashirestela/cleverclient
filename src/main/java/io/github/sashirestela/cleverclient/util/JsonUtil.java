@@ -1,10 +1,5 @@
 package io.github.sashirestela.cleverclient.util;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -12,8 +7,12 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.CollectionType;
-
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class JsonUtil {
 
@@ -27,7 +26,8 @@ public class JsonUtil {
 
     public static <T> Map<String, Object> objectToMap(T object) {
         try {
-            return objectMapperStrict.convertValue(object, new TypeReference<>() {});
+            return objectMapperStrict.convertValue(object, new TypeReference<>() {
+            });
         } catch (IllegalArgumentException e) {
             throw new CleverClientException("Cannot convert object {0} to Map.", object, e);
         }
@@ -68,4 +68,5 @@ public class JsonUtil {
             throw new CleverClientException("Cannot convert the Json {0} to class of {1}.", json, clazzT.getName(), e);
         }
     }
+
 }

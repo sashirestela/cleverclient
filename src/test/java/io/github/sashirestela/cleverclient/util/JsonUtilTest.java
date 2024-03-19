@@ -1,22 +1,20 @@
 package io.github.sashirestela.cleverclient.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JsonUtilTest {
 
@@ -167,12 +165,14 @@ class JsonUtilTest {
     @SuperBuilder
     @Getter
     static class SuperTestClass {
+
         @JsonProperty("integer")
         protected Integer integerField;
         @JsonProperty("string")
         protected String stringField;
         @JsonProperty("real")
         protected Double doubleField;
+
     }
 
     @NoArgsConstructor
@@ -181,9 +181,11 @@ class JsonUtilTest {
     @Getter
     @Setter
     static class ChildTestClass extends SuperTestClass {
+
         private Integer property;
         @JsonProperty("enumerator")
         private TestEnum testEnumField;
+
     }
 
     @NoArgsConstructor

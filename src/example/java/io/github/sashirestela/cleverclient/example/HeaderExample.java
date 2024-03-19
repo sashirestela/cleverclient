@@ -16,6 +16,7 @@ public class HeaderExample {
 
         @GET("/headers")
         String getClassHeaders();
+
     }
 
     static interface MethodHeaderService {
@@ -24,6 +25,7 @@ public class HeaderExample {
         @Header(name = "Fourth-Header", value = "fourthValue")
         @Header(name = "Fith-Header", value = "fithValue")
         String getHeaders();
+
     }
 
     public static void main(String[] args) {
@@ -40,4 +42,5 @@ public class HeaderExample {
         var methodHeaderService = cleverClient.create(MethodHeaderService.class);
         System.out.println(methodHeaderService.getHeaders());
     }
+
 }

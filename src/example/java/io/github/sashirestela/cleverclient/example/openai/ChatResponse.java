@@ -1,15 +1,16 @@
 package io.github.sashirestela.cleverclient.example.openai;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
 @ToString
 public class ChatResponse {
+
     private String id;
     private String object;
     private Long created;
@@ -20,4 +21,5 @@ public class ChatResponse {
     public String firstContent() {
         return getChoices().get(0).getMessage().getContent();
     }
+
 }
