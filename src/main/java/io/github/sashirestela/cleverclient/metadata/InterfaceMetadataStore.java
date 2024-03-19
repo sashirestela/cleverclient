@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,12 +80,7 @@ public class InterfaceMetadataStore {
         for (var javaAnnotation : javaAnnotations) {
             Map<String, String> valueByField = new HashMap<>();
             for (var javaAnnotMethod : javaAnnotation.annotationType().getDeclaredMethods()) {
-                Object object;
-                try {
-                    object = javaAnnotMethod.invoke(javaAnnotation, (Object[]) null);
-                } catch (Exception e) {
-                    object = null;
-                }
+                Object object = getAnnotationValue(javaAnnotation, javaAnnotMethod);
                 if (object instanceof Annotation[]) {
                     isAnnotArray = true;
                     annotations.addAll(getAnnotations((Annotation[]) object));
@@ -140,6 +136,16 @@ public class InterfaceMetadataStore {
                                 pathParam, methodMetadata.getName(), null)));
             }
         });
+    }
+
+    private Object getAnnotationValue(Annotation javaAnnotation, Method javaAnnotMethod) {
+        Object object;
+        try {
+            object = javaAnnotMethod.invoke(javaAnnotation, (Object[]) null);
+        } catch (Exception e) {
+            object = null;
+        }
+        return object;
     }
 
 }

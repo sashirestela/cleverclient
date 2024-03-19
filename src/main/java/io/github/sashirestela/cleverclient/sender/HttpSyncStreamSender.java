@@ -24,11 +24,11 @@ public class HttpSyncStreamSender extends HttpSender {
             final var lineRecord = new CleverClientSSE.LineRecord();
 
             return httpResponse.body()
-                    .peek(line -> {
+                    .map(line -> {
                         logger.debug("Response : {}", line);
                         lineRecord.updateWith(line);
+                        return new CleverClientSSE(lineRecord);
                     })
-                    .map(line -> new CleverClientSSE(lineRecord))
                     .filter(CleverClientSSE::isActualData)
                     .map(item -> JsonUtil.jsonToObject(item.getActualData(), responseClass));
 
