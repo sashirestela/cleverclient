@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.support;
 
+import io.github.sashirestela.cleverclient.Event;
 import io.github.sashirestela.cleverclient.annotation.StreamType;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +29,14 @@ class ReturnTypeTest {
     @Test
     void shouldReturnCategoryAccordingToTheMethodType() throws NoSuchMethodException, SecurityException {
         var testData = Map.ofEntries(
-                Map.entry("asyncStreamObjectMethod", ReturnType.Category.ASYNC_STREAM_OBJECT),
+                Map.entry("asyncStreamEventMethod", ReturnType.Category.ASYNC_STREAM_EVENT),
                 Map.entry("asyncStreamMethod", ReturnType.Category.ASYNC_STREAM),
                 Map.entry("asyncListMethod", ReturnType.Category.ASYNC_LIST),
                 Map.entry("asyncGenericMethod", ReturnType.Category.ASYNC_GENERIC),
                 Map.entry("asyncMyClassMethod", ReturnType.Category.ASYNC_CUSTOM),
                 Map.entry("asyncBinaryMethod", ReturnType.Category.ASYNC_BINARY),
                 Map.entry("asyncStringMethod", ReturnType.Category.ASYNC_PLAIN_TEXT),
-                Map.entry("syncStreamObjectMethod", ReturnType.Category.SYNC_STREAM_OBJECT),
+                Map.entry("syncStreamEventMethod", ReturnType.Category.SYNC_STREAM_EVENT),
                 Map.entry("syncStreamMethod", ReturnType.Category.SYNC_STREAM),
                 Map.entry("syncListMethod", ReturnType.Category.SYNC_LIST),
                 Map.entry("syncGenericMethod", ReturnType.Category.SYNC_GENERIC),
@@ -64,13 +65,13 @@ class ReturnTypeTest {
     @Test
     void shouldReturnMapClassByEventWhenTheMethodIsAnnotatedWithStreamType()
             throws NoSuchMethodException, SecurityException {
-        var method = TestInterface.class.getMethod("asyncStreamObjectMethod", new Class[] {});
+        var method = TestInterface.class.getMethod("asyncStreamEventMethod", new Class[] {});
         var returnType = new ReturnType(method);
         var actualMap = returnType.getClassByEvent();
         var expectedMap = new ConcurrentHashMap<>();
-        expectedMap.put(CleverClientSSE.EVENT_HEADER + "first.create", First.class);
-        expectedMap.put(CleverClientSSE.EVENT_HEADER + "first.complete", First.class);
-        expectedMap.put(CleverClientSSE.EVENT_HEADER + "second.create", Second.class);
+        expectedMap.put("first.create", First.class);
+        expectedMap.put("first.complete", First.class);
+        expectedMap.put("second.create", Second.class);
         assertEquals(Boolean.TRUE, expectedMap.equals(actualMap));
     }
 
@@ -78,7 +79,7 @@ class ReturnTypeTest {
 
         @StreamType(type = First.class, events = { "first.create", "first.complete" })
         @StreamType(type = Second.class, events = { "second.create" })
-        CompletableFuture<Stream<Object>> asyncStreamObjectMethod();
+        CompletableFuture<Stream<Event>> asyncStreamEventMethod();
 
         CompletableFuture<Stream<MyClass>> asyncStreamMethod();
 
@@ -94,7 +95,7 @@ class ReturnTypeTest {
 
         CompletableFuture<Set<MyClass>> asyncSetMethod();
 
-        Stream<Object> syncStreamObjectMethod();
+        Stream<Event> syncStreamEventMethod();
 
         Stream<MyClass> syncStreamMethod();
 

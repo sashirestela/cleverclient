@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CleverClientSSETest {
 
-    Set<String> events = Set.of("event: process", "event: process2");
+    Set<String> events = Set.of("process", "process2");
 
     @BeforeAll
     static void setup() {
@@ -52,8 +52,7 @@ class CleverClientSSETest {
     @Test
     void shouldReturnExpectedMatcheEventWhenRawDataMeetsConditions() {
         Object[][] testData = {
-                { new CleverClientSSE(new LineRecord("event: process", "data: Actual data."), events),
-                        "event: process" },
+                { new CleverClientSSE(new LineRecord("event: process", "data: Actual data."), events), "process" },
                 { new CleverClientSSE(new LineRecord("event: other", "data: Actual data."), events), null },
                 { new CleverClientSSE(new LineRecord("", "data: Actual data.")), "" }
         };

@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import io.github.sashirestela.cleverclient.Event;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE.LineRecord;
@@ -12,7 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.stream.Stream;
 
-public class HttpSyncStreamObjectSender extends HttpSender {
+public class HttpSyncStreamEventSender extends HttpSender {
 
     @Override
     public Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, ReturnType returnType) {
@@ -23,17 +24,20 @@ public class HttpSyncStreamObjectSender extends HttpSender {
             throwExceptionIfErrorIsPresent(httpResponse, Stream.class);
 
             final var lineRecord = new LineRecord();
-            final var eventsWithHeader = returnType.getClassByEvent().keySet();
+            final var events = returnType.getClassByEvent().keySet();
 
             return httpResponse.body()
                     .map(line -> {
                         logger.debug("Response : {}", line);
                         lineRecord.updateWith(line);
-                        return new CleverClientSSE(lineRecord, eventsWithHeader);
+                        return new CleverClientSSE(lineRecord, events);
                     })
                     .filter(CleverClientSSE::isActualData)
-                    .map(item -> JsonUtil.jsonToObject(item.getActualData(),
-                            returnType.getClassByEvent().get(item.getMatchedEvent())));
+                    .map(item -> Event.builder()
+                            .name(item.getMatchedEvent())
+                            .data(JsonUtil.jsonToObject(item.getActualData(),
+                                    returnType.getClassByEvent().get(item.getMatchedEvent())))
+                            .build());
 
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
