@@ -4,29 +4,32 @@ import io.github.sashirestela.cleverclient.support.CleverClientSSE.LineRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CleverClientSSETest {
 
+    Set<String> events = Set.of("event: process", "event: process2");
+
     @BeforeAll
     static void setup() {
         Configurator.builder()
-                .eventToRead("process")
                 .endOfStream("END")
                 .build();
     }
 
     @Test
-    void shouldReturnExpectedValueWhenRawDataHasDifferentValues() {
+    void shouldReturnExpectedValueWhenRawDataMeetsConditions() {
         Object[][] testData = {
-                { new CleverClientSSE(new LineRecord("event: process", "data: This is the actual data.")), true },
-                { new CleverClientSSE(new LineRecord("", "data: This is the actual data.")), true },
-                { new CleverClientSSE(new LineRecord("event: other", "data: This is the actual data.")), false },
-                { new CleverClientSSE(new LineRecord("event: process", "data : This is the actual data.")), false },
-                { new CleverClientSSE(new LineRecord("", "data : This is the actual data.")), false },
+                { new CleverClientSSE(new LineRecord("event: process", "data: Actual data."), events), true },
+                { new CleverClientSSE(new LineRecord("", "data: Actual data.")), true },
+                { new CleverClientSSE(new LineRecord("event: other", "data: Actual data."), events), false },
+                { new CleverClientSSE(new LineRecord("event: process", "data : Actual data."), events), false },
+                { new CleverClientSSE(new LineRecord("", "data : Actual data.")), false },
                 { new CleverClientSSE(new LineRecord("", "\n")), false },
                 { new CleverClientSSE(new LineRecord("", "")), false },
-                { new CleverClientSSE(new LineRecord("event: process", "data: END")), false },
+                { new CleverClientSSE(new LineRecord("event: process", "data: END"), events), false },
                 { new CleverClientSSE(new LineRecord("", "data: END")), false }
         };
         for (Object[] data : testData) {
@@ -38,14 +41,29 @@ class CleverClientSSETest {
     }
 
     @Test
-    @SuppressWarnings("unused")
-    void shouldReturnTheActualDataWhenRawDataMeetsConditions() {
+    void shouldReturnCleanDataWhenRawDataMeetsConditions() {
         CleverClientSSE event = new CleverClientSSE(
                 new LineRecord("event: process", "data:   This is the actual data.  "));
-        var rawData = event.getLineRecord();
         var actualData = event.getActualData();
         var expectedData = "This is the actual data.";
         assertEquals(expectedData, actualData);
+    }
+
+    @Test
+    void shouldReturnExpectedMatcheEventWhenRawDataMeetsConditions() {
+        Object[][] testData = {
+                { new CleverClientSSE(new LineRecord("event: process", "data: Actual data."), events),
+                        "event: process" },
+                { new CleverClientSSE(new LineRecord("event: other", "data: Actual data."), events), null },
+                { new CleverClientSSE(new LineRecord("", "data: Actual data.")), "" }
+        };
+        for (Object[] data : testData) {
+            var event = (CleverClientSSE) data[0];
+            var actualMatchedEvent = event.getMatchedEvent();
+            var expectedMatchedEvent = (String) data[1];
+            assertEquals(expectedMatchedEvent, actualMatchedEvent);
+        }
+
     }
 
 }

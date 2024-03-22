@@ -8,6 +8,7 @@ import io.github.sashirestela.cleverclient.annotation.POST;
 import io.github.sashirestela.cleverclient.annotation.Path;
 import io.github.sashirestela.cleverclient.annotation.Query;
 import io.github.sashirestela.cleverclient.annotation.Resource;
+import io.github.sashirestela.cleverclient.annotation.StreamType;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -82,6 +83,11 @@ public interface ITest {
         @POST
         CompletableFuture<Stream<Demo>> getDemoStream(@Body RequestDemo request);
 
+        @POST
+        @StreamType(type = Demo.class, events = { "created", "completed" })
+        @StreamType(type = String.class, events = { "delta" })
+        CompletableFuture<Stream<Object>> getStreamObject(@Body RequestDemo request);
+
         @Multipart
         @POST
         CompletableFuture<Demo> getFile(@Body RequestDemo request);
@@ -113,6 +119,10 @@ public interface ITest {
 
         @POST
         Stream<Demo> getDemoStream(@Body RequestDemo request);
+
+        @POST
+        @StreamType(type = Demo.class, events = { "created" })
+        Stream<Object> getStreamObject(@Body RequestDemo request);
 
     }
 

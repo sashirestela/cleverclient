@@ -1,6 +1,6 @@
 # 💎 CleverClient
 
-Java library that makes it easier to use the Java's HttpClient to perform http operations, using interfaces.
+Library that makes it easy to use the Java HttpClient to perform http operations through interfaces.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sashirestela_cleverclient&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sashirestela_cleverclient)
 [![codecov](https://codecov.io/gh/sashirestela/cleverclient/graph/badge.svg?token=PEYAFW3EWD)](https://codecov.io/gh/sashirestela/cleverclient)
@@ -23,7 +23,7 @@ Java library that makes it easier to use the Java's HttpClient to perform http o
 
 CleverClient is a Java 11+ library that makes it easy to use the standard [HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) component to call http services by using annotated interfaces.
 
-For example, if we want to use the API [JsonPlaceHolder](https://jsonplaceholder.typicode.com/) and call the endpoint ```/posts```, we just have to create an entity ```Post```, an interface ```PostService``` with special annotatons, and call the API through ```CleverClient```:
+For example, if we want to use the public API [JsonPlaceHolder](https://jsonplaceholder.typicode.com/) and call the endpoint ```/posts```, we just have to create an entity ```Post```, an interface ```PostService``` with special annotatons, and call the API through ```CleverClient```:
 
 ```java
 // Entity
@@ -115,12 +115,10 @@ We have the following attributes to create a CleverClient object:
 | header             | Single header as a name and a value              | optional  |
 | httpClient         | Java HttpClient object                           | optional  |
 | requestInterceptor | Function to modify the request once is built     | optional  |
-| eventsToRead       | List of events's name we want to read in streams | optional  |
-| eventToRead        | An event's name we want to read in streams       | optional  |
 | endsOfStream       | List of texts used to mark the end of streams    | optional  |
 | endOfStream        | Text used to mark the end of streams             | optional  |
 
-The attributes ```event(s)ToRead``` and ```end(s)OfStream``` are required when you have endpoints sending back streams of data (Server Sent Events - SSE).
+The attribute ```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 
 Example:
 
@@ -128,7 +126,6 @@ Example:
 final var BASE_URL = "https://api.example.com";
 final var HEADER_NAME = "Authorization";
 final var HEADER_VALUE = "Bearer qwertyasdfghzxcvb";
-final var EVENT_TO_READ = "inventory";
 final var END_OF_STREAM = "[DONE]";
 
 var httpClient = HttpClient.newBuilder()
@@ -149,32 +146,33 @@ var cleverClient = CleverClient.builder()
         request.setUrl(url);
         return request;
     })
-    .eventToRead(EVENT_TO_READ)
     .endOfStream(END_OF_STREAM)
     .build();
 ```
 
 ### Interface Annotations
 
-| Annotation | Target    | Value                       | Required Value |
-|------------|-----------|-----------------------------|----------------|
-| Resource   | Interface | Resource's url              | optional       |
-| Header     | Interface | Header's name and value     | mandatory      |
-| Header     | Method    | Header's name and value     | mandatory      |
-| GET        | Method    | GET endpoint's url          | optional       |
-| POST       | Method    | POST endpoint's url         | optional       |
-| PUT        | Method    | PUT endpoint's url          | optional       |
-| DELETE     | Method    | DELETE endpoint's url       | optional       |
-| Multipart  | Method    | (None)                      | none           |
-| Path       | Parameter | Path parameter name in url  | mandatory      |
-| Query      | Parameter | Query parameter name in url | mandatory      |
-| Query      | Parameter | (None for Pojos)            | none           |
-| Body       | Parameter | (None)                      | none           |
+| Annotation | Target    | Attributes                  | Required Attrs | Mult |
+|------------|-----------|-----------------------------|----------------|------|
+| Resource   | Interface | Resource's url              | optional       | One  |
+| Header     | Interface | Header's name and value     | mandatory both | Many |
+| Header     | Method    | Header's name and value     | mandatory both | Many |
+| GET        | Method    | GET endpoint's url          | optional       | One  |
+| POST       | Method    | POST endpoint's url         | optional       | One  |
+| PUT        | Method    | PUT endpoint's url          | optional       | One  |
+| DELETE     | Method    | DELETE endpoint's url       | optional       | One  |
+| Multipart  | Method    | (None)                      | none           | One  |
+| StreamType | Method    | type class and events array | mandatory both | Many |
+| Path       | Parameter | Path parameter name in url  | mandatory      | One  |
+| Query      | Parameter | Query parameter name in url | mandatory      | One  |
+| Query      | Parameter | (None for Pojos)            | none           | One  |
+| Body       | Parameter | (None)                      | none           | One  |
 
 * ```Resource``` could be used to separate the repeated part of the endpoints' url in an interface.
 * ```Header``` Used to include more headers (pairs of name and value) at interface or method level. It is possible to have multiple Header annotations for the same target.
 * ```GET, POST, PUT, DELETE``` are used to mark the typical http methods (endpoints).
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
+* ```StreamType``` is used with methods whose return type is Stream of Objects. Commonly you will use more than one to indicate what class (type) is related to what events (array of Strings).
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
 * ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for POJOs using its properties and values.
 * ```Body``` is used to mark a method parameter as the endpoint's payload request, so the request will be application/json at least the endpoint is annotated with Multipart.
@@ -182,22 +180,28 @@ var cleverClient = CleverClient.builder()
 
 ### Supported Response Types
 
-The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Single Class, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) object, and [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) object, and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
+The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Custom type, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) type, [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) type and Stream of [Object](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html), and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
 
-| Method Response                 | Sync/Async | Response Type                          |
-|---------------------------------|------------|----------------------------------------|
-| CompletableFuture<Stream\<T>>   | Async      | Server sent events as Stream of type T |
-| Stream\<T>                      | Sync       | Server sent events as Stream of type T |
-| CompletableFuture<List\<T>>     | Async      | List of type T                         |
-| List\<T>                        | Sync       | List of type T                         |
-| CompletableFuture<Generic\<T>>  | Async      | Generic class of type T                |
-| Generic\<T>                     | Sync       | Generic class of type T                |
-| CompletableFuture\<T>           | Async      | Single class T                         |
-| T                               | Sync       | Single class T                         |
-| CompletableFuture\<InputStream> | Async      | Binary Object                          |
-| InputStream                     | Sync       | Binary Object                          |
-| CompletableFuture\<String>      | Async      | String Object                          |
-| String                          | Sync       | String Object                          |
+| Method's Response Type             | Sync/Async | Description                 |
+|------------------------------------|------------|-----------------------------|
+| CompletableFuture<Stream\<T>>      | Async      | SSE (*) as Stream of type T |
+| Stream\<T>                         | Sync       | SSE (*) as Stream of type T |
+| CompletableFuture<List\<T>>        | Async      | List of type T              |
+| List\<T>                           | Sync       | List of type T              |
+| CompletableFuture<Generic\<T>>     | Async      | Generic class of type T     |
+| Generic\<T>                        | Sync       | Generic class of type T     |
+| CompletableFuture\<T>              | Async      | Custom class T              |
+| T                                  | Sync       | Custom class T              |
+| CompletableFuture\<InputStream>    | Async      | Binary type                 |
+| InputStream                        | Sync       | Binary type                 |
+| CompletableFuture\<String>         | Async      | String type                 |
+| String                             | Sync       | String type                 |
+| CompletableFuture<Stream\<Object>> | Async      | SSE (*) as Stream of Object |
+| Stream\<Object>                    | Sync       | SSE (*) as Stream of Object |
+
+(*) SSE: Server Sent Events
+
+```CompletableFuture<Stream<Object>>``` and ```Stream<Object>``` are used for handling SSE with multiple events and classes.
 
 ### Interface Default Methods
 
@@ -207,26 +211,26 @@ You can create interface default methods to execute special requirements such as
 @Resource("/v1/chat/completions")
 interface Completions {
 
-    @POST
-    Stream<ChatResponse> __createSyncStream(@Body ChatRequest chatRequest);
-
     default Stream<ChatResponse> createSyncStream(ChatRequest chatRequest) {
         var request = chatRequest.withStream(true);
-        return __createSyncStream(request);
+        return createSyncStreamBasic(request);
     }
-
-    @POST
-    CompletableFuture<Stream<ChatResponse>> __createAsyncStream(@Body ChatRequest chatRequest);
 
     default CompletableFuture<Stream<ChatResponse>> createAsyncStream(ChatRequest chatRequest) {
         var request = chatRequest.withStream(true);
-        return __createAsyncStream(request);
+        return createAsyncStreamBasic(request);
     }
+
+    @POST
+    Stream<ChatResponse> createSyncStreamBasic(@Body ChatRequest chatRequest);
+
+    @POST
+    CompletableFuture<Stream<ChatResponse>> createAsyncStreamBasic(@Body ChatRequest chatRequest);
 
 }
 ```
 
-Note that we have named the annotated methods with the suffix "__" just to indicate that we should not call them directly but should call the default ones (those without the suffix).
+Note that we have named the annotated methods with the suffix "Basic" just to indicate that we should not call them directly but should call the default ones (those without the suffix).
 
 ## ✳ Examples
 

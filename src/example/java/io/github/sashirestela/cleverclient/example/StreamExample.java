@@ -12,7 +12,7 @@ import java.util.Arrays;
  * Before running this example you must have an OpenAI account and keep your Api Key in an
  * environment variable called OPENAI_API_KEY.
  * 
- * @see https://platform.openai.com/docs/api-reference/authentication
+ * @see <a href="https://platform.openai.com/docs/api-reference/authentication">OpenAI Authentication</a>
  */
 public class StreamExample {
 

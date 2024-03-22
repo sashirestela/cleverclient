@@ -1,6 +1,8 @@
 package io.github.sashirestela.cleverclient.http;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.Configurator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +37,13 @@ class HttpProcessorTest {
     HttpResponse<String> httpResponse = mock(HttpResponse.class);
     HttpResponse<Stream<String>> httpResponseStream = mock(HttpResponse.class);
     HttpResponse<InputStream> httpResponseBinary = mock(HttpResponse.class);
+
+    @BeforeAll
+    static void setup() {
+        Configurator.builder()
+                .endOfStream("END")
+                .build();
+    }
 
     @BeforeEach
     void init() {
@@ -199,6 +208,33 @@ class HttpProcessorTest {
     }
 
     @Test
+    void shouldReturnAStreamSyncWhenMethodReturnTypeIsAStreamObject() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
+                .thenReturn(httpResponseStream);
+        when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseStream.body())
+                .thenReturn(Stream.of("event: created",
+                        "data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
+
+        var service = httpProcessor.createProxy(ITest.SyncService.class);
+        var actualStreamObject = service.getStreamObject(new ITest.RequestDemo("Descr", null));
+        var actualObject = actualStreamObject.findFirst().get();
+        var expectedObject = new ITest.Demo(100, "Description", true);
+
+        assertEquals(expectedObject, actualObject);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenMethodReturnTypeIsAStreamObject() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
+                .thenThrow(new InterruptedException("The operation was interrupted"));
+
+        var service = httpProcessor.createProxy(ITest.SyncService.class);
+        var requestDemo = new ITest.RequestDemo("Descr", null);
+        assertThrows(CleverClientException.class, () -> service.getStreamObject(requestDemo));
+    }
+
+    @Test
     void shouldReturnAStringAsyncWhenMethodReturnTypeIsAString() {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
@@ -286,6 +322,23 @@ class HttpProcessorTest {
         var expectedDemo = new ITest.Demo(100, "Description", true);
 
         assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    void shouldReturnAStreamAsyncWhenMethodReturnTypeIsAStreamObject() {
+        when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
+                .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
+        when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseStream.body())
+                .thenReturn(Stream.of("event: created",
+                        "data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
+
+        var service = httpProcessor.createProxy(ITest.AsyncService.class);
+        var actualStreamObject = service.getStreamObject(new ITest.RequestDemo("Descr", null)).join();
+        var actualObject = actualStreamObject.findFirst().get();
+        var expectedObject = new ITest.Demo(100, "Description", true);
+
+        assertEquals(expectedObject, actualObject);
     }
 
     @Test

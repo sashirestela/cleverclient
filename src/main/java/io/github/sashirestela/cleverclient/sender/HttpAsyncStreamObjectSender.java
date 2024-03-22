@@ -10,7 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.stream.Stream;
 
-public class HttpAsyncStreamSender extends HttpSender {
+public class HttpAsyncStreamObjectSender extends HttpSender {
 
     @Override
     public Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, ReturnType returnType) {
@@ -22,15 +22,17 @@ public class HttpAsyncStreamSender extends HttpSender {
             throwExceptionIfErrorIsPresent(response, Stream.class);
 
             final var lineRecord = new LineRecord();
+            final var eventsWithHeader = returnType.getClassByEvent().keySet();
 
             return response.body()
                     .map(line -> {
                         logger.debug("Response : {}", line);
                         lineRecord.updateWith(line);
-                        return new CleverClientSSE(lineRecord);
+                        return new CleverClientSSE(lineRecord, eventsWithHeader);
                     })
                     .filter(CleverClientSSE::isActualData)
-                    .map(item -> JsonUtil.jsonToObject(item.getActualData(), returnType.getBaseClass()));
+                    .map(item -> JsonUtil.jsonToObject(item.getActualData(),
+                            returnType.getClassByEvent().get(item.getMatchedEvent())));
         });
     }
 

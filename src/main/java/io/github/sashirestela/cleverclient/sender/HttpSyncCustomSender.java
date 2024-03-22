@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.sender;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
 
 import java.io.IOException;
@@ -8,11 +9,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 
-public class HttpSyncObjectSender extends HttpSender {
+public class HttpSyncCustomSender extends HttpSender {
 
     @Override
-    public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
-            Class<S> genericClass) {
+    public Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, ReturnType returnType) {
         try {
 
             var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
@@ -23,7 +23,7 @@ public class HttpSyncObjectSender extends HttpSender {
 
             logger.debug("Response : {}", rawData);
 
-            return JsonUtil.jsonToObject(rawData, responseClass);
+            return JsonUtil.jsonToObject(rawData, returnType.getBaseClass());
 
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();

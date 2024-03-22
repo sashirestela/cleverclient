@@ -41,15 +41,12 @@ public class CleverClient {
      * @param httpClient         Custom Java's HttpClient component. One is created by default if none
      *                           is passed. Optional.
      * @param requestInterceptor Function to modify the request once it has been built.
-     * @param eventsToRead       List of events's name that we want to read from server sent events
-     *                           (SSE). Optional.
      * @param endsOfStream       Texts used to mark the final of streams when handling server sent
      *                           events (SSE). Optional.
      */
     @Builder
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
-            UnaryOperator<HttpRequestData> requestInterceptor, @Singular("eventToRead") List<String> eventsToRead,
-            @Singular("endOfStream") List<String> endsOfStream) {
+            UnaryOperator<HttpRequestData> requestInterceptor, @Singular("endOfStream") List<String> endsOfStream) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
@@ -61,7 +58,6 @@ public class CleverClient {
                 .requestInterceptor(this.requestInterceptor)
                 .build();
         Configurator.builder()
-                .eventsToRead(Optional.ofNullable(eventsToRead).orElse(Arrays.asList()))
                 .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
                 .build();
         logger.debug("CleverClient has been created.");
