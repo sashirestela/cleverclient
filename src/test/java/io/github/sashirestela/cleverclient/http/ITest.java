@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.Event;
 import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Header;
@@ -86,7 +87,7 @@ public interface ITest {
         @POST
         @StreamType(type = Demo.class, events = { "created", "completed" })
         @StreamType(type = String.class, events = { "delta" })
-        CompletableFuture<Stream<Object>> getStreamObject(@Body RequestDemo request);
+        CompletableFuture<Stream<Event>> getStreamEvent(@Body RequestDemo request);
 
         @Multipart
         @POST
@@ -122,7 +123,7 @@ public interface ITest {
 
         @POST
         @StreamType(type = Demo.class, events = { "created" })
-        Stream<Object> getStreamObject(@Body RequestDemo request);
+        Stream<Event> getStreamEvent(@Body RequestDemo request);
 
     }
 

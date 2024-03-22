@@ -22,14 +22,14 @@ public class HttpSenderFactory {
 
     private HttpSenderFactory() {
         sendersMap = new EnumMap<>(Category.class);
-        sendersMap.put(Category.ASYNC_STREAM_OBJECT, HttpAsyncStreamObjectSender::new);
+        sendersMap.put(Category.ASYNC_STREAM_EVENT, HttpAsyncStreamEventSender::new);
         sendersMap.put(Category.ASYNC_STREAM, HttpAsyncStreamSender::new);
         sendersMap.put(Category.ASYNC_LIST, HttpAsyncListSender::new);
         sendersMap.put(Category.ASYNC_GENERIC, HttpAsyncGenericSender::new);
         sendersMap.put(Category.ASYNC_CUSTOM, HttpAsyncCustomSender::new);
         sendersMap.put(Category.ASYNC_BINARY, HttpAsyncBinarySender::new);
         sendersMap.put(Category.ASYNC_PLAIN_TEXT, HttpAsyncPlainTextSender::new);
-        sendersMap.put(Category.SYNC_STREAM_OBJECT, HttpSyncStreamObjectSender::new);
+        sendersMap.put(Category.SYNC_STREAM_EVENT, HttpSyncStreamEventSender::new);
         sendersMap.put(Category.SYNC_STREAM, HttpSyncStreamSender::new);
         sendersMap.put(Category.SYNC_LIST, HttpSyncListSender::new);
         sendersMap.put(Category.SYNC_GENERIC, HttpSyncGenericSender::new);

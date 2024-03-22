@@ -5,7 +5,7 @@ Library that makes it easy to use the Java HttpClient to perform http operations
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sashirestela_cleverclient&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sashirestela_cleverclient)
 [![codecov](https://codecov.io/gh/sashirestela/cleverclient/graph/badge.svg?token=PEYAFW3EWD)](https://codecov.io/gh/sashirestela/cleverclient)
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.sashirestela/cleverclient)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sashirestela/cleverclient/maven.yml)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sashirestela/cleverclient/build_java_maven.yml)
 
 ### Table of Contents
 - [Description](#-description)
@@ -162,7 +162,7 @@ var cleverClient = CleverClient.builder()
 | PUT        | Method    | PUT endpoint's url          | optional       | One  |
 | DELETE     | Method    | DELETE endpoint's url       | optional       | One  |
 | Multipart  | Method    | (None)                      | none           | One  |
-| StreamType | Method    | type class and events array | mandatory both | Many |
+| StreamType | Method    | class type and events array | mandatory both | Many |
 | Path       | Parameter | Path parameter name in url  | mandatory      | One  |
 | Query      | Parameter | Query parameter name in url | mandatory      | One  |
 | Query      | Parameter | (None for Pojos)            | none           | One  |
@@ -172,7 +172,7 @@ var cleverClient = CleverClient.builder()
 * ```Header``` Used to include more headers (pairs of name and value) at interface or method level. It is possible to have multiple Header annotations for the same target.
 * ```GET, POST, PUT, DELETE``` are used to mark the typical http methods (endpoints).
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
-* ```StreamType``` is used with methods whose return type is Stream of Objects. Commonly you will use more than one to indicate what class (type) is related to what events (array of Strings).
+* ```StreamType``` is used with methods whose return type is Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java). Commonly you will use more than one to indicate what class (type) is related to what events (array of Strings).
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
 * ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for POJOs using its properties and values.
 * ```Body``` is used to mark a method parameter as the endpoint's payload request, so the request will be application/json at least the endpoint is annotated with Multipart.
@@ -180,7 +180,7 @@ var cleverClient = CleverClient.builder()
 
 ### Supported Response Types
 
-The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Custom type, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) type, [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) type and Stream of [Object](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html), and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
+The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Custom type, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) type, [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) type and Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java), and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
 
 | Method's Response Type             | Sync/Async | Description                 |
 |------------------------------------|------------|-----------------------------|
@@ -196,12 +196,14 @@ The reponse types are determined from the method responses. We don't need any an
 | InputStream                        | Sync       | Binary type                 |
 | CompletableFuture\<String>         | Async      | String type                 |
 | String                             | Sync       | String type                 |
-| CompletableFuture<Stream\<Object>> | Async      | SSE (*) as Stream of Object |
-| Stream\<Object>                    | Sync       | SSE (*) as Stream of Object |
+| CompletableFuture<Stream\<Event>>  | Async      | SSE (*) as Stream of Event  |
+| Stream\<Event>                     | Sync       | SSE (*) as Stream of Event  |
 
 (*) SSE: Server Sent Events
 
-```CompletableFuture<Stream<Object>>``` and ```Stream<Object>``` are used for handling SSE with multiple events and classes.
+* ```CompletableFuture<Stream<T>>``` and ```Stream<T>``` are used for handling SSE without events and data of the class ```T``` only.
+* ```CompletableFuture<Stream<Event>>``` and ```Stream<Event>``` are used for handling SSE with multiple events and data of different classes.
+* The [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java) class will bring the event name and the data object.
 
 ### Interface Default Methods
 
@@ -210,6 +212,12 @@ You can create interface default methods to execute special requirements such as
 ```java
 @Resource("/v1/chat/completions")
 interface Completions {
+
+    @POST
+    Stream<ChatResponse> createSyncStreamBasic(@Body ChatRequest chatRequest);
+
+    @POST
+    CompletableFuture<Stream<ChatResponse>> createAsyncStreamBasic(@Body ChatRequest chatRequest);
 
     default Stream<ChatResponse> createSyncStream(ChatRequest chatRequest) {
         var request = chatRequest.withStream(true);
@@ -220,12 +228,6 @@ interface Completions {
         var request = chatRequest.withStream(true);
         return createAsyncStreamBasic(request);
     }
-
-    @POST
-    Stream<ChatResponse> createSyncStreamBasic(@Body ChatRequest chatRequest);
-
-    @POST
-    CompletableFuture<Stream<ChatResponse>> createAsyncStreamBasic(@Body ChatRequest chatRequest);
 
 }
 ```

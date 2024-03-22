@@ -208,7 +208,7 @@ class HttpProcessorTest {
     }
 
     @Test
-    void shouldReturnAStreamSyncWhenMethodReturnTypeIsAStreamObject() throws IOException, InterruptedException {
+    void shouldReturnAStreamSyncWhenMethodReturnTypeIsAStreamEvent() throws IOException, InterruptedException {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(httpResponseStream);
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
@@ -217,8 +217,8 @@ class HttpProcessorTest {
                         "data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
-        var actualStreamObject = service.getStreamObject(new ITest.RequestDemo("Descr", null));
-        var actualObject = actualStreamObject.findFirst().get();
+        var actualStreamObject = service.getStreamEvent(new ITest.RequestDemo("Descr", null));
+        var actualObject = actualStreamObject.findFirst().get().getData();
         var expectedObject = new ITest.Demo(100, "Description", true);
 
         assertEquals(expectedObject, actualObject);
@@ -231,7 +231,7 @@ class HttpProcessorTest {
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
         var requestDemo = new ITest.RequestDemo("Descr", null);
-        assertThrows(CleverClientException.class, () -> service.getStreamObject(requestDemo));
+        assertThrows(CleverClientException.class, () -> service.getStreamEvent(requestDemo));
     }
 
     @Test
@@ -325,7 +325,7 @@ class HttpProcessorTest {
     }
 
     @Test
-    void shouldReturnAStreamAsyncWhenMethodReturnTypeIsAStreamObject() {
+    void shouldReturnAStreamAsyncWhenMethodReturnTypeIsAStreamEvent() {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
@@ -334,8 +334,8 @@ class HttpProcessorTest {
                         "data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
-        var actualStreamObject = service.getStreamObject(new ITest.RequestDemo("Descr", null)).join();
-        var actualObject = actualStreamObject.findFirst().get();
+        var actualStreamObject = service.getStreamEvent(new ITest.RequestDemo("Descr", null)).join();
+        var actualObject = actualStreamObject.findFirst().get().getData();
         var expectedObject = new ITest.Demo(100, "Description", true);
 
         assertEquals(expectedObject, actualObject);

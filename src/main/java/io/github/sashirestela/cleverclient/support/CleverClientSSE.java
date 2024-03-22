@@ -5,28 +5,28 @@ import java.util.Set;
 
 public class CleverClientSSE {
 
-    public static final String EVENT_HEADER = "event: ";
+    private static final String EVENT_HEADER = "event: ";
     private static final String DATA_HEADER = "data: ";
     private static final String SEPARATOR = "";
 
     private LineRecord lineRecord;
     private List<String> endsOfStream;
-    private Set<String> eventsWithHeader;
+    private Set<String> events;
 
     public CleverClientSSE(LineRecord lineRecord) {
         this.lineRecord = lineRecord;
         this.endsOfStream = Configurator.one().getEndsOfStream();
-        this.eventsWithHeader = Set.of(SEPARATOR);
+        this.events = Set.of(SEPARATOR);
     }
 
-    public CleverClientSSE(LineRecord lineRecord, Set<String> eventsWithHeader) {
+    public CleverClientSSE(LineRecord lineRecord, Set<String> events) {
         this.lineRecord = lineRecord;
         this.endsOfStream = Configurator.one().getEndsOfStream();
-        this.eventsWithHeader = eventsWithHeader;
+        this.events = events;
     }
 
     public boolean isActualData() {
-        return eventsWithHeader.contains(lineRecord.previous()) && lineRecord.current().startsWith(DATA_HEADER)
+        return isMatchedEvent() && lineRecord.current().startsWith(DATA_HEADER)
                 && endsOfStream.stream().anyMatch(eos -> !lineRecord.current().contains(eos));
     }
 
@@ -34,8 +34,13 @@ public class CleverClientSSE {
         return lineRecord.current().replace(DATA_HEADER, "").strip();
     }
 
+    private boolean isMatchedEvent() {
+        return events.stream()
+                .anyMatch(ev -> lineRecord.previous().equals((ev.equals(SEPARATOR) ? SEPARATOR : EVENT_HEADER + ev)));
+    }
+
     public String getMatchedEvent() {
-        return eventsWithHeader.contains(lineRecord.previous()) ? lineRecord.previous() : null;
+        return isMatchedEvent() ? lineRecord.previous().replace(EVENT_HEADER, "").strip() : null;
     }
 
     public static class LineRecord {

@@ -14,7 +14,7 @@ public class ReturnType {
     private static final String LIST = "java.util.List";
     private static final String INPUTSTREAM = "java.io.InputStream";
     private static final String STRING = "java.lang.String";
-    private static final String OBJECT = "java.lang.Object";
+    private static final String EVENT = "io.github.sashirestela.cleverclient.Event";
 
     private static final String REGEX = "[<>]";
     private static final String JAVA_PCK = "java";
@@ -38,6 +38,10 @@ public class ReturnType {
 
     public ReturnType(Method method) {
         this(method.getGenericReturnType().getTypeName());
+        setClassByEventIfExists(method);
+    }
+
+    private void setClassByEventIfExists(Method method) {
         if (method.isAnnotationPresent(StreamType.List.class)) {
             this.classByEvent = calculateClassByEvent(
                     method.getDeclaredAnnotationsByType(StreamType.List.class)[0].value());
@@ -51,7 +55,7 @@ public class ReturnType {
         Map<String, Class<?>> map = new ConcurrentHashMap<>();
         Arrays.stream(streamTypeList).forEach(streamType -> {
             Arrays.stream(streamType.events())
-                    .forEach(event -> map.put(CleverClientSSE.EVENT_HEADER + event, streamType.type()));
+                    .forEach(event -> map.put(event, streamType.type()));
         });
         return map;
     }
@@ -96,8 +100,8 @@ public class ReturnType {
 
     private Category asyncCategory() {
         if (isStream()) {
-            if (isObject()) {
-                return Category.ASYNC_STREAM_OBJECT;
+            if (isEvent()) {
+                return Category.ASYNC_STREAM_EVENT;
             } else {
                 return Category.ASYNC_STREAM;
             }
@@ -118,8 +122,8 @@ public class ReturnType {
 
     private Category syncCategory() {
         if (isStream()) {
-            if (isObject()) {
-                return Category.SYNC_STREAM_OBJECT;
+            if (isEvent()) {
+                return Category.SYNC_STREAM_EVENT;
             } else {
                 return Category.SYNC_STREAM;
             }
@@ -156,7 +160,7 @@ public class ReturnType {
     }
 
     private boolean isCustom() {
-        return !isInputStream() && !isString() && !isObject() && (size == 1 || (size == 2 && isAsync()));
+        return !isInputStream() && !isString() && !isEvent() && (size == 1 || (size == 2 && isAsync()));
     }
 
     private boolean isBinary() {
@@ -175,19 +179,19 @@ public class ReturnType {
         return STRING.equals(returnTypeArray[lastIndex]);
     }
 
-    private boolean isObject() {
-        return OBJECT.equals(returnTypeArray[lastIndex]);
+    private boolean isEvent() {
+        return EVENT.equals(returnTypeArray[lastIndex]);
     }
 
     public enum Category {
-        ASYNC_STREAM_OBJECT,
+        ASYNC_STREAM_EVENT,
         ASYNC_STREAM,
         ASYNC_LIST,
         ASYNC_GENERIC,
         ASYNC_CUSTOM,
         ASYNC_BINARY,
         ASYNC_PLAIN_TEXT,
-        SYNC_STREAM_OBJECT,
+        SYNC_STREAM_EVENT,
         SYNC_STREAM,
         SYNC_LIST,
         SYNC_GENERIC,
