@@ -46,7 +46,7 @@ public class InterfaceMetadataStore {
         for (var javaMethod : interfaceClass.getMethods()) {
             var methodMetadata = MethodMetadata.builder()
                     .name(javaMethod.getName())
-                    .returnType(new ReturnType(javaMethod.getGenericReturnType().getTypeName()))
+                    .returnType(new ReturnType(javaMethod))
                     .isDefault(javaMethod.isDefault())
                     .annotations(getAnnotations(javaMethod.getDeclaredAnnotations()))
                     .parameters(getParameters(javaMethod.getParameters()))

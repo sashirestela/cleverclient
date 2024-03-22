@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.sender;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -10,8 +11,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 public class HttpSyncPlainTextSender extends HttpSender {
 
     @Override
-    public <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
-            Class<S> genericClass) {
+    public Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, ReturnType returnType) {
         try {
 
             var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());

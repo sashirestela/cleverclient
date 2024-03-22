@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.sender;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +28,12 @@ public abstract class HttpSender {
      * Method to be implementd for concrete classes to send request to the Java's HttpClient and receive
      * response.
      * 
-     * @param <S>           Type of a generic class if exists.
-     * @param <T>           Type of the response.
-     * @param httpClient    Java's HttpClient component.
-     * @param httpRequest   Java's HttpRequest component.
-     * @param responseClass Response class.
-     * @param genericClass  Generic class if exists.
+     * @param httpClient  Java's HttpClient component.
+     * @param httpRequest Java's HttpRequest component.
+     * @param returnType  Response class and generic class if exists.
      * @return Response coming from Java's HttpClient.
      */
-    public abstract <S, T> Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, Class<T> responseClass,
-            Class<S> genericClass);
+    public abstract Object sendRequest(HttpClient httpClient, HttpRequest httpRequest, ReturnType returnType);
 
     /**
      * Exception handling that will be called by any concrete class.

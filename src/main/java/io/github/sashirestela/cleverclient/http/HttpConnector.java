@@ -53,8 +53,6 @@ public class HttpConnector {
         logger.debug("Request Headers : {}", formattedHeaders);
 
         var bodyPublisher = createBodyPublisher(bodyObject, contentType);
-        var responseClass = returnType.getBaseClass();
-        var genericClass = returnType.getGenericClassIfExists();
         var headersArray = headers.toArray(new String[0]);
         HttpRequest httpRequest = null;
         if (headersArray.length > 0) {
@@ -70,7 +68,7 @@ public class HttpConnector {
                     .build();
         }
         var httpSender = HttpSenderFactory.get().createSender(returnType);
-        return httpSender.sendRequest(httpClient, httpRequest, responseClass, genericClass);
+        return httpSender.sendRequest(httpClient, httpRequest, returnType);
     }
 
     private void interceptRequest() {
