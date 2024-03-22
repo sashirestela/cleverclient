@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReturnTypeTest {
 
@@ -72,7 +71,7 @@ class ReturnTypeTest {
         expectedMap.put(CleverClientSSE.EVENT_HEADER + "first.create", First.class);
         expectedMap.put(CleverClientSSE.EVENT_HEADER + "first.complete", First.class);
         expectedMap.put(CleverClientSSE.EVENT_HEADER + "second.create", Second.class);
-        assertTrue(expectedMap.equals(actualMap));
+        assertEquals(Boolean.TRUE, expectedMap.equals(actualMap));
     }
 
     static interface TestInterface {

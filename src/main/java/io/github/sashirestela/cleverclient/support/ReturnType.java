@@ -48,12 +48,12 @@ public class ReturnType {
     }
 
     private Map<String, Class<?>> calculateClassByEvent(StreamType[] streamTypeList) {
-        Map<String, Class<?>> classByEvent = new ConcurrentHashMap<>();
+        Map<String, Class<?>> map = new ConcurrentHashMap<>();
         Arrays.stream(streamTypeList).forEach(streamType -> {
             Arrays.stream(streamType.events())
-                    .forEach(event -> classByEvent.put(CleverClientSSE.EVENT_HEADER + event, streamType.type()));
+                    .forEach(event -> map.put(CleverClientSSE.EVENT_HEADER + event, streamType.type()));
         });
-        return classByEvent;
+        return map;
     }
 
     public String toString() {
