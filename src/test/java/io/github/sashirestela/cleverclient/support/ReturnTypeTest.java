@@ -1,7 +1,6 @@
 package io.github.sashirestela.cleverclient.support;
 
 import io.github.sashirestela.cleverclient.Event;
-import io.github.sashirestela.cleverclient.annotation.StreamType;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -63,7 +62,7 @@ class ReturnTypeTest {
     }
 
     @Test
-    void shouldReturnMapClassByEventWhenTheMethodIsAnnotatedWithStreamType()
+    void shouldReturnMapClassByEventWhenTheMethodIsAnnotatedWithCompositeMultiStreamType()
             throws NoSuchMethodException, SecurityException {
         var method = TestInterface.class.getMethod("asyncStreamEventMethod", new Class[] {});
         var returnType = new ReturnType(method);
@@ -75,10 +74,21 @@ class ReturnTypeTest {
         assertEquals(Boolean.TRUE, expectedMap.equals(actualMap));
     }
 
+    @Test
+    void shouldReturnMapClassByEventWhenTheMethodIsAnnotatedWithCompositeSingleStreamType()
+            throws NoSuchMethodException, SecurityException {
+        var method = TestInterface.class.getMethod("syncStreamEventMethod", new Class[] {});
+        var returnType = new ReturnType(method);
+        var actualMap = returnType.getClassByEvent();
+        var expectedMap = new ConcurrentHashMap<>();
+        expectedMap.put("first.create", First.class);
+        expectedMap.put("first.complete", First.class);
+        assertEquals(Boolean.TRUE, expectedMap.equals(actualMap));
+    }
+
     static interface TestInterface {
 
-        @StreamType(type = First.class, events = { "first.create", "first.complete" })
-        @StreamType(type = Second.class, events = { "second.create" })
+        @CompositeTwo
         CompletableFuture<Stream<Event>> asyncStreamEventMethod();
 
         CompletableFuture<Stream<MyClass>> asyncStreamMethod();
@@ -95,6 +105,7 @@ class ReturnTypeTest {
 
         CompletableFuture<Set<MyClass>> asyncSetMethod();
 
+        @CompositeOne
         Stream<Event> syncStreamEventMethod();
 
         Stream<MyClass> syncStreamMethod();
