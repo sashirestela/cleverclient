@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
 @Repeatable(List.class)
 public @interface StreamType {
 
@@ -21,7 +21,7 @@ public @interface StreamType {
 
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
+    @Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
     @interface List {
 
         StreamType[] value();

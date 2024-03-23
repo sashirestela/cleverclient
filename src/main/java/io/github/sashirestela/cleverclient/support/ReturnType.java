@@ -2,6 +2,7 @@ package io.github.sashirestela.cleverclient.support;
 
 import io.github.sashirestela.cleverclient.annotation.StreamType;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -44,11 +45,30 @@ public class ReturnType {
     private void setClassByEventIfExists(Method method) {
         if (method.isAnnotationPresent(StreamType.List.class)) {
             this.classByEvent = calculateClassByEvent(
-                    method.getDeclaredAnnotationsByType(StreamType.List.class)[0].value());
+                    method.getDeclaredAnnotation(StreamType.List.class).value());
         } else if (method.isAnnotationPresent(StreamType.class)) {
             this.classByEvent = calculateClassByEvent(
                     new StreamType[] { method.getDeclaredAnnotation(StreamType.class) });
+        } else {
+            var annotations = method.getDeclaredAnnotations();
+            if (isAnnotationPresent(annotations, StreamType.List.class)) {
+                this.classByEvent = calculateClassByEvent(
+                        Arrays.stream(annotations)
+                                .map(a -> a.annotationType().getDeclaredAnnotation(StreamType.List.class).value())
+                                .findFirst()
+                                .orElse(null));
+            } else if (isAnnotationPresent(annotations, StreamType.class)) {
+                this.classByEvent = calculateClassByEvent(
+                        new StreamType[] { Arrays.stream(annotations)
+                                .map(a -> a.annotationType().getDeclaredAnnotation(StreamType.class))
+                                .findFirst()
+                                .orElse(null) });
+            }
         }
+    }
+
+    private boolean isAnnotationPresent(Annotation[] annotations, Class<? extends Annotation> clazz) {
+        return Arrays.stream(annotations).anyMatch(a -> a.annotationType().isAnnotationPresent(clazz));
     }
 
     private Map<String, Class<?>> calculateClassByEvent(StreamType[] streamTypeList) {
