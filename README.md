@@ -23,7 +23,7 @@ Library that makes it easy to use the Java HttpClient to perform http operations
 
 CleverClient is a Java 11+ library that makes it easy to use the standard [HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) component to call http services by using annotated interfaces.
 
-For example, if we want to use the public API [JsonPlaceHolder](https://jsonplaceholder.typicode.com/) and call the endpoint ```/posts```, we just have to create an entity ```Post```, an interface ```PostService``` with special annotatons, and call the API through ```CleverClient```:
+For example, if we want to use the public API [JsonPlaceHolder](https://jsonplaceholder.typicode.com/) and call its endpoint ```/posts```, we just have to create an entity ```Post```, an interface ```PostService``` with special annotatons, and call the API through ```CleverClient```:
 
 ```java
 // Entity
@@ -152,27 +152,29 @@ var cleverClient = CleverClient.builder()
 
 ### Interface Annotations
 
-| Annotation | Target    | Attributes                  | Required Attrs | Mult |
-|------------|-----------|-----------------------------|----------------|------|
-| Resource   | Interface | Resource's url              | optional       | One  |
-| Header     | Interface | Header's name and value     | mandatory both | Many |
-| Header     | Method    | Header's name and value     | mandatory both | Many |
-| GET        | Method    | GET endpoint's url          | optional       | One  |
-| POST       | Method    | POST endpoint's url         | optional       | One  |
-| PUT        | Method    | PUT endpoint's url          | optional       | One  |
-| DELETE     | Method    | DELETE endpoint's url       | optional       | One  |
-| Multipart  | Method    | (None)                      | none           | One  |
-| StreamType | Method    | class type and events array | mandatory both | Many |
-| Path       | Parameter | Path parameter name in url  | mandatory      | One  |
-| Query      | Parameter | Query parameter name in url | mandatory      | One  |
-| Query      | Parameter | (None for Pojos)            | none           | One  |
-| Body       | Parameter | (None)                      | none           | One  |
+| Annotation | Target     | Attributes                  | Required Attrs | Mult |
+|------------|------------|-----------------------------|----------------|------|
+| Resource   | Interface  | Resource's url              | optional       | One  |
+| Header     | Interface  | Header's name and value     | mandatory both | Many |
+| Header     | Method     | Header's name and value     | mandatory both | Many |
+| GET        | Method     | GET endpoint's url          | optional       | One  |
+| POST       | Method     | POST endpoint's url         | optional       | One  |
+| PUT        | Method     | PUT endpoint's url          | optional       | One  |
+| DELETE     | Method     | DELETE endpoint's url       | optional       | One  |
+| PATCH      | Method     | PATCH endpoint's url        | optional       | One  |
+| Multipart  | Method     | (None)                      | none           | One  |
+| StreamType | Method     | Class type and events array | mandatory both | Many |
+| StreamType | Annotation | Class type and events array | mandatory both | Many |
+| Path       | Parameter  | Path parameter name in url  | mandatory      | One  |
+| Query      | Parameter  | Query parameter name in url | mandatory      | One  |
+| Query      | Parameter  | (None for Pojos)            | none           | One  |
+| Body       | Parameter  | (None)                      | none           | One  |
 
 * ```Resource``` could be used to separate the repeated part of the endpoints' url in an interface.
 * ```Header``` Used to include more headers (pairs of name and value) at interface or method level. It is possible to have multiple Header annotations for the same target.
 * ```GET, POST, PUT, DELETE``` are used to mark the typical http methods (endpoints).
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
-* ```StreamType``` is used with methods whose return type is Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java). Commonly you will use more than one to indicate what class (type) is related to what events (array of Strings).
+* ```StreamType``` is used with methods whose return type is Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java). Tipically you will use more than one of this annotation to indicate what classes (types) are related to what events (array of Strings). You can also use them for custom annotations in case you want to reuse them for many methods, so you just apply the custom composite annotation.
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
 * ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for POJOs using its properties and values.
 * ```Body``` is used to mark a method parameter as the endpoint's payload request, so the request will be application/json at least the endpoint is annotated with Multipart.
@@ -180,9 +182,9 @@ var cleverClient = CleverClient.builder()
 
 ### Supported Response Types
 
-The reponse types are determined from the method responses. We don't need any annotation for that. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Custom type, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) type, [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) type and Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java), and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
+The reponse types are determined from the method's return types. We have six response types: [Stream](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/stream/Stream.html) of elements, [List](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html) of elements, [Generic](https://docs.oracle.com/javase/tutorial/java/generics/types.html) type, Custom type, [Binary](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/InputStream.html) type, [String](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html) type and Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java), and all of them can be asynchronous or synchronous. For async responses you have to use the Java class [CompletableFuture](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/CompletableFuture.html).
 
-| Method's Response Type             | Sync/Async | Description                 |
+| Response Type                      | Sync/Async | Description                 |
 |------------------------------------|------------|-----------------------------|
 | CompletableFuture<Stream\<T>>      | Async      | SSE (*) as Stream of type T |
 | Stream\<T>                         | Sync       | SSE (*) as Stream of type T |
@@ -203,7 +205,7 @@ The reponse types are determined from the method responses. We don't need any an
 
 * ```CompletableFuture<Stream<T>>``` and ```Stream<T>``` are used for handling SSE without events and data of the class ```T``` only.
 * ```CompletableFuture<Stream<Event>>``` and ```Stream<Event>``` are used for handling SSE with multiple events and data of different classes.
-* The [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java) class will bring the event name and the data object.
+* The [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java) class will bring for each event: the event name and the data object.
 
 ### Interface Default Methods
 
