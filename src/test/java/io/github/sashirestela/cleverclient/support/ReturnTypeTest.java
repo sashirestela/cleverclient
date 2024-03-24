@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.support;
 
 import io.github.sashirestela.cleverclient.Event;
+import io.github.sashirestela.cleverclient.annotation.POST;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -88,6 +89,7 @@ class ReturnTypeTest {
 
     static interface TestInterface {
 
+        @POST
         @CompositeTwo
         CompletableFuture<Stream<Event>> asyncStreamEventMethod();
 
