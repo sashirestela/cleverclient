@@ -6,6 +6,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ReturnType {
@@ -50,25 +51,30 @@ public class ReturnType {
             this.classByEvent = calculateClassByEvent(
                     new StreamType[] { method.getDeclaredAnnotation(StreamType.class) });
         } else {
-            var annotations = method.getDeclaredAnnotations();
-            if (isAnnotationPresent(annotations, StreamType.List.class)) {
+            var innerStreamTypeList = getInnerAnnotationIfExists(method, StreamType.List.class);
+            if (innerStreamTypeList.isPresent()) {
                 this.classByEvent = calculateClassByEvent(
-                        Arrays.stream(annotations)
-                                .map(a -> a.annotationType().getDeclaredAnnotation(StreamType.List.class).value())
-                                .findFirst()
-                                .orElse(null));
-            } else if (isAnnotationPresent(annotations, StreamType.class)) {
-                this.classByEvent = calculateClassByEvent(
-                        new StreamType[] { Arrays.stream(annotations)
-                                .map(a -> a.annotationType().getDeclaredAnnotation(StreamType.class))
-                                .findFirst()
-                                .orElse(null) });
+                        innerStreamTypeList.get()
+                                .annotationType()
+                                .getDeclaredAnnotation(StreamType.List.class)
+                                .value());
+            } else {
+                var innerStreamType = getInnerAnnotationIfExists(method, StreamType.class);
+                if (innerStreamType.isPresent()) {
+                    this.classByEvent = calculateClassByEvent(
+                            new StreamType[] { innerStreamType.get()
+                                    .annotationType()
+                                    .getDeclaredAnnotation(StreamType.class) });
+                }
             }
         }
     }
 
-    private boolean isAnnotationPresent(Annotation[] annotations, Class<? extends Annotation> clazz) {
-        return Arrays.stream(annotations).anyMatch(a -> a.annotationType().isAnnotationPresent(clazz));
+    private Optional<? extends Annotation> getInnerAnnotationIfExists(Method method,
+            Class<? extends Annotation> clazz) {
+        return Arrays.stream(method.getDeclaredAnnotations())
+                .filter(a -> a.annotationType().isAnnotationPresent(clazz))
+                .findFirst();
     }
 
     private Map<String, Class<?>> calculateClassByEvent(StreamType[] streamTypeList) {
