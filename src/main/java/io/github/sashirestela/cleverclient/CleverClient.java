@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
@@ -31,6 +32,7 @@ public class CleverClient {
     private final Map<String, String> headers;
     private final HttpClient httpClient;
     private final UnaryOperator<HttpRequestData> requestInterceptor;
+    private final Consumer<Object> bodyInspector;
     private final HttpProcessor httpProcessor;
 
     /**
@@ -41,21 +43,25 @@ public class CleverClient {
      * @param httpClient         Custom Java's HttpClient component. One is created by default if none
      *                           is passed. Optional.
      * @param requestInterceptor Function to modify the request once it has been built.
+     * @param bodyInspector      Function to inspect the Body request parameter.
      * @param endsOfStream       Texts used to mark the final of streams when handling server sent
      *                           events (SSE). Optional.
      */
     @Builder
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
-            UnaryOperator<HttpRequestData> requestInterceptor, @Singular("endOfStream") List<String> endsOfStream) {
+            UnaryOperator<HttpRequestData> requestInterceptor, Consumer<Object> bodyInspector,
+            @Singular("endOfStream") List<String> endsOfStream) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
         this.requestInterceptor = requestInterceptor;
+        this.bodyInspector = bodyInspector;
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
                 .headers(CommonUtil.mapToListOfString(this.headers))
                 .httpClient(this.httpClient)
                 .requestInterceptor(this.requestInterceptor)
+                .bodyInspector(bodyInspector)
                 .build();
         Configurator.builder()
                 .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
