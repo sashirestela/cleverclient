@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
@@ -30,6 +31,7 @@ public class HttpProcessor implements InvocationHandler {
     private final List<String> headers;
     private final HttpClient httpClient;
     private final UnaryOperator<HttpRequestData> requestInterceptor;
+    private final Consumer<Object> bodyInspector;
 
     /**
      * Creates a generic dynamic proxy with this HttpProcessor object acting as an InvocationHandler to
@@ -99,8 +101,9 @@ public class HttpProcessor implements InvocationHandler {
         var url = baseUrl + URLBuilder.one().build(urlMethod, methodMetadata, arguments);
         var httpMethod = methodMetadata.getHttpAnnotationName();
         var returnType = methodMetadata.getReturnType();
-        var bodyObject = calculateBodyObject(methodMetadata, arguments);
         var contentType = methodMetadata.getContentType();
+        var body = getAndInspectBody(methodMetadata, arguments);
+        var bodyObject = getBodyObject(body, contentType);
         var fullHeaders = new ArrayList<>(this.headers);
         fullHeaders.addAll(calculateHeaderContentType(contentType));
         fullHeaders.addAll(interfaceMetadata.getFullHeadersByMethod(methodMetadata));
@@ -117,14 +120,24 @@ public class HttpProcessor implements InvocationHandler {
         return httpConnector.sendRequest();
     }
 
-    private Object calculateBodyObject(MethodMetadata methodMetadata, Object[] arguments) {
+    private Object getAndInspectBody(MethodMetadata methodMetadata, Object[] arguments) {
         var bodyIndex = methodMetadata.getBodyIndex();
-        var bodyObject = bodyIndex >= 0 ? arguments[bodyIndex] : null;
-        if (bodyObject != null) {
-            if (methodMetadata.getContentType() == ContentType.MULTIPART_FORMDATA) {
-                bodyObject = JsonUtil.objectToMap(bodyObject);
-            } else if (methodMetadata.getContentType() == ContentType.APPLICATION_JSON) {
-                bodyObject = JsonUtil.objectToJson(bodyObject);
+        var body = bodyIndex >= 0 ? arguments[bodyIndex] : null;
+
+        if (body != null && bodyInspector != null) {
+            bodyInspector.accept(body);
+        }
+
+        return body;
+    }
+
+    private Object getBodyObject(Object body, ContentType contentType) {
+        Object bodyObject = null;
+        if (body != null) {
+            if (contentType == ContentType.MULTIPART_FORMDATA) {
+                bodyObject = JsonUtil.objectToMap(body);
+            } else if (contentType == ContentType.APPLICATION_JSON) {
+                bodyObject = JsonUtil.objectToJson(body);
             }
         }
         return bodyObject;

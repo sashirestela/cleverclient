@@ -108,15 +108,16 @@ Take in account that you need to use **Java 11 or greater**.
 
 We have the following attributes to create a CleverClient object:
 
-| Attribute          | Description                                      | Required  |
-| -------------------|--------------------------------------------------|-----------|
-| baseUrl            | Api's url                                        | mandatory |
-| headers            | Map of headers (name/value)                      | optional  |
-| header             | Single header as a name and a value              | optional  |
-| httpClient         | Java HttpClient object                           | optional  |
-| requestInterceptor | Function to modify the request once is built     | optional  |
-| endsOfStream       | List of texts used to mark the end of streams    | optional  |
-| endOfStream        | Text used to mark the end of streams             | optional  |
+| Attribute          | Description                                       | Required  |
+| -------------------|---------------------------------------------------|-----------|
+| baseUrl            | Api's url                                         | mandatory |
+| headers            | Map of headers (name/value)                       | optional  |
+| header             | Single header as a name and a value               | optional  |
+| httpClient         | Java HttpClient object                            | optional  |
+| requestInterceptor | Function to modify the request once is built      | optional  |
+| bodyInspector      | Function to inspect the `@Body` request parameter | optional  |
+| endsOfStream       | List of texts used to mark the end of streams     | optional  |
+| endOfStream        | Text used to mark the end of streams              | optional  |
 
 The attribute ```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 

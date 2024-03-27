@@ -17,8 +17,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,6 +43,7 @@ class CleverClientTest {
         assertNotNull(cleverClient.getBaseUrl());
         assertNotNull(cleverClient.getHttpProcessor());
         assertNull(cleverClient.getRequestInterceptor());
+        assertNull(cleverClient.getBodyInspector());
     }
 
     @Test
@@ -120,6 +123,44 @@ class CleverClientTest {
         var expectedBody = "{\"id\":\"1\",\"description\":\"sample\"}";
         assertEquals(expectedUrl, actualUrl);
         assertEquals(expectedBody, actualBody);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldNotThrownExceptionWhenBodyInspectorEndsSuccessfully() {
+        var httpClient = mock(HttpClient.class);
+        Consumer<Object> bodyInspector = body -> {
+            var sample = (Sample) body;
+            if (sample.getModel() == null) {
+                throw new IllegalArgumentException("The parameter model must not be null.");
+            }
+        };
+        var cleverClient = CleverClient.builder()
+                .baseUrl("https://test")
+                .bodyInspector(bodyInspector)
+                .httpClient(httpClient)
+                .build();
+        when(httpClient.sendAsync(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(mock(HttpResponse.class)));
+        var testService = cleverClient.create(TestCleverClient.class);
+        assertDoesNotThrow(() -> testService.getText(Sample.builder().model("abc").build(), "math"));
+    }
+
+    @Test
+    void shouldThrownExceptionWhenBodyInspectorFails() {
+        Consumer<Object> bodyInspector = body -> {
+            var sample = (Sample) body;
+            if (sample.getModel() == null) {
+                throw new IllegalArgumentException("The parameter model must not be null.");
+            }
+        };
+        var cleverClient = CleverClient.builder()
+                .baseUrl("https://test")
+                .bodyInspector(bodyInspector)
+                .build();
+        var testService = cleverClient.create(TestCleverClient.class);
+        assertThrows(IllegalArgumentException.class,
+                () -> testService.getText(Sample.builder().build(), "math"));
     }
 
     @Value
