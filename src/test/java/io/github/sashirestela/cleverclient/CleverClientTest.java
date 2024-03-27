@@ -159,8 +159,8 @@ class CleverClientTest {
                 .bodyInspector(bodyInspector)
                 .build();
         var testService = cleverClient.create(TestCleverClient.class);
-        assertThrows(IllegalArgumentException.class,
-                () -> testService.getText(Sample.builder().build(), "math"));
+        var sample = Sample.builder().id("1").build();
+        assertThrows(IllegalArgumentException.class, () -> testService.getText(sample, "math"));
     }
 
     @Value
