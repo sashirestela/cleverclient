@@ -2,12 +2,14 @@ package io.github.sashirestela.cleverclient.support;
 
 import io.github.sashirestela.cleverclient.support.CleverClientSSE.LineRecord;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Order(1)
 class CleverClientSSETest {
 
     Set<String> events = Set.of("process", "process2");
@@ -36,7 +38,8 @@ class CleverClientSSETest {
             var event = (CleverClientSSE) data[0];
             var actualCondition = event.isActualData();
             var expectedCondition = (boolean) data[1];
-            assertEquals(expectedCondition, actualCondition);
+            assertEquals(expectedCondition, actualCondition, "For data '" + event.getActualData()
+                    + "' was expecting " + expectedCondition + " but was " + actualCondition);
         }
     }
 
