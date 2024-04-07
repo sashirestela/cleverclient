@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -49,13 +50,30 @@ public class HttpMultipart {
                 byteArrays.add(toBytes(NL));
             } else {
                 var fieldValue = entry.getValue();
-                byteArrays.add(toBytes(FIELD_NAME + DQ + fieldName + DQ + NL));
-                byteArrays.add(toBytes(NL));
-                byteArrays.add(toBytes(fieldValue + NL));
+                var isFirst = true;
+                if (fieldValue instanceof Collection) {
+                    for (Object item : (Collection<?>) fieldValue) {
+                        addIndividualField(byteArrays, fieldName + "[]", item, isFirst);
+                        isFirst = false;
+                    }
+                } else {
+                    addIndividualField(byteArrays, fieldName, fieldValue, isFirst);
+                }
             }
         }
         byteArrays.add(toBytes(DASH + Constant.BOUNDARY_VALUE + DASH + NL));
         return byteArrays;
+    }
+
+    private static void addIndividualField(List<byte[]> byteArrays, String fieldName, Object fieldValue,
+            boolean isFirst) {
+        if (!isFirst) {
+            byteArrays.add(toBytes(DASH + Constant.BOUNDARY_VALUE + NL));
+            byteArrays.add(toBytes(DISPOSITION));
+        }
+        byteArrays.add(toBytes(FIELD_NAME + DQ + fieldName + DQ + NL));
+        byteArrays.add(toBytes(NL));
+        byteArrays.add(toBytes(fieldValue + NL));
     }
 
     private static byte[] toBytes(String text) {

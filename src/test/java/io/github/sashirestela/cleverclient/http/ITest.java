@@ -171,4 +171,20 @@ public interface ITest {
 
     }
 
+    @Getter
+    @AllArgsConstructor
+    static class MultipartClass {
+
+        private java.nio.file.Path file;
+
+        private int id;
+
+        private String text;
+
+        private List<String> group;
+
+        private Integer[] numbers;
+
+    }
+
 }
