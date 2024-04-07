@@ -80,7 +80,7 @@ var newPost = postService.createPost(new Post(
 System.out.println(newPost);
 ```
 
-## 🛠️ Installation
+## ⚙ Installation
 
 You can install CleverClient by adding the following dependency to your Maven project:
 
