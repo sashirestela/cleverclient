@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.support;
 
 import io.github.sashirestela.cleverclient.annotation.StreamType;
+import io.github.sashirestela.cleverclient.annotation.StreamType.StreamTypeArray;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -44,19 +45,19 @@ public class ReturnType {
     }
 
     private void setClassByEventIfExists(Method method) {
-        if (method.isAnnotationPresent(StreamType.List.class)) {
+        if (method.isAnnotationPresent(StreamTypeArray.class)) {
             this.classByEvent = calculateClassByEvent(
-                    method.getDeclaredAnnotation(StreamType.List.class).value());
+                    method.getDeclaredAnnotation(StreamTypeArray.class).value());
         } else if (method.isAnnotationPresent(StreamType.class)) {
             this.classByEvent = calculateClassByEvent(
                     new StreamType[] { method.getDeclaredAnnotation(StreamType.class) });
         } else {
-            var innerStreamTypeList = getInnerAnnotationIfExists(method, StreamType.List.class);
+            var innerStreamTypeList = getInnerAnnotationIfExists(method, StreamTypeArray.class);
             if (innerStreamTypeList.isPresent()) {
                 this.classByEvent = calculateClassByEvent(
                         innerStreamTypeList.get()
                                 .annotationType()
-                                .getDeclaredAnnotation(StreamType.List.class)
+                                .getDeclaredAnnotation(StreamTypeArray.class)
                                 .value());
             } else {
                 var innerStreamType = getInnerAnnotationIfExists(method, StreamType.class);

@@ -134,6 +134,18 @@ public interface ITest {
 
     }
 
+    @Resource("/api/demos/{demoId}")
+    interface WithResourcePathParamAndDefaultMethods {
+
+        @GET
+        Demo getDemoPrimitive(@Path("demoId") Integer demoId);
+
+        default Demo getDemo(Integer demoId) {
+            return getDemoPrimitive(demoId);
+        }
+
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
