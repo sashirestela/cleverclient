@@ -119,21 +119,23 @@ public class InterfaceMetadataStore {
 
     private void validate(InterfaceMetadata interfaceMetadata) {
         interfaceMetadata.getMethodBySignature().forEach((methodSignature, methodMetadata) -> {
-            if (!methodMetadata.isDefault() && !methodMetadata.hasHttpAnnotation()) {
-                throw new CleverClientException("Missing HTTP annotation for the method {0}.",
-                        methodMetadata.getName(), null);
-            }
-            var url = interfaceMetadata.getFullUrlByMethod(methodMetadata);
-            var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
-            if (!CommonUtil.isNullOrEmpty(listPathParams)) {
-                listPathParams.forEach(pathParam -> methodMetadata.getPathParameters()
-                        .stream()
-                        .map(parameter -> parameter.getAnnotation().getValue())
-                        .filter(paramAnnotValue -> pathParam.equals(paramAnnotValue))
-                        .findFirst()
-                        .orElseThrow(() -> new CleverClientException(
-                                "Path param {0} in the url cannot find an annotated argument in the method {1}.",
-                                pathParam, methodMetadata.getName(), null)));
+            if (!methodMetadata.isDefault()) {
+                if (!methodMetadata.hasHttpAnnotation()) {
+                    throw new CleverClientException("Missing HTTP annotation for the method {0}.",
+                            methodMetadata.getName(), null);
+                }
+                var url = interfaceMetadata.getFullUrlByMethod(methodMetadata);
+                var listPathParams = CommonUtil.findFullMatches(url, Constant.REGEX_PATH_PARAM_URL);
+                if (!CommonUtil.isNullOrEmpty(listPathParams)) {
+                    listPathParams.forEach(pathParam -> methodMetadata.getPathParameters()
+                            .stream()
+                            .map(parameter -> parameter.getAnnotation().getValue())
+                            .filter(paramAnnotValue -> pathParam.equals(paramAnnotValue))
+                            .findFirst()
+                            .orElseThrow(() -> new CleverClientException(
+                                    "Path param {0} in the url cannot find an annotated argument in the method {1}.",
+                                    pathParam, methodMetadata.getName(), null)));
+                }
             }
         });
     }

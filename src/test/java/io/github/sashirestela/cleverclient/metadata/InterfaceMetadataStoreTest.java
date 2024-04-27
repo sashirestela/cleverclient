@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static io.github.sashirestela.cleverclient.util.CommonUtil.createMapString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -149,6 +150,11 @@ class InterfaceMetadataStoreTest {
         assertEquals(
                 "Path param demoId in the url cannot find an annotated argument in the method unmatchedPathParamMethod.",
                 exception.getMessage());
+    }
+
+    @Test
+    void shouldSaveSuccesfullyWhenInterfaceHasResourcePathParamAndDefaultMethod() {
+        assertDoesNotThrow(() -> store.save(ITest.WithResourcePathParamAndDefaultMethods.class));
     }
 
 }
