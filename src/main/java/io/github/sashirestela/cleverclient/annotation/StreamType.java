@@ -1,6 +1,6 @@
 package io.github.sashirestela.cleverclient.annotation;
 
-import io.github.sashirestela.cleverclient.annotation.StreamType.List;
+import io.github.sashirestela.cleverclient.annotation.StreamType.StreamTypeArray;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
-@Repeatable(List.class)
+@Repeatable(StreamTypeArray.class)
 public @interface StreamType {
 
     Class<?> type();
@@ -22,7 +22,7 @@ public @interface StreamType {
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
-    @interface List {
+    @interface StreamTypeArray {
 
         StreamType[] value();
 
