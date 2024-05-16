@@ -3,10 +3,11 @@ package io.github.sashirestela.cleverclient.support;
 import io.github.sashirestela.cleverclient.util.Constant;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,11 +37,12 @@ public class HttpMultipart {
                 String mimeType = null;
                 byte[] fileContent = null;
                 try {
-                    var path = Path.of(new URL((String) entry.getValue()).getPath());
+                    URI uri = new URI(entry.getValue().toString());
+                    var path = Paths.get(uri);
                     fileName = path.toString();
                     mimeType = Files.probeContentType(path);
                     fileContent = Files.readAllBytes(path);
-                } catch (IOException e) {
+                } catch (IOException | URISyntaxException e) {
                     throw new CleverClientException("Error trying to read the file {0}.", fileName, e);
                 }
                 byteArrays.add(toBytes(FIELD_NAME + DQ + fieldName + DQ + FILE_NAME + DQ + fileName + DQ + NL));
