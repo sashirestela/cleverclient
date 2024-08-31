@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -126,6 +128,35 @@ class URLBuilderTest {
         assertEquals(expectedUrl, actualUrl);
     }
 
+    @Test
+    void shouldReturnReplacedUrlWithQueryParamsWhenMethodContainsEnumQueryParams() {
+        var url = "/api/domain/entities";
+        var paramsList = List.of(
+                ParameterMetadata.builder()
+                        .index(0)
+                        .annotation(AnnotationMetadata.builder()
+                                .name("Query")
+                                .isHttpMethod(false)
+                                .valueByField(Map.of("value", "statusOpen"))
+                                .build())
+                        .build(),
+                ParameterMetadata.builder()
+                        .index(1)
+                        .annotation(AnnotationMetadata.builder()
+                                .name("Query")
+                                .isHttpMethod(false)
+                                .valueByField(Map.of("value", "statusClosed"))
+                                .build())
+                        .build());
+
+        when(methodMetadata.getPathParameters()).thenReturn(List.of());
+        when(methodMetadata.getQueryParameters()).thenReturn(paramsList);
+
+        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { Status.OPEN, Status.CLOSED });
+        var expectedUrl = "/api/domain/entities?statusOpen=open&statusClosed=CLOSED";
+        assertEquals(expectedUrl, actualUrl);
+    }
+
     @Data
     @AllArgsConstructor
     static class Pagination {
@@ -133,6 +164,14 @@ class URLBuilderTest {
         private Integer size;
         private Integer page;
 
+    }
+
+    enum Status {
+
+        @JsonProperty("open")
+        OPEN,
+
+        CLOSED;
     }
 
 }
