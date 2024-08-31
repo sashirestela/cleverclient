@@ -1,13 +1,12 @@
 package io.github.sashirestela.cleverclient.http;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.AnnotationMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Map;

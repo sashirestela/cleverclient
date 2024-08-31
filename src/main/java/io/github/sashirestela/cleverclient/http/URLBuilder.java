@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.http;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.ParameterMetadata;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
@@ -11,8 +12,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class URLBuilder {
 
