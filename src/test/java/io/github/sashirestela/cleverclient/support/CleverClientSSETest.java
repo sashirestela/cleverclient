@@ -1,25 +1,15 @@
 package io.github.sashirestela.cleverclient.support;
 
 import io.github.sashirestela.cleverclient.support.CleverClientSSE.LineRecord;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Order(1)
 class CleverClientSSETest {
 
     Set<String> events = Set.of("process", "process2");
-
-    @BeforeAll
-    static void setup() {
-        Configurator.builder()
-                .endOfStream("END")
-                .build();
-    }
 
     @Test
     void shouldReturnExpectedValueWhenRawDataMeetsConditions() {
