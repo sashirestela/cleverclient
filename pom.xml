@@ -6,7 +6,7 @@
 
   <groupId>io.github.sashirestela</groupId>
   <artifactId>cleverclient</artifactId>
-  <version>1.4.4</version>
+  <version>1.5.0</version>
   <packaging>jar</packaging>
 
   <name>cleverclient</name>
@@ -52,21 +52,21 @@
     <maven.compiler.release>11</maven.compiler.release>
     <!-- Dependencies Versions -->
     <slf4j.version>2.0.16</slf4j.version>
-    <lombok.version>1.18.34</lombok.version>
-    <jackson.version>2.17.2</jackson.version>
-    <junit.version>5.11.0</junit.version>
-    <mockito.version>5.13.0</mockito.version>
+    <lombok.version>1.18.36</lombok.version>
+    <jackson.version>2.18.1</jackson.version>
+    <junit.version>5.11.3</junit.version>
+    <mockito.version>5.14.2</mockito.version>
     <!-- Plugins Versions -->
     <compiler.version>3.13.0</compiler.version>
     <enforcer.version>3.5.0</enforcer.version>
-    <surefire.version>3.5.0</surefire.version>
-    <exec.version>3.4.1</exec.version>
+    <surefire.version>3.5.2</surefire.version>
+    <exec.version>3.5.0</exec.version>
     <jacoco.version>0.8.12</jacoco.version>
     <helper.version>3.6.0</helper.version>
-    <versions.version>2.17.1</versions.version>
+    <versions.version>2.18.0</versions.version>
     <source.version>3.3.1</source.version>
-    <javadoc.version>3.10.0</javadoc.version>
-    <gpg.version>3.2.5</gpg.version>
+    <javadoc.version>3.11.1</javadoc.version>
+    <gpg.version>3.2.7</gpg.version>
     <sonatype.version>1.7.0</sonatype.version>
     <spotless.version>2.43.0</spotless.version>
   </properties>
@@ -180,7 +180,7 @@
               <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
-          </plugin>          
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -209,6 +209,12 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${jackson.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -245,6 +251,10 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -290,7 +300,7 @@
                 <requireMavenVersion>
                   <version>3.6.3</version>
                 </requireMavenVersion>
-              </rules>    
+              </rules>
             </configuration>
           </execution>
         </executions>
