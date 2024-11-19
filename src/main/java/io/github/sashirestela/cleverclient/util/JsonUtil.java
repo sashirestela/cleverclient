@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.Configurator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 public class JsonUtil {
 
-    private static final ObjectMapper objectMapperStrict = new ObjectMapper();
+    private static final ObjectMapper objectMapperStrict = Configurator.one().getObjectMapper();
 
     private static final ObjectReader objectReaderIgnoringUnknown = objectMapperStrict.reader()
             .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +131,13 @@ class JsonUtilTest {
         assertThrows(CleverClientException.class, () -> JsonUtil.objectToMap(object));
     }
 
+    @Test
+    void shouldHandleLocalDateWhenAnObjectMapperWithTimeModuleIsPassed() {
+        String expectedJson = "{\"date\":[2024,12,31]}";
+        String actualJson = JsonUtil.objectToJson(new DateClass(LocalDate.of(2024, 12, 31)));
+        assertEquals(expectedJson, actualJson);
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
@@ -196,6 +204,15 @@ class JsonUtilTest {
         private String first;
 
         private Integer second;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    static class DateClass {
+
+        private LocalDate date;
 
     }
 

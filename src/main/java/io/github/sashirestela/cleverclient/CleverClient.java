@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.support.Configurator;
@@ -46,11 +47,12 @@ public class CleverClient {
      * @param bodyInspector      Function to inspect the Body request parameter.
      * @param endsOfStream       Texts used to mark the final of streams when handling server sent
      *                           events (SSE). Optional.
+     * @param objectMapper       Provides Json conversions either to and from objects. Optional.
      */
     @Builder
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
             UnaryOperator<HttpRequestData> requestInterceptor, Consumer<Object> bodyInspector,
-            @Singular("endOfStream") List<String> endsOfStream) {
+            @Singular("endOfStream") List<String> endsOfStream, ObjectMapper objectMapper) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
@@ -65,6 +67,7 @@ public class CleverClient {
                 .build();
         Configurator.builder()
                 .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
+                .objectMapper(Optional.ofNullable(objectMapper).orElse(new ObjectMapper()))
                 .build();
         logger.debug("CleverClient has been created.");
     }

@@ -52,7 +52,6 @@ class CleverClientTest {
                 .baseUrl("https://test")
                 .header("headerName", "headerValue")
                 .httpClient(HttpClient.newHttpClient())
-                .endOfStream("[DONE]")
                 .build();
         var test = cleverClient.create(TestCleverClient.class);
         assertNotNull(test);
@@ -62,8 +61,7 @@ class CleverClientTest {
     void shouldThrownExceptionWhenTryingToPassAnEmptyBaseUrl() {
         var cleverClientBuilder = CleverClient.builder()
                 .header("headerName", "headerValue")
-                .httpClient(HttpClient.newHttpClient())
-                .endOfStream("[DONE]");
+                .httpClient(HttpClient.newHttpClient());
         assertThrows(NullPointerException.class,
                 cleverClientBuilder::build);
     }
