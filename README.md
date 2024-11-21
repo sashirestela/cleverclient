@@ -118,6 +118,7 @@ We have the following attributes to create a CleverClient object:
 | bodyInspector      | Function to inspect the `@Body` request parameter | optional  |
 | endsOfStream       | List of texts used to mark the end of streams     | optional  |
 | endOfStream        | Text used to mark the end of streams              | optional  |
+| objectMapper       | Provides Json conversions either to/from objects  | optional  |
 
 The attribute ```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 
@@ -137,6 +138,9 @@ var httpClient = HttpClient.newBuilder()
     .proxy(ProxySelector.of(new InetSocketAddress("proxy.example.com", 80)))
     .build();
 
+var objectMapper = new ObjectMapper()
+    .registerModule(new JavaTimeModule());
+
 var cleverClient = CleverClient.builder()
     .baseUrl(BASE_URL)
     .header(HEADER_NAME, HEADER_VALUE)
@@ -148,6 +152,7 @@ var cleverClient = CleverClient.builder()
         return request;
     })
     .endOfStream(END_OF_STREAM)
+    .objectMapper(objectMapper)
     .build();
 ```
 
@@ -173,7 +178,7 @@ var cleverClient = CleverClient.builder()
 
 * ```Resource``` could be used to separate the repeated part of the endpoints' url in an interface.
 * ```Header``` Used to include more headers (pairs of name and value) at interface or method level. It is possible to have multiple Header annotations for the same target.
-* ```GET, POST, PUT, DELETE``` are used to mark the typical http methods (endpoints).
+* ```GET, POST, PUT, DELETE, PATCH``` are used to mark the typical http methods (endpoints).
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
 * ```StreamType``` is used with methods whose return type is Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java). Tipically you will use more than one of this annotation to indicate what classes (types) are related to what events (array of Strings). You can also use them for custom annotations in case you want to reuse them for many methods, so you just apply the custom composite annotation.
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
