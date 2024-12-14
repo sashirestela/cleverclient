@@ -1,6 +1,8 @@
 package io.github.sashirestela.cleverclient.sender;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.CleverClientException.HttpResponseInfo;
+import io.github.sashirestela.cleverclient.support.CleverClientException.HttpResponseInfo.HttpRequestInfo;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import org.slf4j.Logger;
@@ -59,8 +61,22 @@ public abstract class HttpSender {
                 data = (String) response.body();
             }
             logger.error("Response : {}", data);
-            throw new CleverClientException("ERROR : {0}", data, null);
+            throw new CleverClientException(fillResponseInfo(response, data));
         }
+    }
+
+    private HttpResponseInfo fillResponseInfo(HttpResponse<?> response, String data) {
+        var request = response.request();
+        return HttpResponseInfo.builder()
+                .statusCode(response.statusCode())
+                .data(data)
+                .headers(response.headers().map())
+                .request(HttpRequestInfo.builder()
+                        .httpMethod(request.method())
+                        .url(request.uri().toString())
+                        .headers(request.headers().map())
+                        .build())
+                .build();
     }
 
 }
