@@ -40,7 +40,7 @@ public class CleverClientException extends RuntimeException {
         return Optional.ofNullable(responseInfo);
     }
 
-    public static Optional<CleverClientException> bringOut(Throwable exception) {
+    public static Optional<CleverClientException> getFrom(Throwable exception) {
         if (exception instanceof CleverClientException) {
             return Optional.of((CleverClientException) exception);
         } else if (exception.getCause() instanceof CleverClientException) {

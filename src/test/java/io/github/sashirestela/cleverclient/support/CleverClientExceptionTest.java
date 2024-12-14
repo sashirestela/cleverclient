@@ -29,7 +29,7 @@ class CleverClientExceptionTest {
                 { new Exception("No CleverClientException"), false }
         };
         for (Object[] data : testData) {
-            var optionalException = CleverClientException.bringOut((Throwable) data[0]);
+            var optionalException = CleverClientException.getFrom((Throwable) data[0]);
             var expectedCondition = (boolean) data[1];
             var actualCondition = optionalException.isPresent();
             assertEquals(expectedCondition, actualCondition);
