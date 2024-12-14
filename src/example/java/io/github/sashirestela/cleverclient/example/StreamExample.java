@@ -81,7 +81,7 @@ public class StreamExample {
 
     private static void handleException(Exception e) {
         System.out.println(e.getMessage());
-        CleverClientException.bringOut(e)
+        CleverClientException.getFrom(e)
                 .ifPresentOrElse(
                         cce -> cce.responseInfo()
                                 .ifPresentOrElse(
