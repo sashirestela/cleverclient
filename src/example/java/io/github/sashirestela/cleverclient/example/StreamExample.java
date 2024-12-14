@@ -7,6 +7,10 @@ import io.github.sashirestela.cleverclient.example.openai.ChatService;
 import io.github.sashirestela.cleverclient.example.openai.Message;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 
 /**
@@ -20,6 +24,8 @@ public class StreamExample {
 
     public static void main(String[] args) {
         try {
+            redirectSystemErr();
+
             final var BASE_URL = "https://api.openai.com";
             final var AUTHORIZATION_HEADER = "Authorization";
             final var BEARER_AUTHORIZATION = "Bearer " + System.getenv("OPENAI_API_KEY");
@@ -59,6 +65,13 @@ public class StreamExample {
         }
     }
 
+    private static void redirectSystemErr() throws FileNotFoundException {
+        File file = new File("error.log");
+        FileOutputStream fos = new FileOutputStream(file);
+        PrintStream ps = new PrintStream(fos);
+        System.setErr(ps);
+    }
+
     private static void showTitle(String title) {
         final var times = 50;
         System.out.println("=".repeat(times));
@@ -68,17 +81,13 @@ public class StreamExample {
 
     private static void handleException(Exception e) {
         System.out.println(e.getMessage());
-        CleverClientException cce = null;
-        if (e instanceof CleverClientException) {
-            cce = (CleverClientException) e;
-        } else if (e.getCause() instanceof CleverClientException) {
-            cce = (CleverClientException) e.getCause();
-        }
-        if (cce != null) {
-            cce.responseInfo().ifPresentOrElse(System.out::println, cce::printStackTrace);
-        } else {
-            e.printStackTrace();
-        }
+        CleverClientException.bringOut(e)
+                .ifPresentOrElse(
+                        cce -> cce.responseInfo()
+                                .ifPresentOrElse(
+                                        System.out::println,
+                                        cce::printStackTrace),
+                        e::printStackTrace);
     }
 
 }

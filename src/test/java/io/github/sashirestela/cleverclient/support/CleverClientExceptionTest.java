@@ -21,4 +21,22 @@ class CleverClientExceptionTest {
         assertNotNull(exception.getCause());
     }
 
+    @Test
+    void shouldBringOutTheCleverClientExceptionIfItExists() {
+        Object[][] testData = {
+                { new CleverClientException("Outer Exception"), true },
+                { new Exception("Outer Exception", new CleverClientException("Inner Exception")), true },
+                { new Exception("No CleverClientException"), false }
+        };
+        for (Object[] data : testData) {
+            var optionalException = CleverClientException.bringOut((Throwable) data[0]);
+            var expectedCondition = (boolean) data[1];
+            var actualCondition = optionalException.isPresent();
+            assertEquals(expectedCondition, actualCondition);
+            if (expectedCondition) {
+                assertEquals(CleverClientException.class, optionalException.get().getClass());
+            }
+        }
+    }
+
 }
