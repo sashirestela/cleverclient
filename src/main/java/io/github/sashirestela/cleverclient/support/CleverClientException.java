@@ -40,6 +40,16 @@ public class CleverClientException extends RuntimeException {
         return Optional.ofNullable(responseInfo);
     }
 
+    public static Optional<CleverClientException> bringOut(Throwable exception) {
+        if (exception instanceof CleverClientException) {
+            return Optional.of((CleverClientException) exception);
+        } else if (exception.getCause() instanceof CleverClientException) {
+            return Optional.of((CleverClientException) exception.getCause());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     @Data
     @Builder
     public static class HttpResponseInfo implements Serializable {
