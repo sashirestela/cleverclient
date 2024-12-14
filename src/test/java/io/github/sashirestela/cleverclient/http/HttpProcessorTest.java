@@ -14,16 +14,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +44,8 @@ class HttpProcessorTest {
     HttpResponse<String> httpResponse = mock(HttpResponse.class);
     HttpResponse<Stream<String>> httpResponseStream = mock(HttpResponse.class);
     HttpResponse<InputStream> httpResponseBinary = mock(HttpResponse.class);
+    HttpRequest httpRequest = mock(HttpRequest.class);
+    HttpHeaders httpHeaders = mock(HttpHeaders.class);
 
     @BeforeAll
     static void setup() {
@@ -359,49 +366,76 @@ class HttpProcessorTest {
     }
 
     @Test
-    void shouldThrownExceptionWhenCallingNoStreamingMethodAndServerRespondsWithError() {
+    void shouldThrownExceptionWhenCallingNoStreamingMethodAndServerRespondsWithError() throws URISyntaxException {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
+        when(httpHeaders.map()).thenReturn(Map.of());
+        when(httpRequest.method()).thenReturn("GET");
+        when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
+        when(httpRequest.headers()).thenReturn(httpHeaders);
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponse.body()).thenReturn(
                 "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}");
+        when(httpResponse.headers()).thenReturn(httpHeaders);
+        when(httpResponse.request()).thenReturn(httpRequest);
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemo(100);
-        Exception exception = assertThrows(CompletionException.class,
-                () -> futureService.join());
-        assertTrue(exception.getMessage().contains("The resource does not exist"));
+
+        Exception exception = assertThrows(CompletionException.class, () -> futureService.join());
+        CleverClientException nestedException = (CleverClientException) exception.getCause();
+        assertNotNull(nestedException);
+        assertEquals(CleverClientException.class, nestedException.getClass());
+        assertTrue(nestedException.responseInfo().get().getData().contains("The resource does not exist"));
     }
 
     @Test
-    void shouldThrownExceptionWhenCallingStreamingMethodAndServerRespondsWithError() {
+    void shouldThrownExceptionWhenCallingStreamingMethodAndServerRespondsWithError() throws URISyntaxException {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
+        when(httpHeaders.map()).thenReturn(Map.of());
+        when(httpRequest.method()).thenReturn("GET");
+        when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
+        when(httpRequest.headers()).thenReturn(httpHeaders);
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponseStream.body()).thenReturn(Stream.of(
                 "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}"));
+        when(httpResponseStream.headers()).thenReturn(httpHeaders);
+        when(httpResponseStream.request()).thenReturn(httpRequest);
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemoStream(new ITest.RequestDemo("Descr", null));
-        Exception exception = assertThrows(CompletionException.class,
-                () -> futureService.join());
-        assertTrue(exception.getMessage().contains("The resource does not exist"));
+
+        Exception exception = assertThrows(CompletionException.class, () -> futureService.join());
+        CleverClientException nestedException = (CleverClientException) exception.getCause();
+        assertNotNull(nestedException);
+        assertEquals(CleverClientException.class, nestedException.getClass());
+        assertTrue(nestedException.responseInfo().get().getData().contains("The resource does not exist"));
     }
 
     @Test
-    void shouldThrownExceptionWhenCallingBinaryMethodAndServerRespondsWithError() {
+    void shouldThrownExceptionWhenCallingBinaryMethodAndServerRespondsWithError() throws URISyntaxException {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
+        when(httpHeaders.map()).thenReturn(Map.of());
+        when(httpRequest.method()).thenReturn("GET");
+        when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
+        when(httpRequest.headers()).thenReturn(httpHeaders);
         when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponseBinary.body()).thenReturn(new ByteArrayInputStream(
                 "{\"error\": {\"message\": \"The resource does not exist\", \"type\": \"T\", \"param\": \"P\", \"code\": \"C\"}}"
                         .getBytes()));
+        when(httpResponseBinary.headers()).thenReturn(httpHeaders);
+        when(httpResponseBinary.request()).thenReturn(httpRequest);
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
         var futureService = service.getDemoBinary(100);
-        Exception exception = assertThrows(CompletionException.class,
-                () -> futureService.join());
-        assertTrue(exception.getMessage().contains("The resource does not exist"));
+
+        Exception exception = assertThrows(CompletionException.class, () -> futureService.join());
+        CleverClientException nestedException = (CleverClientException) exception.getCause();
+        assertNotNull(nestedException);
+        assertEquals(CleverClientException.class, nestedException.getClass());
+        assertTrue(nestedException.responseInfo().get().getData().contains("The resource does not exist"));
     }
 
     @Test

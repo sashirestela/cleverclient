@@ -12,4 +12,6 @@ public class Constant {
 
     public static final String REGEX_PATH_PARAM_URL = "\\{(.*?)\\}";
 
+    public static final String HTTP_ERROR_MESSAGE = "HTTP interaction failed: server returned a {0} response status.";
+
 }

@@ -27,7 +27,7 @@ public class HttpSyncBinarySender extends HttpSender {
 
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new CleverClientException(e.getMessage(), null, e);
+            throw new CleverClientException(e);
         }
     }
 
