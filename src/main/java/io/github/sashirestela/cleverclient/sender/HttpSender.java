@@ -5,12 +5,12 @@ import io.github.sashirestela.cleverclient.support.CleverClientException.HttpRes
 import io.github.sashirestela.cleverclient.support.CleverClientException.HttpResponseInfo.HttpRequestInfo;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
+import io.github.sashirestela.cleverclient.util.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -46,7 +46,8 @@ public abstract class HttpSender {
     @SuppressWarnings("unchecked")
     protected void throwExceptionIfErrorIsPresent(HttpResponse<?> response, Class<?> clazz) {
         logger.debug("Response Code : {}", response.statusCode());
-        if (!CommonUtil.isInHundredsOf(response.statusCode(), HttpURLConnection.HTTP_OK)) {
+        if (CommonUtil.isBetweenHundredsOf(response.statusCode(), Constant.HTTP_CLIENT_ERROR_CODE,
+                Constant.HTTP_SERVER_ERROR_CODE)) {
             var data = "";
             if (Stream.class.equals(clazz)) {
                 data = ((Stream<String>) response.body())

@@ -42,7 +42,11 @@ public class CommonUtil {
     }
 
     public static boolean isInHundredsOf(int value, int range) {
-        return Math.floor(value / 100.0) * 100 == range;
+        return value >= range && value < (range + 100);
+    }
+
+    public static boolean isBetweenHundredsOf(int value, int minRange, int maxRange) {
+        return value >= minRange && value < (maxRange + 100);
     }
 
     public static Map<String, String> createMapString(String... keyValPairs) {

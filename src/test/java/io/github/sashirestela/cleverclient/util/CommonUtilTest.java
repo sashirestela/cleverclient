@@ -92,7 +92,7 @@ class CommonUtilTest {
     }
 
     @Test
-    void shouldDetectIfValueIsInTheRangeWhenTwoValuesAreCompared() {
+    void shouldDetectIfSomeValueIsInHundredsOfOneLimit() {
         Object[][] testData = {
                 { 199, 200, false },
                 { 200, 200, true },
@@ -103,6 +103,22 @@ class CommonUtilTest {
         for (var data : testData) {
             var actualResult = CommonUtil.isInHundredsOf((int) data[0], (int) data[1]);
             var expectedResult = (boolean) data[2];
+            assertEquals(expectedResult, actualResult);
+        }
+    }
+
+    @Test
+    void shouldDetectIfSomeValueIsBetweenHundredsOfTwoLimits() {
+        Object[][] testData = {
+                { 399, 400, 500, false },
+                { 400, 400, 500, true },
+                { 500, 400, 500, true },
+                { 599, 400, 500, true },
+                { 600, 400, 500, false }
+        };
+        for (var data : testData) {
+            var actualResult = CommonUtil.isBetweenHundredsOf((int) data[0], (int) data[1], (int) data[2]);
+            var expectedResult = (boolean) data[3];
             assertEquals(expectedResult, actualResult);
         }
     }
