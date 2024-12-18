@@ -245,124 +245,72 @@ Note that we have named the annotated methods with the suffix "Basic" just to in
 
 ### Exception Handling
 
-The `CleverClientException` provides robust error handling mechanisms for HTTP client interactions, allowing you to capture and process different types of errors comprehensively.
+CleverClient provides a flexible exception handling mechanism through the `ExceptionConverter` abstract class. This allows you to convert HTTP errors and other exceptions into your own custom exceptions. Here's how to use it:
 
-#### Key Exception Handling Scenarios
+1. Create your custom HTTP exception class.
+2. Create your exception converter by extending `ExceptionConverter`.
+3. Implement the `convertHttpException` method to handle HTTP errors.
 
-##### 1. Basic Exception Catching
-
-```java
-try {
-    // Your HTTP client method call
-    Response response = client.someMethod();
-} catch (CleverClientException e) {
-    // Handle the specific CleverClient exception
-    System.err.println("An error occurred: " + e.getMessage());
-}
-```
-
-##### 2. Accessing HTTP Response Details
-
-When an exception occurs during an HTTP request, you can retrieve detailed response information:
+Basic example:
 
 ```java
-try {
-    // HTTP client method call
-    client.makeRequest();
-} catch (CleverClientException e) {
-    // Check if response info is available
-    e.responseInfo().ifPresent(responseInfo -> {
-        // Access status code
-        int statusCode = responseInfo.getStatusCode();
-        System.err.println("HTTP Status Code: " + statusCode);
+// Custom HTTP Exceptions
+public class FirstHttpException extends RuntimeException {
+    private final String errorDetail;
 
-        // Access response headers
-        Map<String, List<String>> headers = responseInfo.getHeaders();
-        headers.forEach((key, value) -> 
-            System.err.println(key + ": " + value)
-        );
-
-        // Access response data
-        String responseData = responseInfo.getData();
-        System.err.println("Response Body: " + responseData);
-
-        // Access request details
-        CleverClientException.HttpResponseInfo.HttpRequestInfo requestInfo = 
-            responseInfo.getRequest();
-        System.err.println("Request Method: " + requestInfo.getHttpMethod());
-        System.err.println("Request URL: " + requestInfo.getUrl());
-    });
-}
-```
-##### 3. Extracting CleverClientException from Other Exceptions
-
-The library provides a utility method to extract `CleverClientException` from other exception types. This is the case when exceptions occurs in `CompletableFuture` processing, where a CompletionException is the outer exception and CleverClientException is the cause one:
-
-```java
-try {
-    // Some method that might throw an exception
-    performOperation();
-} catch (Throwable e) {
-    // Try to extract CleverClientException
-    Optional<CleverClientException> cleverException = 
-        CleverClientException.getFrom(e);
+    public FirstHttpException(String errorDetail) {
+        this.errorDetail = errorDetail;
+    }
     
-    cleverException.ifPresent(exception -> {
-        // Handle the CleverClientException specifically
-        System.err.println("Detailed HTTP Error: " + exception.getMessage());
-        
-        // Optionally access response details
-        exception.responseInfo().ifPresent(responseInfo -> {
-            // Handle response info
-        });
-    });
+    // Getters
 }
-```
-#### Best Practices
 
-- Always handle exceptions at the appropriate level of your application.
-- Log detailed error information for troubleshooting.
-- Use the `responseInfo()` method to get additional context about HTTP errors.
-- Consider creating custom error handling logic based on specific status codes or error conditions.
+public class SecondHttpException extends RuntimeException {
+    private final String errorDetail;
 
-#### Example of Complex Error Handling
+    public SecondHttpException(String errorDetail) {
+        this.errorDetail = errorDetail;
+    }
+    
+    // Getters
+}
 
-```java
-public void robustHttpCall() {
-    try {
-        // HTTP client method
-        client.executeRequest();
-    } catch (CleverClientException e) {
-        // Comprehensive error handling
-        if (e.responseInfo().isPresent()) {
-            HttpResponseInfo info = e.responseInfo().get();
-            switch (info.getStatusCode()) {
-                case 400:
-                    handleBadRequest(info);
-                    break;
-                case 401:
-                    handleUnauthorized(info);
-                    break;
-                case 500:
-                    handleServerError(info);
-                    break;
-                default:
-                    handleGenericError(e);
-            }
-        } else {
-            // Handle exceptions without response info
-            handleGenericError(e);
+// Custom Exception Converter
+public class MyExceptionConverter extends ExceptionConverter {
+    public static void rethrow(Throwable e) {
+        throw new MyExceptionConverter().convert(e);
+    }
+
+    @Override
+    public RuntimeException convertHttpException(ResponseInfo responseInfo) {
+        if (responseInfo.getStatusCode() == 400) {
+            return new FirstHttpException(responseInfo.getData());
+        } else if (responseInfo.getStatusCode() == 401) {
+            return new SecondHttpException(responseInfo.getData());
         }
+    }
+}
+
+// Usage in try-catch block
+try {
+    // Your CleverClient API calls here
+} catch (Exception e) {
+    try {
+        MyExceptionConverter.rethrow(e);
+    } catch (FirstHttpException fhe) {
+        // Handle your first custom exception
+    } catch (SecondHttpException she) {
+        // Handle your second custom exception
+
+    // ... Other custom exceptions
+
+    } catch (RuntimeException re) {
+        // Handle default exceptions
     }
 }
 ```
 
-#### Recommendations
-
-- Always use try-catch blocks when making HTTP calls
-- Log errors for monitoring and debugging
-- Implement specific handling for different HTTP status codes
-- Use the rich error information provided by `CleverClientException`
+This mechanism allows you to handle both HTTP errors and other runtime exceptions in a clean, consistent way while preserving the original error information from the API response.
 
 ## ✳ Examples
 
