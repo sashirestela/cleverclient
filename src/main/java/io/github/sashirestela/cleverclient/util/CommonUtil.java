@@ -45,10 +45,6 @@ public class CommonUtil {
         return value >= range && value < (range + 100);
     }
 
-    public static boolean isBetweenHundredsOf(int value, int minRange, int maxRange) {
-        return value >= minRange && value < (maxRange + 100);
-    }
-
     public static Map<String, String> createMapString(String... keyValPairs) {
         if (keyValPairs.length % 2 > 0) {
             throw new IllegalArgumentException("It is expected an even number of elements.");
