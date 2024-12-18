@@ -1,8 +1,8 @@
 package io.github.sashirestela.cleverclient.sender;
 
+import io.github.sashirestela.cleverclient.ResponseInfo;
+import io.github.sashirestela.cleverclient.ResponseInfo.RequestInfo;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.support.CleverClientException.HttpResponseInfo;
-import io.github.sashirestela.cleverclient.support.CleverClientException.HttpResponseInfo.HttpRequestInfo;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import io.github.sashirestela.cleverclient.util.Constant;
@@ -56,7 +56,7 @@ public abstract class HttpSender {
                 try {
                     data = new String(((InputStream) response.body()).readAllBytes(), StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    logger.error("Cannot read input stream. {}", e.getMessage());
+                    throw new CleverClientException(e);
                 }
             } else {
                 data = (String) response.body();
@@ -66,13 +66,13 @@ public abstract class HttpSender {
         }
     }
 
-    private HttpResponseInfo fillResponseInfo(HttpResponse<?> response, String data) {
+    private ResponseInfo fillResponseInfo(HttpResponse<?> response, String data) {
         var request = response.request();
-        return HttpResponseInfo.builder()
+        return ResponseInfo.builder()
                 .statusCode(response.statusCode())
                 .data(data)
                 .headers(response.headers().map())
-                .request(HttpRequestInfo.builder()
+                .request(RequestInfo.builder()
                         .httpMethod(request.method())
                         .url(request.uri().toString())
                         .headers(request.headers().map())

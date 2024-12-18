@@ -1,11 +1,13 @@
 package io.github.sashirestela.cleverclient.example;
 
 import io.github.sashirestela.cleverclient.CleverClient;
+import io.github.sashirestela.cleverclient.ExceptionConverter;
+import io.github.sashirestela.cleverclient.ResponseInfo;
 import io.github.sashirestela.cleverclient.example.openai.ChatRequest;
 import io.github.sashirestela.cleverclient.example.openai.ChatResponse;
 import io.github.sashirestela.cleverclient.example.openai.ChatService;
 import io.github.sashirestela.cleverclient.example.openai.Message;
-import io.github.sashirestela.cleverclient.support.CleverClientException;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +24,7 @@ import java.util.Arrays;
  */
 public class StreamExample {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         try {
             redirectSystemErr();
 
@@ -61,7 +63,15 @@ public class StreamExample {
                     .forEach(System.out::print);
             System.out.println();
         } catch (Exception e) {
-            handleException(e);
+            try {
+                MyExceptionConverter.rethrow(e);
+            } catch (MyHttpException mhe) {
+                System.out.println("Http Response Code: " + mhe.getResponseCode() +
+                        "\nError Detail:\n" + mhe.getErrorDetail());
+            } catch (RuntimeException re) {
+                System.out.println(re.getMessage());
+                re.printStackTrace();
+            }
         }
     }
 
@@ -79,15 +89,33 @@ public class StreamExample {
         System.out.println("-".repeat(times));
     }
 
-    private static void handleException(Exception e) {
-        System.out.println(e.getMessage());
-        CleverClientException.getFrom(e)
-                .ifPresentOrElse(
-                        cce -> cce.responseInfo()
-                                .ifPresentOrElse(
-                                        System.out::println,
-                                        cce::printStackTrace),
-                        e::printStackTrace);
+    public static class MyExceptionConverter extends ExceptionConverter {
+
+        private MyExceptionConverter() {
+        }
+
+        public static void rethrow(Throwable e) {
+            throw new MyExceptionConverter().convert(e);
+        }
+
+        @Override
+        public RuntimeException convertHttpException(ResponseInfo responseInfo) {
+            return new MyHttpException(responseInfo.getStatusCode(), responseInfo.getData());
+        }
+
+    }
+
+    @Getter
+    public static class MyHttpException extends RuntimeException {
+
+        private final int responseCode;
+        private final String errorDetail;
+
+        public MyHttpException(int responseCode, String errorDetail) {
+            this.responseCode = responseCode;
+            this.errorDetail = errorDetail;
+        }
+
     }
 
 }
