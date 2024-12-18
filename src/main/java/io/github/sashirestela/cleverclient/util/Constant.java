@@ -14,8 +14,6 @@ public class Constant {
 
     public static final String HTTP_ERROR_MESSAGE = "HTTP interaction failed: server returned a {0} response status.";
 
-    public static final int HTTP_CLIENT_ERROR_CODE = 400;
-
-    public static final int HTTP_SERVER_ERROR_CODE = 500;
+    public static final int HTTP_SUCCESSFUL = 200;
 
 }

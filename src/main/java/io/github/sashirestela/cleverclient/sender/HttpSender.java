@@ -46,8 +46,7 @@ public abstract class HttpSender {
     @SuppressWarnings("unchecked")
     protected void throwExceptionIfErrorIsPresent(HttpResponse<?> response, Class<?> clazz) {
         logger.debug("Response Code : {}", response.statusCode());
-        if (CommonUtil.isBetweenHundredsOf(response.statusCode(), Constant.HTTP_CLIENT_ERROR_CODE,
-                Constant.HTTP_SERVER_ERROR_CODE)) {
+        if (!CommonUtil.isInHundredsOf(response.statusCode(), Constant.HTTP_SUCCESSFUL)) {
             var data = "";
             if (Stream.class.equals(clazz)) {
                 data = ((Stream<String>) response.body())

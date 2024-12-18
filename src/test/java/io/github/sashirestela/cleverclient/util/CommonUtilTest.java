@@ -108,22 +108,6 @@ class CommonUtilTest {
     }
 
     @Test
-    void shouldDetectIfSomeValueIsBetweenHundredsOfTwoLimits() {
-        Object[][] testData = {
-                { 399, 400, 500, false },
-                { 400, 400, 500, true },
-                { 500, 400, 500, true },
-                { 599, 400, 500, true },
-                { 600, 400, 500, false }
-        };
-        for (var data : testData) {
-            var actualResult = CommonUtil.isBetweenHundredsOf((int) data[0], (int) data[1], (int) data[2]);
-            var expectedResult = (boolean) data[3];
-            assertEquals(expectedResult, actualResult);
-        }
-    }
-
-    @Test
     void shouldCreateMapStringWhenAStringListIsPassed() {
         var expectedMap = new HashMap<String, String>();
         expectedMap.put("key1", "val1");
