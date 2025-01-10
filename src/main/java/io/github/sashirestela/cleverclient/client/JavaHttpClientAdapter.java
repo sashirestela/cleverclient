@@ -49,11 +49,11 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
         var httpRequest = convertToHttpRequest(request);
         try {
             var httpResponse = httpClient.send(httpRequest, functions.bodyHandler.get());
-            logger.debug("Response Code : {}", httpResponse.statusCode());
+            logger.debug(RESPONSE_CODE_FORMAT, httpResponse.statusCode());
             throwExceptionIfErrorIsPresent(convertToResponseData(httpResponse));
             var response = httpResponse.body();
             if (!returnType.isStream()) {
-                logger.debug("Response : {}", response);
+                logger.debug(RESPONSE_FORMAT, response);
             }
             return functions.responseConverter.apply(response, returnType);
         } catch (IOException | InterruptedException e) {
@@ -69,11 +69,11 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
         var httpRequest = convertToHttpRequest(request);
         var httpResponseFuture = httpClient.sendAsync(httpRequest, functions.bodyHandler.get());
         return httpResponseFuture.thenApply(httpResponse -> {
-            logger.debug("Response Code : {}", httpResponse.statusCode());
+            logger.debug(RESPONSE_CODE_FORMAT, httpResponse.statusCode());
             throwExceptionIfErrorIsPresent(convertToResponseData(httpResponse));
             var response = httpResponse.body();
             if (!returnType.isStream()) {
-                logger.debug("Response : {}", response);
+                logger.debug(RESPONSE_FORMAT, response);
             }
             return functions.responseConverter.apply(response, returnType);
         });
@@ -103,14 +103,14 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
     private BodyPublisher createBodyPublisher(Object bodyObject, ContentType contentType) {
         BodyPublisher bodyPublisher = null;
         if (contentType == null) {
-            logger.debug("Request Body : (Empty)");
+            logger.debug(REQUEST_BODY_FORMAT, "(Empty)");
             bodyPublisher = BodyPublishers.noBody();
         } else if (contentType == ContentType.MULTIPART_FORMDATA) {
-            logger.debug("Request Body : {}", bodyObject);
+            logger.debug(REQUEST_BODY_FORMAT, bodyObject);
             var bodyBytes = HttpMultipart.toByteArrays((Map<String, Object>) bodyObject);
             bodyPublisher = BodyPublishers.ofByteArrays(bodyBytes);
         } else if (contentType == ContentType.APPLICATION_JSON) {
-            logger.debug("Request Body : {}", bodyObject);
+            logger.debug(REQUEST_BODY_FORMAT, bodyObject);
             bodyPublisher = BodyPublishers.ofString((String) bodyObject);
         }
         return bodyPublisher;
@@ -194,7 +194,7 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
         final var lineRecord = new CleverClientSSE.LineRecord();
         return response
                 .map(line -> {
-                    logger.debug("Response : {}", line);
+                    logger.debug(RESPONSE_FORMAT, line);
                     lineRecord.updateWith(line);
                     return new CleverClientSSE(lineRecord);
                 })
@@ -208,7 +208,7 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
 
         return response
                 .map(line -> {
-                    logger.debug("Response : {}", line);
+                    logger.debug(RESPONSE_FORMAT, line);
                     lineRecord.updateWith(line);
                     return new CleverClientSSE(lineRecord, events);
                 })
