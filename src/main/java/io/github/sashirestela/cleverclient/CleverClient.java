@@ -1,6 +1,8 @@
 package io.github.sashirestela.cleverclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.sashirestela.cleverclient.client.HttpClientAdapter;
+import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.support.Configurator;
@@ -12,7 +14,6 @@ import lombok.Singular;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,8 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * Main class and entry point to use this library. This is a kind of wrapper that makes it easier to
- * use the Java's HttpClient component to call http services by using annotated interfaces.
+ * Main class and entry point to use this library. This is a smart wrapper that makes it easier to
+ * use a Http client component to call http services by using annotated interfaces.
  */
 @Getter
 public class CleverClient {
@@ -31,7 +32,7 @@ public class CleverClient {
 
     private final String baseUrl;
     private final Map<String, String> headers;
-    private final HttpClient httpClient;
+    private final HttpClientAdapter clientAdapter;
     private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final Consumer<Object> bodyInspector;
     private final HttpProcessor httpProcessor;
@@ -41,8 +42,8 @@ public class CleverClient {
      * 
      * @param baseUrl            Root of the url of the API service to call. Mandatory.
      * @param headers            Http headers for all the API service. Optional.
-     * @param httpClient         Custom Java's HttpClient component. One is created by default if none
-     *                           is passed. Optional.
+     * @param clientAdapter      Component to call http services. If none is passed the
+     *                           JavaHttpClientAdapter will be used. Optional.
      * @param requestInterceptor Function to modify the request once it has been built.
      * @param bodyInspector      Function to inspect the Body request parameter.
      * @param endsOfStream       Texts used to mark the final of streams when handling server sent
@@ -50,18 +51,18 @@ public class CleverClient {
      * @param objectMapper       Provides Json conversions either to and from objects. Optional.
      */
     @Builder
-    public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClient httpClient,
+    public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClientAdapter clientAdapter,
             UnaryOperator<HttpRequestData> requestInterceptor, Consumer<Object> bodyInspector,
             @Singular("endOfStream") List<String> endsOfStream, ObjectMapper objectMapper) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
-        this.httpClient = Optional.ofNullable(httpClient).orElse(HttpClient.newHttpClient());
+        this.clientAdapter = Optional.ofNullable(clientAdapter).orElse(new JavaHttpClientAdapter());
         this.requestInterceptor = requestInterceptor;
         this.bodyInspector = bodyInspector;
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
                 .headers(CommonUtil.mapToListOfString(this.headers))
-                .httpClient(this.httpClient)
+                .clientAdapter(this.clientAdapter)
                 .requestInterceptor(this.requestInterceptor)
                 .bodyInspector(bodyInspector)
                 .build();

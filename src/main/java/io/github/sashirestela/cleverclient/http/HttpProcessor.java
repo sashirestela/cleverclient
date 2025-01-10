@@ -1,5 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.client.HttpClientAdapter;
+import io.github.sashirestela.cleverclient.client.RequestData;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadata.MethodMetadata;
 import io.github.sashirestela.cleverclient.metadata.InterfaceMetadataStore;
 import io.github.sashirestela.cleverclient.support.ContentType;
@@ -13,7 +15,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,7 +30,7 @@ public class HttpProcessor implements InvocationHandler {
 
     private final String baseUrl;
     private final List<String> headers;
-    private final HttpClient httpClient;
+    private final HttpClientAdapter clientAdapter;
     private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final Consumer<Object> bodyInspector;
 
@@ -107,17 +108,15 @@ public class HttpProcessor implements InvocationHandler {
         var fullHeaders = new ArrayList<>(this.headers);
         fullHeaders.addAll(calculateHeaderContentType(contentType));
         fullHeaders.addAll(interfaceMetadata.getFullHeadersByMethod(methodMetadata));
-        var httpConnector = HttpConnector.builder()
-                .httpClient(httpClient)
+        var request = RequestData.builder()
                 .url(url)
                 .httpMethod(httpMethod)
                 .returnType(returnType)
-                .bodyObject(bodyObject)
+                .body(bodyObject)
                 .contentType(contentType)
                 .headers(fullHeaders)
-                .requestInterceptor(requestInterceptor)
                 .build();
-        return httpConnector.sendRequest();
+        return clientAdapter.sendRequest(request, requestInterceptor);
     }
 
     private Object getAndInspectBody(MethodMetadata methodMetadata, Object[] arguments) {
