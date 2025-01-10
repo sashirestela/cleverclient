@@ -21,6 +21,9 @@ import java.util.stream.Stream;
 public abstract class HttpClientAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(HttpClientAdapter.class);
+    protected static final String REQUEST_BODY_FORMAT = "Request Body : {}";
+    protected static final String RESPONSE_CODE_FORMAT = "Response Code : {}";
+    protected static final String RESPONSE_FORMAT = "Response : {}";
 
     public Object sendRequest(RequestData originalRequest, UnaryOperator<HttpRequestData> requestInterceptor) {
         var actualRequest = interceptRequest(originalRequest, requestInterceptor);
@@ -68,7 +71,7 @@ public abstract class HttpClientAdapter {
             } else {
                 data = (String) response.getBody();
             }
-            logger.error("Response : {}", data);
+            logger.error(RESPONSE_FORMAT, data);
             throw new CleverClientException(fillResponseInfo(response, data));
         }
     }
