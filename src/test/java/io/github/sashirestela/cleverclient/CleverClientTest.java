@@ -4,6 +4,7 @@ import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Query;
 import io.github.sashirestela.cleverclient.annotation.Resource;
+import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.util.HttpRequestBodyTestUtility;
@@ -39,7 +40,6 @@ class CleverClientTest {
                 .baseUrl("https://test")
                 .build();
         assertEquals(Map.of(), cleverClient.getHeaders());
-        assertEquals(HttpClient.Version.HTTP_2, cleverClient.getHttpClient().version());
         assertNotNull(cleverClient.getBaseUrl());
         assertNotNull(cleverClient.getHttpProcessor());
         assertNull(cleverClient.getRequestInterceptor());
@@ -51,7 +51,7 @@ class CleverClientTest {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
                 .header("headerName", "headerValue")
-                .httpClient(HttpClient.newHttpClient())
+                .clientAdapter(new JavaHttpClientAdapter())
                 .build();
         var test = cleverClient.create(TestCleverClient.class);
         assertNotNull(test);
@@ -61,7 +61,7 @@ class CleverClientTest {
     void shouldThrownExceptionWhenTryingToPassAnEmptyBaseUrl() {
         var cleverClientBuilder = CleverClient.builder()
                 .header("headerName", "headerValue")
-                .httpClient(HttpClient.newHttpClient());
+                .clientAdapter(new JavaHttpClientAdapter());
         assertThrows(NullPointerException.class,
                 cleverClientBuilder::build);
     }
@@ -103,7 +103,7 @@ class CleverClientTest {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
                 .requestInterceptor(requestInterceptor)
-                .httpClient(httpClient)
+                .clientAdapter(new JavaHttpClientAdapter(httpClient))
                 .build();
         when(httpClient.sendAsync(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(mock(HttpResponse.class)));
@@ -136,7 +136,7 @@ class CleverClientTest {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://test")
                 .bodyInspector(bodyInspector)
-                .httpClient(httpClient)
+                .clientAdapter(new JavaHttpClientAdapter(httpClient))
                 .build();
         when(httpClient.sendAsync(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(mock(HttpResponse.class)));

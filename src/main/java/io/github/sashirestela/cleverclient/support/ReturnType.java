@@ -80,10 +80,9 @@ public class ReturnType {
 
     private Map<String, Class<?>> calculateClassByEvent(StreamType[] streamTypeList) {
         Map<String, Class<?>> map = new ConcurrentHashMap<>();
-        Arrays.stream(streamTypeList).forEach(streamType -> {
-            Arrays.stream(streamType.events())
-                    .forEach(event -> map.put(event, streamType.type()));
-        });
+        Arrays.stream(streamTypeList)
+                .forEach(streamType -> Arrays.stream(streamType.events())
+                        .forEach(event -> map.put(event, streamType.type())));
         return map;
     }
 
@@ -169,11 +168,11 @@ public class ReturnType {
         }
     }
 
-    private boolean isAsync() {
+    public boolean isAsync() {
         return size > 1 && ASYNC.equals(returnTypeArray[firstIndex]);
     }
 
-    private boolean isStream() {
+    public boolean isStream() {
         return size > 1 && STREAM.equals(returnTypeArray[prevLastIndex]);
     }
 

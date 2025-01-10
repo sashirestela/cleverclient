@@ -1,5 +1,6 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.Configurator;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,7 +60,7 @@ class HttpProcessorTest {
         httpProcessor = HttpProcessor.builder()
                 .baseUrl("https://api.demo")
                 .headers(List.of())
-                .httpClient(httpClient)
+                .clientAdapter(new JavaHttpClientAdapter(httpClient))
                 .build();
     }
 
@@ -76,6 +77,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(httpResponse);
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
@@ -100,6 +102,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
                 .thenReturn(httpResponseBinary);
         when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseBinary.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponseBinary.body()).thenReturn(binaryData);
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
@@ -123,6 +126,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(httpResponse);
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
@@ -146,6 +150,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(httpResponse);
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body())
                 .thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
 
@@ -171,6 +176,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(httpResponse);
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("[{\"id\":100,\"description\":\"Description\",\"active\":true}]");
 
         var service = httpProcessor.createProxy(ITest.SyncService.class);
@@ -195,6 +201,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(httpResponseStream);
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseStream.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponseStream.body())
                 .thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
@@ -221,6 +228,7 @@ class HttpProcessorTest {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(httpResponseStream);
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseStream.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponseStream.body())
                 .thenReturn(Stream.of("event: created",
                         "data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
@@ -248,6 +256,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
@@ -263,6 +272,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
         when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseBinary.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponseBinary.body()).thenReturn(binaryData);
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
@@ -277,6 +287,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
@@ -291,6 +302,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body())
                 .thenReturn("{\"id\":1,\"listDemo\":[{\"id\":100,\"description\":\"Description\",\"active\":true}]}");
 
@@ -307,6 +319,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("[{\"id\":100,\"description\":\"Description\",\"active\":true}]");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
@@ -322,6 +335,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseStream.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponseStream.body())
                 .thenReturn(Stream.of("data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
 
@@ -338,6 +352,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponseStream.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponseStream.body())
                 .thenReturn(Stream.of("event: created",
                         "data: {\"id\":100,\"description\":\"Description\",\"active\":true}"));
@@ -355,6 +370,7 @@ class HttpProcessorTest {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t,s) -> true));
         when(httpResponse.body()).thenReturn("{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
         var service = httpProcessor.createProxy(ITest.AsyncService.class);
