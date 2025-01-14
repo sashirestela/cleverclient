@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,38 +34,42 @@ public class HttpMultipart {
             byteArrays.add(toBytes(DISPOSITION));
             var fieldName = entry.getKey();
             if (isFile(entry.getValue())) {
-                String fileName = null;
-                String mimeType = null;
-                byte[] fileContent = null;
-                try {
-                    URI uri = new URI(entry.getValue().toString());
-                    var path = Paths.get(uri);
-                    fileName = path.toString();
-                    mimeType = Files.probeContentType(path);
-                    fileContent = Files.readAllBytes(path);
-                } catch (IOException | URISyntaxException e) {
-                    throw new CleverClientException("Error trying to read the file {0}.", fileName, e);
-                }
-                byteArrays.add(toBytes(FIELD_NAME + DQ + fieldName + DQ + FILE_NAME + DQ + fileName + DQ + NL));
-                byteArrays.add(toBytes(CONTENT_TYPE + mimeType + NL));
-                byteArrays.add(toBytes(NL));
-                byteArrays.add(fileContent);
-                byteArrays.add(toBytes(NL));
+                processFileEntry(byteArrays, fieldName, entry.getValue());
             } else {
-                var fieldValue = entry.getValue();
-                var isFirst = true;
-                if (fieldValue instanceof Collection) {
-                    for (Object item : (Collection<?>) fieldValue) {
-                        addIndividualField(byteArrays, fieldName + "[]", item, isFirst);
-                        isFirst = false;
-                    }
-                } else {
-                    addIndividualField(byteArrays, fieldName, fieldValue, isFirst);
-                }
+                processNonFileEntry(byteArrays, fieldName, entry.getValue());
             }
         }
         byteArrays.add(toBytes(DASH + Constant.BOUNDARY_VALUE + DASH + NL));
         return byteArrays;
+    }
+
+    private static void processFileEntry(List<byte[]> byteArrays, String fieldName, Object value) {
+        try {
+            URI uri = new URI(value.toString());
+            Path path = Paths.get(uri);
+            String fileName = path.toString();
+            String mimeType = Files.probeContentType(path);
+            byte[] fileContent = Files.readAllBytes(path);
+            byteArrays.add(toBytes(FIELD_NAME + DQ + fieldName + DQ + FILE_NAME + DQ + fileName + DQ + NL));
+            byteArrays.add(toBytes(CONTENT_TYPE + mimeType + NL));
+            byteArrays.add(toBytes(NL));
+            byteArrays.add(fileContent);
+            byteArrays.add(toBytes(NL));
+        } catch (IOException | URISyntaxException e) {
+            throw new CleverClientException("Error trying to read a file.", null, e);
+        }
+    }
+
+    private static void processNonFileEntry(List<byte[]> byteArrays, String fieldName, Object fieldValue) {
+        var isFirst = true;
+        if (fieldValue instanceof Collection) {
+            for (Object item : (Collection<?>) fieldValue) {
+                addIndividualField(byteArrays, fieldName + "[]", item, isFirst);
+                isFirst = false;
+            }
+        } else {
+            addIndividualField(byteArrays, fieldName, fieldValue, isFirst);
+        }
     }
 
     private static void addIndividualField(List<byte[]> byteArrays, String fieldName, Object fieldValue,
