@@ -22,21 +22,25 @@ import java.util.Arrays;
  * @see <a href= "https://platform.openai.com/docs/api-reference/authentication">OpenAI
  *      Authentication</a>
  */
-public class StreamExample {
+public class StreamExample extends AbstractExample {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public StreamExample(String clientAlias) {
+        super(clientAlias);
+    }
+
+    public StreamExample() {
+        this("javahttp");
+    }
+
+    public void run() {
         try {
             redirectSystemErr();
 
-            final var BASE_URL = "https://api.openai.com";
-            final var AUTHORIZATION_HEADER = "Authorization";
-            final var BEARER_AUTHORIZATION = "Bearer " + System.getenv("OPENAI_API_KEY");
-            final var END_OF_STREAM = "[DONE]";
-
             var cleverClient = CleverClient.builder()
-                    .baseUrl(BASE_URL)
-                    .header(AUTHORIZATION_HEADER, BEARER_AUTHORIZATION)
-                    .endOfStream(END_OF_STREAM)
+                    .baseUrl("https://api.openai.com")
+                    .clientAdapter(clientAdapter)
+                    .header("Authorization", "Bearer " + System.getenv("OPENAI_API_KEY"))
+                    .endOfStream("[DONE]")
                     .build();
             var chatService = cleverClient.create(ChatService.class);
 
@@ -62,6 +66,8 @@ public class StreamExample {
                     .map(ChatResponse::firstContent)
                     .forEach(System.out::print);
             System.out.println();
+
+            clientAdapter.shutdown();
         } catch (Exception e) {
             try {
                 MyExceptionConverter.rethrow(e);
@@ -75,18 +81,11 @@ public class StreamExample {
         }
     }
 
-    private static void redirectSystemErr() throws FileNotFoundException {
+    private void redirectSystemErr() throws FileNotFoundException {
         File file = new File("error.log");
         FileOutputStream fos = new FileOutputStream(file);
         PrintStream ps = new PrintStream(fos);
         System.setErr(ps);
-    }
-
-    private static void showTitle(String title) {
-        final var times = 50;
-        System.out.println("=".repeat(times));
-        System.out.println(title);
-        System.out.println("-".repeat(times));
     }
 
     public static class MyExceptionConverter extends ExceptionConverter {
@@ -116,6 +115,11 @@ public class StreamExample {
             this.errorDetail = errorDetail;
         }
 
+    }
+
+    public static void main(String[] args) {
+        var example = new StreamExample();
+        example.run();
     }
 
 }

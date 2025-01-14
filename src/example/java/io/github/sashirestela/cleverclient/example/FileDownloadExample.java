@@ -8,7 +8,28 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class FileDownloadExample {
+public class FileDownloadExample extends AbstractExample {
+
+    public FileDownloadExample(String clientAlias) {
+        super(clientAlias);
+    }
+
+    public FileDownloadExample() {
+        this("javahttp");
+    }
+
+    public void run() throws IOException {
+        var cleverClient = CleverClient.builder()
+                .baseUrl("https://via.placeholder.com")
+                .clientAdapter(clientAdapter)
+                .build();
+
+        var imageService = cleverClient.create(ImageService.class);
+        var binaryData = imageService.getImage("92c952");
+        var file = new FileOutputStream("src/test/resources/download.png");
+        file.write(binaryData.readAllBytes());
+        file.close();
+    }
 
     static interface ImageService {
 
@@ -18,17 +39,8 @@ public class FileDownloadExample {
     }
 
     public static void main(String[] args) throws IOException {
-        final var BASE_URL = "https://via.placeholder.com";
-
-        var cleverClient = CleverClient.builder()
-                .baseUrl(BASE_URL)
-                .build();
-
-        var imageService = cleverClient.create(ImageService.class);
-        var binaryData = imageService.getImage("92c952");
-        var file = new FileOutputStream("src/test/resources/download.png");
-        file.write(binaryData.readAllBytes());
-        file.close();
+        var example = new FileDownloadExample();
+        example.run();
     }
 
 }

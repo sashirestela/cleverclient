@@ -4,7 +4,31 @@ import io.github.sashirestela.cleverclient.CleverClient;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Header;
 
-public class HeaderExample {
+public class HeaderExample extends AbstractExample {
+
+    public HeaderExample(String clientAlias) {
+        super(clientAlias);
+    }
+
+    public HeaderExample() {
+        this("javahttp");
+    }
+
+    public void run() {
+        var cleverClient = CleverClient.builder()
+                .baseUrl("https://httpbin.org")
+                .clientAdapter(clientAdapter)
+                .build();
+
+        showTitle("First Group of Headers");
+        var classHeaderService = cleverClient.create(ClassHeaderService.class);
+        System.out.println(classHeaderService.getFullHeaders());
+        System.out.println(classHeaderService.getClassHeaders());
+
+        showTitle("Second Group of Headers");
+        var methodHeaderService = cleverClient.create(MethodHeaderService.class);
+        System.out.println(methodHeaderService.getHeaders());
+    }
 
     @Header(name = "First-Header", value = "firstValue")
     @Header(name = "Second-Header", value = "secondValue")
@@ -29,18 +53,8 @@ public class HeaderExample {
     }
 
     public static void main(String[] args) {
-        final var BASE_URL = "https://httpbin.org";
-
-        var cleverClient = CleverClient.builder()
-                .baseUrl(BASE_URL)
-                .build();
-
-        var classHeaderService = cleverClient.create(ClassHeaderService.class);
-        System.out.println(classHeaderService.getFullHeaders());
-        System.out.println(classHeaderService.getClassHeaders());
-
-        var methodHeaderService = cleverClient.create(MethodHeaderService.class);
-        System.out.println(methodHeaderService.getHeaders());
+        var example = new HeaderExample();
+        example.run();
     }
 
 }
