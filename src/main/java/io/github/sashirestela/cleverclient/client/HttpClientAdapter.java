@@ -1,11 +1,15 @@
 package io.github.sashirestela.cleverclient.client;
 
+import io.github.sashirestela.cleverclient.Event;
 import io.github.sashirestela.cleverclient.ResponseInfo;
 import io.github.sashirestela.cleverclient.ResponseInfo.RequestInfo;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.support.CleverClientSSE;
+import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import io.github.sashirestela.cleverclient.util.Constant;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +44,8 @@ public abstract class HttpClientAdapter {
     protected abstract Object sendAsync(RequestData request);
 
     protected abstract Object send(RequestData request);
+
+    public abstract void shutdown();
 
     private RequestData interceptRequest(RequestData originalRequest,
             UnaryOperator<HttpRequestData> requestInterceptor) {
@@ -105,6 +111,36 @@ public abstract class HttpClientAdapter {
         }
         print.append("}");
         return print.toString();
+    }
+
+    protected Stream<Object> convertToStreamOfObjects(Stream<String> response, ReturnType returnType) {
+        final var lineRecord = new CleverClientSSE.LineRecord();
+        return response
+                .map(line -> {
+                    logger.debug(RESPONSE_FORMAT, line);
+                    lineRecord.updateWith(line);
+                    return new CleverClientSSE(lineRecord);
+                })
+                .filter(CleverClientSSE::isActualData)
+                .map(item -> JsonUtil.jsonToObject(item.getActualData(), returnType.getBaseClass()));
+    }
+
+    protected Stream<Object> convertToStreamOfEvents(Stream<String> response, ReturnType returnType) {
+        final var lineRecord = new CleverClientSSE.LineRecord();
+        final var events = returnType.getClassByEvent().keySet();
+
+        return response
+                .map(line -> {
+                    logger.debug(RESPONSE_FORMAT, line);
+                    lineRecord.updateWith(line);
+                    return new CleverClientSSE(lineRecord, events);
+                })
+                .filter(CleverClientSSE::isActualData)
+                .map(item -> Event.builder()
+                        .name(item.getMatchedEvent())
+                        .data(JsonUtil.jsonToObject(item.getActualData(),
+                                returnType.getClassByEvent().get(item.getMatchedEvent())))
+                        .build());
     }
 
 }

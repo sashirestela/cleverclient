@@ -197,7 +197,7 @@ public class ReturnType {
         return isString() && (size == 1 || (size == 2 && isAsync()));
     }
 
-    private boolean isInputStream() {
+    public boolean isInputStream() {
         return INPUTSTREAM.equals(returnTypeArray[lastIndex]);
     }
 
