@@ -1,8 +1,6 @@
 package io.github.sashirestela.cleverclient.client;
 
-import io.github.sashirestela.cleverclient.Event;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.support.HttpMultipart;
 import io.github.sashirestela.cleverclient.support.ReturnType;
@@ -22,6 +20,7 @@ import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -40,6 +39,10 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
 
     public JavaHttpClientAdapter() {
         this(HttpClient.newHttpClient());
+    }
+
+    public HttpClient getJavaHttpClient() {
+        return httpClient;
     }
 
     @Override
@@ -76,6 +79,15 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
                 logger.debug(RESPONSE_FORMAT, response);
             }
             return functions.responseConverter.apply(response, returnType);
+        });
+    }
+
+    @Override
+    public void shutdown() {
+        this.httpClient.executor().ifPresent(executor -> {
+            if (executor instanceof ExecutorService) {
+                ((ExecutorService) executor).shutdown();
+            }
         });
     }
 
@@ -188,36 +200,6 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
         functionsByCategoryMap.put(Category.ASYNC_STREAM_EVENT, new FunctionsByCategory(
                 () -> BodyHandlers.ofLines(),
                 (r, t) -> convertToStreamOfEvents((Stream<String>) r, t)));
-    }
-
-    private Stream<?> convertToStreamOfObjects(Stream<String> response, ReturnType returnType) {
-        final var lineRecord = new CleverClientSSE.LineRecord();
-        return response
-                .map(line -> {
-                    logger.debug(RESPONSE_FORMAT, line);
-                    lineRecord.updateWith(line);
-                    return new CleverClientSSE(lineRecord);
-                })
-                .filter(CleverClientSSE::isActualData)
-                .map(item -> JsonUtil.jsonToObject(item.getActualData(), returnType.getBaseClass()));
-    }
-
-    private Stream<?> convertToStreamOfEvents(Stream<String> response, ReturnType returnType) {
-        final var lineRecord = new CleverClientSSE.LineRecord();
-        final var events = returnType.getClassByEvent().keySet();
-
-        return response
-                .map(line -> {
-                    logger.debug(RESPONSE_FORMAT, line);
-                    lineRecord.updateWith(line);
-                    return new CleverClientSSE(lineRecord, events);
-                })
-                .filter(CleverClientSSE::isActualData)
-                .map(item -> Event.builder()
-                        .name(item.getMatchedEvent())
-                        .data(JsonUtil.jsonToObject(item.getActualData(),
-                                returnType.getClassByEvent().get(item.getMatchedEvent())))
-                        .build());
     }
 
 }
