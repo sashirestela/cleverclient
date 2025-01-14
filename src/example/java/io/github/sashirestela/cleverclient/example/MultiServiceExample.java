@@ -4,13 +4,20 @@ import io.github.sashirestela.cleverclient.CleverClient;
 import io.github.sashirestela.cleverclient.example.jsonplaceholder.AlbumService;
 import io.github.sashirestela.cleverclient.example.jsonplaceholder.PostService;
 
-public class MultiServiceExample {
+public class MultiServiceExample extends AbstractExample {
 
-    public static void main(String[] args) {
-        final var BASE_URL = "https://jsonplaceholder.typicode.com";
+    public MultiServiceExample(String clientAlias) {
+        super(clientAlias);
+    }
 
+    public MultiServiceExample() {
+        this("javahttp");
+    }
+
+    public void run() {
         var cleverClient = CleverClient.builder()
-                .baseUrl(BASE_URL)
+                .baseUrl("https://jsonplaceholder.typicode.com")
+                .clientAdapter(clientAdapter)
                 .build();
         var postService = cleverClient.create(PostService.class);
         var albumService = cleverClient.create(AlbumService.class);
@@ -32,11 +39,9 @@ public class MultiServiceExample {
         System.out.println(post);
     }
 
-    private static void showTitle(String title) {
-        final var times = 50;
-        System.out.println("=".repeat(times));
-        System.out.println(title);
-        System.out.println("-".repeat(times));
+    public static void main(String[] args) {
+        var example = new MultiServiceExample();
+        example.run();
     }
 
 }

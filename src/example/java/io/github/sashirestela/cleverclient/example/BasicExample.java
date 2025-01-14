@@ -4,13 +4,20 @@ import io.github.sashirestela.cleverclient.CleverClient;
 import io.github.sashirestela.cleverclient.example.jsonplaceholder.Post;
 import io.github.sashirestela.cleverclient.example.jsonplaceholder.PostService;
 
-public class BasicExample {
+public class BasicExample extends AbstractExample {
 
-    public static void main(String[] args) {
-        final var BASE_URL = "https://jsonplaceholder.typicode.com";
+    public BasicExample(String clientAlias) {
+        super(clientAlias);
+    }
 
+    public BasicExample() {
+        this("javahttp");
+    }
+
+    public void run() {
         var cleverClient = CleverClient.builder()
-                .baseUrl(BASE_URL)
+                .baseUrl("https://jsonplaceholder.typicode.com")
+                .clientAdapter(clientAdapter)
                 .build();
         var postService = cleverClient.create(PostService.class);
 
@@ -54,11 +61,9 @@ public class BasicExample {
         System.out.println("Post was deleted");
     }
 
-    private static void showTitle(String title) {
-        final var times = 50;
-        System.out.println("=".repeat(times));
-        System.out.println(title);
-        System.out.println("-".repeat(times));
+    public static void main(String[] args) {
+        var example = new BasicExample();
+        example.run();
     }
 
 }
