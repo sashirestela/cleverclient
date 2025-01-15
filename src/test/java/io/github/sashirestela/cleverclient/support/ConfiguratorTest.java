@@ -2,14 +2,18 @@ package io.github.sashirestela.cleverclient.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Order(1)
 class ConfiguratorTest {
+
+    @BeforeAll
+    static void setup() {
+        Configurator.reset();
+    }
 
     @Test
     void testBuilder() {
