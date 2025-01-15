@@ -2,11 +2,13 @@ package io.github.sashirestela.cleverclient.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
+import io.github.sashirestela.cleverclient.test.TestSupport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -18,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JsonUtilTest {
+
+    @BeforeAll
+    static void setup() {
+        TestSupport.setupConfigurator();
+    }
 
     @Test
     void shouldConvertObjectToJsonWhenClassHasNoIssues() {
