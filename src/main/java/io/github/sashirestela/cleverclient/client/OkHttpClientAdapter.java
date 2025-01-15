@@ -85,11 +85,15 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
             public void onResponse(Call call, Response response) throws IOException {
                 logger.debug(RESPONSE_CODE_FORMAT, response.code());
                 var responseContent = getReponseContent(response.body(), returnType);
-                throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-                if (!returnType.isStream()) {
-                    logger.debug(RESPONSE_FORMAT, responseContent);
+                try {
+                    throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
+                    if (!returnType.isStream()) {
+                        logger.debug(RESPONSE_FORMAT, responseContent);
+                    }
+                    responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
+                } catch (CleverClientException e) {
+                    responseFuture.completeExceptionally(e);
                 }
-                responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
             }
 
         });
@@ -156,11 +160,11 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
                 .statusCode(response.code())
                 .body(responseContent)
                 .headers(response.headers().toMultimap())
-                .request(ResponseData.Request.builder()
+                .request(request != null ? ResponseData.Request.builder()
                         .httpMethod(request.method())
                         .url(request.url().toString())
                         .headers(request.headers().toMultimap())
-                        .build())
+                        .build() : null)
                 .build();
     }
 
