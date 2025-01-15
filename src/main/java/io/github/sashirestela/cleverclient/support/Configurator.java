@@ -39,4 +39,9 @@ public class Configurator {
         return configurator;
     }
 
+    // For testing purpouse only
+    public static void reset() {
+        configurator.wasBuilt = false;
+    }
+
 }
