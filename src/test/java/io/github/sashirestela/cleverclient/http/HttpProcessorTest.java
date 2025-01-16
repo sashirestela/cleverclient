@@ -39,6 +39,8 @@ interface HttpProcessorTest {
 
     void setMocksForStreamWithError(Stream<String> result) throws IOException, URISyntaxException;
 
+    void testShutdown();
+
     @BeforeAll
     static void setup() {
         TestSupport.setupConfigurator();
@@ -341,6 +343,11 @@ interface HttpProcessorTest {
         var expectedValue = "Hello Test";
 
         assertEquals(expectedValue, actualValue);
+    }
+
+    @Test
+    default void shouldShutdownWithoutExceptions() {
+        testShutdown();
     }
 
 }
