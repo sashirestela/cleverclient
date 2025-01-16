@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -177,6 +178,16 @@ class OkHttpProcessorTest implements HttpProcessorTest {
         when(responseBody.byteStream()).thenReturn(
                 new ByteArrayInputStream(result.collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8)));
         when(okHttpResponse.request()).thenReturn(okHttpRequest);
+    }
+
+    @Override
+    public void testShutdown() {
+        var defaultAdapter = new OkHttpClientAdapter();
+        assertDoesNotThrow(() -> defaultAdapter.shutdown());
+
+        var client = new OkHttpClient();
+        var customAdapter = new OkHttpClientAdapter(client);
+        assertDoesNotThrow(() -> customAdapter.shutdown());
     }
 
 }

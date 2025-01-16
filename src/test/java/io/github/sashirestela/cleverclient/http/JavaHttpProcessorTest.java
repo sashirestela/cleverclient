@@ -15,8 +15,10 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -144,6 +146,16 @@ class JavaHttpProcessorTest implements HttpProcessorTest {
         when(httpResponseStream.body()).thenReturn(result);
         when(httpResponseStream.headers()).thenReturn(httpHeaders);
         when(httpResponseStream.request()).thenReturn(httpRequest);
+    }
+
+    @Override
+    public void testShutdown() {
+        var defaultAdapter = new JavaHttpClientAdapter();
+        assertDoesNotThrow(() -> defaultAdapter.shutdown());
+
+        var client = HttpClient.newBuilder().executor(Executors.newFixedThreadPool(2)).build();
+        var customAdapter = new JavaHttpClientAdapter(client);
+        assertDoesNotThrow(() -> customAdapter.shutdown());
     }
 
 }
