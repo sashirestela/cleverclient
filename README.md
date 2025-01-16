@@ -1,6 +1,6 @@
 # 💎 CleverClient
 
-Library that makes it easy to use the Java HttpClient to perform http operations through interfaces.
+A Java library for making http client requests easily.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sashirestela_cleverclient&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sashirestela_cleverclient)
 [![codecov](https://codecov.io/gh/sashirestela/cleverclient/graph/badge.svg?token=PEYAFW3EWD)](https://codecov.io/gh/sashirestela/cleverclient)
@@ -12,17 +12,18 @@ Library that makes it easy to use the Java HttpClient to perform http operations
 - [Installation](#-installation)
 - [Features](#-features)
   - [CleverClient Builder](#cleverclient-builder)
+  - [Http Client](#http-client) **NEW**
   - [Interface Annotations](#interface-annotations)
   - [Supported Response Types](#supported-response-types)
   - [Interface Default Methods](#interface-default-methods)
-  - [Exception Handling](#exception-handling) **NEW**
+  - [Exception Handling](#exception-handling)
 - [Examples](#-examples)
 - [Contributing](#-contributing)
 - [License](#-license)
 
 ## 💡 Description
 
-CleverClient is a Java 11+ library that makes it easy to use the standard [HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) component to call http services by using annotated interfaces.
+CleverClient is a Java library that simplifies requesting client-side Http services using annotated interfaces and methods. CleverClient uses behind the scenes the well-known Http client libraries: [Java's HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) (by default) or [Square's OkHttp](https://square.github.io/okhttp/).
 
 For example, if we want to use the public API [JsonPlaceHolder](https://jsonplaceholder.typicode.com/) and call its endpoint ```/posts```, we just have to create an entity ```Post```, an interface ```PostService``` with special annotatons, and call the API through ```CleverClient```:
 
@@ -54,7 +55,7 @@ public interface PostService {
 
 // Use CleverClient to call the API
 var cleverClient = CleverClient.builder()
-    .baseUrl("https://jsonplaceholder.typicode.com/")
+    .baseUrl("https://jsonplaceholder.typicode.com")
     .build();
 
 var postService = cleverClient.create(PostService.class);
@@ -83,13 +84,18 @@ System.out.println(newPost);
 
 ## ⚙ Installation
 
-You can install CleverClient by adding the following dependency to your Maven project:
-
+You can install CleverClient by adding the following dependencies to your Maven project:
 ```xml
 <dependency>
     <groupId>io.github.sashirestela</groupId>
     <artifactId>cleverclient</artifactId>
-    <version>[latest version]</version>
+    <version>[cleverclient_latest_version]</version>
+</dependency>
+<!-- OkHttp dependency is optional if you decide to use it with CleverClient -->
+<dependency>
+    <groupId>com.squareup.okhttp3</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>[okhttp_latest_version]</version>
 </dependency>
 ```
 
@@ -97,7 +103,9 @@ Or alternatively using Gradle:
 
 ```groovy
 dependencies {
-    implementation 'io.github.sashirestela:cleverclient:[latest version]'
+    implementation("io.github.sashirestela:cleverclient:[cleverclient_latest_version]")
+    /* OkHttp dependency is optional if you decide to use it with CleverClient */
+    implementation("com.squareup.okhttp3:okhttp:[okhttp_latest_version]")
 }
 ```
 
@@ -109,19 +117,19 @@ Take in account that you need to use **Java 11 or greater**.
 
 We have the following attributes to create a CleverClient object:
 
-| Attribute          | Description                                       | Required  |
-| -------------------|---------------------------------------------------|-----------|
-| baseUrl            | Api's url                                         | mandatory |
-| headers            | Map of headers (name/value)                       | optional  |
-| header             | Single header as a name and a value               | optional  |
-| httpClient         | Java HttpClient object                            | optional  |
-| requestInterceptor | Function to modify the request once is built      | optional  |
-| bodyInspector      | Function to inspect the `@Body` request parameter | optional  |
-| endsOfStream       | List of texts used to mark the end of streams     | optional  |
-| endOfStream        | Text used to mark the end of streams              | optional  |
-| objectMapper       | Provides Json conversions either to/from objects  | optional  |
+| Attribute          | Description                                                | Required  |
+| -------------------|------------------------------------------------------------|-----------|
+| baseUrl            | Api's url                                                  | mandatory |
+| headers            | Map of headers (name/value)                                | optional  |
+| header             | Single header as a name and a value                        | optional  |
+| clientAdapter      | Object of one of the specialized HttpClientAdapter classes | optional  |
+| requestInterceptor | Function to modify the request once is built               | optional  |
+| bodyInspector      | Function to inspect the `@Body` request parameter          | optional  |
+| endsOfStream       | List of texts used to mark the end of streams              | optional  |
+| endOfStream        | Text used to mark the end of streams                       | optional  |
+| objectMapper       | Provides Json conversions either to/from objects           | optional  |
 
-The attribute ```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
+```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 
 Example:
 
@@ -145,17 +153,35 @@ var objectMapper = new ObjectMapper()
 var cleverClient = CleverClient.builder()
     .baseUrl(BASE_URL)
     .header(HEADER_NAME, HEADER_VALUE)
-    .httpClient(httpClient)
+    .clientAdapter(new JavaHttpClientAdapter(httpClient))
     .requestInterceptor(request -> {
         var url = request.getUrl();
         url + (url.contains("?") ? "&" : "?") + "env=testing";
         request.setUrl(url);
         return request;
     })
+    .bodyInspector(body -> {
+        var validator = new Validator();
+        var violations = validator.validate(body);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+    })
     .endOfStream(END_OF_STREAM)
     .objectMapper(objectMapper)
     .build();
 ```
+
+### Http Client
+
+With CleverClient you have two Http client alternatives: Java's HttpClient or OkHttp. The Builder attribute ```clientAdapter``` is used to indicate which to use. If you don't indicate any Http client, the Java's HttpClient will be used by default:
+
+| clientAdapter's value                           | Description                         |
+|-------------------------------------------------|-------------------------------------|
+| new JavaHttpClientAdapter()                     | Uses a default Java's HttpClient    |
+| new JavaHttpClientAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
+| new OkHttpClientAdapter()                       | Uses a default OkHttpClient         |
+| new OkHttpClientAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
 
 ### Interface Annotations
 
@@ -337,12 +363,9 @@ Some examples have been created in the folder [example](https://github.com/sashi
 
   Where:
 
-  * ```<className>``` is mandatory and must be one of the values:
-    * BasicExample
-    * FileDownloadExample
-    * HeaderExample
-    * MultiServiceExample
-    * StreamExample (This requires you have an OpenAI account and set the env variable OPENAI_API_TOKEN)
+  * ```<className>``` is mandatory and must be one of the Java files in the folder example: BasicExample, BasicExampleOkHttp, StreamExample, StreamExampleOkHttp, etc.
+  
+    Some examples require you have an OpenAI account and set the env variable OPENAI_API_TOKEN, such as Multipart*, Stream*.
   
   * ```[logOptions]``` are optional and you can you use them to set:
     * Logger lever: ```-Dorg.slf4j.simpleLogger.defaultLogLevel=<logLevel>```
