@@ -128,7 +128,6 @@ public abstract class HttpClientAdapter {
     protected Stream<Object> convertToStreamOfEvents(Stream<String> response, ReturnType returnType) {
         final var lineRecord = new CleverClientSSE.LineRecord();
         final var events = returnType.getClassByEvent().keySet();
-
         return response
                 .map(line -> {
                     logger.debug(RESPONSE_FORMAT, line);
