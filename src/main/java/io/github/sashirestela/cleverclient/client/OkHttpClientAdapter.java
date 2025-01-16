@@ -57,12 +57,18 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
         try {
             var response = okHttpClient.newCall(okHttpRequest).execute();
             logger.debug(RESPONSE_CODE_FORMAT, response.code());
-            var responseContent = getReponseContent(response.body(), returnType);
-            throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-            if (!returnType.isStream()) {
-                logger.debug(RESPONSE_FORMAT, responseContent);
+            if (returnType.isStream()) {
+                var responseContent = getResponseContent(response.body(), returnType);
+                throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
+                return functions.responseConverter.apply(responseContent, returnType);
+            } else {
+                try (response) {
+                    var responseContent = getResponseContent(response.body(), returnType);
+                    throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
+                    logger.debug(RESPONSE_FORMAT, responseContent);
+                    return functions.responseConverter.apply(responseContent, returnType);
+                }
             }
-            return functions.responseConverter.apply(responseContent, returnType);
         } catch (IOException e) {
             throw new CleverClientException(e);
         }
@@ -84,15 +90,24 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 logger.debug(RESPONSE_CODE_FORMAT, response.code());
-                var responseContent = getReponseContent(response.body(), returnType);
-                try {
-                    throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-                    if (!returnType.isStream()) {
-                        logger.debug(RESPONSE_FORMAT, responseContent);
+                if (returnType.isStream()) {
+                    try {
+                        Object responseContent = getResponseContent(response.body(), returnType);
+                        throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
+                        responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
+                    } catch (CleverClientException e) {
+                        response.close();
+                        responseFuture.completeExceptionally(e);
                     }
-                    responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
-                } catch (CleverClientException e) {
-                    responseFuture.completeExceptionally(e);
+                } else {
+                    try (response) {
+                        Object responseContent = getResponseContent(response.body(), returnType);
+                        throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
+                        logger.debug(RESPONSE_FORMAT, responseContent);
+                        responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
+                    } catch (CleverClientException e) {
+                        responseFuture.completeExceptionally(e);
+                    }
                 }
             }
 
@@ -168,11 +183,17 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
                 .build();
     }
 
-    private Object getReponseContent(ResponseBody responseBody, ReturnType returnType) {
+    private Object getResponseContent(ResponseBody responseBody, ReturnType returnType) {
         try {
             if (returnType.isStream()) {
-                var reader = new BufferedReader(new InputStreamReader(responseBody.byteStream()));
-                return reader.lines();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(responseBody.byteStream()));
+                return reader.lines().onClose(() -> {
+                    try {
+                        responseBody.close();
+                    } catch (Exception e) {
+                        throw new CleverClientException(e);
+                    }
+                });
             } else if (returnType.isInputStream()) {
                 return responseBody.byteStream();
             } else {
