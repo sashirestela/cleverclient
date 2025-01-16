@@ -23,11 +23,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class OkHttpClientAdapter extends HttpClientAdapter {
 
@@ -187,13 +190,45 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
         try {
             if (returnType.isStream()) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(responseBody.byteStream()));
-                return reader.lines().onClose(() -> {
-                    try {
-                        responseBody.close();
-                    } catch (Exception e) {
-                        throw new CleverClientException(e);
+                return StreamSupport.stream(new Spliterator<String>() {
+
+                    private final Iterator<String> iterator = reader.lines().iterator();
+                    private boolean closed = false;
+
+                    @Override
+                    public boolean tryAdvance(java.util.function.Consumer<? super String> action) {
+                        if (iterator.hasNext()) {
+                            action.accept(iterator.next());
+                            return true;
+                        }
+                        if (!closed) {
+                            try {
+                                reader.close();
+                                responseBody.close();
+                                closed = true;
+                            } catch (Exception e) {
+                                throw new CleverClientException(e);
+                            }
+                        }
+                        return false;
                     }
-                });
+
+                    @Override
+                    public Spliterator<String> trySplit() {
+                        return null;
+                    }
+
+                    @Override
+                    public long estimateSize() {
+                        return Long.MAX_VALUE;
+                    }
+
+                    @Override
+                    public int characteristics() {
+                        return Spliterator.ORDERED;
+                    }
+
+                }, false);
             } else if (returnType.isInputStream()) {
                 return responseBody.byteStream();
             } else {
