@@ -84,7 +84,7 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
 
     @Override
     public void shutdown() {
-        this.httpClient.executor().ifPresent(executor -> {
+        httpClient.executor().ifPresent(executor -> {
             if (executor instanceof ExecutorService) {
                 ((ExecutorService) executor).shutdown();
             }
