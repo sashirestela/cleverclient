@@ -4,12 +4,14 @@ import io.github.sashirestela.cleverclient.Event;
 import io.github.sashirestela.cleverclient.ResponseInfo;
 import io.github.sashirestela.cleverclient.ResponseInfo.RequestInfo;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
+import io.github.sashirestela.cleverclient.http.HttpResponseData;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import io.github.sashirestela.cleverclient.support.ReturnType;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import io.github.sashirestela.cleverclient.util.Constant;
 import io.github.sashirestela.cleverclient.util.JsonUtil;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Setter
 public abstract class HttpClientAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(HttpClientAdapter.class);
@@ -29,8 +32,11 @@ public abstract class HttpClientAdapter {
     protected static final String RESPONSE_CODE_FORMAT = "Response Code : {}";
     protected static final String RESPONSE_FORMAT = "Response : {}";
 
-    public Object sendRequest(RequestData originalRequest, UnaryOperator<HttpRequestData> requestInterceptor) {
-        var actualRequest = interceptRequest(originalRequest, requestInterceptor);
+    protected UnaryOperator<HttpRequestData> requestInterceptor;
+    protected UnaryOperator<HttpResponseData> responseInterceptor;
+
+    public Object sendRequest(RequestData originalRequest) {
+        var actualRequest = interceptRequest(originalRequest);
         logger.debug("Http Call : {} {}", actualRequest.getHttpMethod(), actualRequest.getUrl());
         var formattedHeaders = formattedHeaders(actualRequest.getHeaders());
         logger.debug("Request Headers : {}", formattedHeaders);
@@ -47,17 +53,26 @@ public abstract class HttpClientAdapter {
 
     public abstract void shutdown();
 
-    private RequestData interceptRequest(RequestData originalRequest,
-            UnaryOperator<HttpRequestData> requestInterceptor) {
+    private RequestData interceptRequest(RequestData originalRequest) {
         if (requestInterceptor != null) {
             var httpRequestData = originalRequest.getHttpRequestData();
-            httpRequestData = requestInterceptor.apply(httpRequestData);
+            httpRequestData = this.requestInterceptor.apply(httpRequestData);
             return originalRequest
                     .withUrl(httpRequestData.getUrl())
                     .withBody(httpRequestData.getBody())
                     .withHeaders(CommonUtil.mapToListOfString(httpRequestData.getHeaders()));
         } else {
             return originalRequest;
+        }
+    }
+
+    protected ResponseData interceptResponse(ResponseData originalResponse) {
+        if (responseInterceptor != null && originalResponse.getBody() instanceof String) {
+            var httpResponseData = originalResponse.getHttpResponseData();
+            httpResponseData = this.responseInterceptor.apply(httpResponseData);
+            return originalResponse.withBody(httpResponseData.getBody());
+        } else {
+            return originalResponse;
         }
     }
 
@@ -113,22 +128,25 @@ public abstract class HttpClientAdapter {
         return print.toString();
     }
 
-    protected Stream<Object> convertToStreamOfObjects(Stream<String> response, ReturnType returnType) {
+    @SuppressWarnings("unchecked")
+    protected Stream<Object> convertToStreamOfObjects(ResponseData responseData, ReturnType returnType) {
         final var lineRecord = new CleverClientSSE.LineRecord();
-        return response
+        return ((Stream<String>) responseData.getBody())
                 .map(line -> {
                     logger.debug(RESPONSE_FORMAT, line);
                     lineRecord.updateWith(line);
                     return new CleverClientSSE(lineRecord);
                 })
                 .filter(CleverClientSSE::isActualData)
-                .map(item -> JsonUtil.jsonToObject(item.getActualData(), returnType.getBaseClass()));
+                .map(item -> JsonUtil.jsonToObject(interceptStreamItem(responseData, item.getActualData()),
+                        returnType.getBaseClass()));
     }
 
-    protected Stream<Object> convertToStreamOfEvents(Stream<String> response, ReturnType returnType) {
+    @SuppressWarnings("unchecked")
+    protected Stream<Object> convertToStreamOfEvents(ResponseData responseData, ReturnType returnType) {
         final var lineRecord = new CleverClientSSE.LineRecord();
         final var events = returnType.getClassByEvent().keySet();
-        return response
+        return ((Stream<String>) responseData.getBody())
                 .map(line -> {
                     logger.debug(RESPONSE_FORMAT, line);
                     lineRecord.updateWith(line);
@@ -137,9 +155,18 @@ public abstract class HttpClientAdapter {
                 .filter(CleverClientSSE::isActualData)
                 .map(item -> Event.builder()
                         .name(item.getMatchedEvent())
-                        .data(JsonUtil.jsonToObject(item.getActualData(),
+                        .data(JsonUtil.jsonToObject(interceptStreamItem(responseData, item.getActualData()),
                                 returnType.getClassByEvent().get(item.getMatchedEvent())))
                         .build());
+    }
+
+    private String interceptStreamItem(ResponseData responseData, String text) {
+        if (this.responseInterceptor == null) {
+            return text;
+        }
+        var httpResponseData = responseData.getHttpResponseData(text);
+        httpResponseData = this.responseInterceptor.apply(httpResponseData);
+        return httpResponseData.getBody();
     }
 
 }

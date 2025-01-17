@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class JavaHttpClientAdapter extends HttpClientAdapter {
 
@@ -53,12 +52,15 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
         try {
             var httpResponse = httpClient.send(httpRequest, functions.bodyHandler.get());
             logger.debug(RESPONSE_CODE_FORMAT, httpResponse.statusCode());
-            throwExceptionIfErrorIsPresent(convertToResponseData(httpResponse));
-            var response = httpResponse.body();
+            var originalResponseData = convertToResponseData(httpResponse);
+            throwExceptionIfErrorIsPresent(originalResponseData);
+            var responseData = interceptResponse(originalResponseData);
             if (!returnType.isStream()) {
-                logger.debug(RESPONSE_FORMAT, response);
+                logger.debug(RESPONSE_FORMAT, responseData.getBody());
+                return functions.responseConverter.apply(responseData.getBody(), returnType);
+            } else {
+                return functions.responseConverter.apply(responseData, returnType);
             }
-            return functions.responseConverter.apply(response, returnType);
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new CleverClientException(e);
@@ -73,12 +75,15 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
         var httpResponseFuture = httpClient.sendAsync(httpRequest, functions.bodyHandler.get());
         return httpResponseFuture.thenApply(httpResponse -> {
             logger.debug(RESPONSE_CODE_FORMAT, httpResponse.statusCode());
-            throwExceptionIfErrorIsPresent(convertToResponseData(httpResponse));
-            var response = httpResponse.body();
+            var originalResponseData = convertToResponseData(httpResponse);
+            throwExceptionIfErrorIsPresent(originalResponseData);
+            var responseData = interceptResponse(originalResponseData);
             if (!returnType.isStream()) {
-                logger.debug(RESPONSE_FORMAT, response);
+                logger.debug(RESPONSE_FORMAT, responseData.getBody());
+                return functions.responseConverter.apply(responseData.getBody(), returnType);
+            } else {
+                return functions.responseConverter.apply(responseData, returnType);
             }
-            return functions.responseConverter.apply(response, returnType);
         });
     }
 
@@ -155,7 +160,6 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
 
     }
 
-    @SuppressWarnings("unchecked")
     private void fillFunctionsByCategory() {
         this.functionsByCategoryMap = new EnumMap<>(Category.class);
         functionsByCategoryMap.put(Category.SYNC_BINARY, new FunctionsByCategory(
@@ -175,10 +179,10 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
                 (r, t) -> JsonUtil.jsonToList((String) r, t.getBaseClass())));
         functionsByCategoryMap.put(Category.SYNC_STREAM, new FunctionsByCategory(
                 () -> BodyHandlers.ofLines(),
-                (r, t) -> convertToStreamOfObjects((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfObjects((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.SYNC_STREAM_EVENT, new FunctionsByCategory(
                 () -> BodyHandlers.ofLines(),
-                (r, t) -> convertToStreamOfEvents((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfEvents((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.ASYNC_BINARY, new FunctionsByCategory(
                 () -> BodyHandlers.ofInputStream(),
                 (r, t) -> r));
@@ -196,10 +200,10 @@ public class JavaHttpClientAdapter extends HttpClientAdapter {
                 (r, t) -> JsonUtil.jsonToList((String) r, t.getBaseClass())));
         functionsByCategoryMap.put(Category.ASYNC_STREAM, new FunctionsByCategory(
                 () -> BodyHandlers.ofLines(),
-                (r, t) -> convertToStreamOfObjects((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfObjects((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.ASYNC_STREAM_EVENT, new FunctionsByCategory(
                 () -> BodyHandlers.ofLines(),
-                (r, t) -> convertToStreamOfEvents((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfEvents((ResponseData) r, t)));
     }
 
 }
