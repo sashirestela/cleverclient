@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Spliterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class OkHttpClientAdapter extends HttpClientAdapter {
@@ -62,14 +61,18 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
             logger.debug(RESPONSE_CODE_FORMAT, response.code());
             if (returnType.isStream()) {
                 var responseContent = getResponseContent(response.body(), returnType);
-                throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-                return functions.responseConverter.apply(responseContent, returnType);
+                var originalResponseData = convertToResponseData(response, responseContent);
+                throwExceptionIfErrorIsPresent(originalResponseData);
+                var responseData = interceptResponse(originalResponseData);
+                return functions.responseConverter.apply(responseData, returnType);
             } else {
                 try (response) {
                     var responseContent = getResponseContent(response.body(), returnType);
-                    throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-                    logger.debug(RESPONSE_FORMAT, responseContent);
-                    return functions.responseConverter.apply(responseContent, returnType);
+                    var originalResponseData = convertToResponseData(response, responseContent);
+                    throwExceptionIfErrorIsPresent(originalResponseData);
+                    var responseData = interceptResponse(originalResponseData);
+                    logger.debug(RESPONSE_FORMAT, responseData.getBody());
+                    return functions.responseConverter.apply(responseData.getBody(), returnType);
                 }
             }
         } catch (IOException e) {
@@ -95,19 +98,23 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
                 logger.debug(RESPONSE_CODE_FORMAT, response.code());
                 if (returnType.isStream()) {
                     try {
-                        Object responseContent = getResponseContent(response.body(), returnType);
-                        throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-                        responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
+                        var responseContent = getResponseContent(response.body(), returnType);
+                        var originalResponseData = convertToResponseData(response, responseContent);
+                        throwExceptionIfErrorIsPresent(originalResponseData);
+                        var responseData = interceptResponse(originalResponseData);
+                        responseFuture.complete(functions.responseConverter.apply(responseData, returnType));
                     } catch (CleverClientException e) {
                         response.close();
                         responseFuture.completeExceptionally(e);
                     }
                 } else {
                     try (response) {
-                        Object responseContent = getResponseContent(response.body(), returnType);
-                        throwExceptionIfErrorIsPresent(convertToResponseData(response, responseContent));
-                        logger.debug(RESPONSE_FORMAT, responseContent);
-                        responseFuture.complete(functions.responseConverter.apply(responseContent, returnType));
+                        var responseContent = getResponseContent(response.body(), returnType);
+                        var originalResponseData = convertToResponseData(response, responseContent);
+                        throwExceptionIfErrorIsPresent(originalResponseData);
+                        var responseData = interceptResponse(originalResponseData);
+                        logger.debug(RESPONSE_FORMAT, responseData.getBody());
+                        responseFuture.complete(functions.responseConverter.apply(responseData.getBody(), returnType));
                     } catch (CleverClientException e) {
                         responseFuture.completeExceptionally(e);
                     }
@@ -249,7 +256,6 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
 
     }
 
-    @SuppressWarnings("unchecked")
     private void fillFunctionsByCategory() {
         this.functionsByCategoryMap = new EnumMap<>(Category.class);
         functionsByCategoryMap.put(Category.SYNC_BINARY, new FunctionsByCategory(
@@ -263,9 +269,9 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
         functionsByCategoryMap.put(Category.SYNC_LIST, new FunctionsByCategory(
                 (r, t) -> JsonUtil.jsonToList((String) r, t.getBaseClass())));
         functionsByCategoryMap.put(Category.SYNC_STREAM, new FunctionsByCategory(
-                (r, t) -> convertToStreamOfObjects((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfObjects((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.SYNC_STREAM_EVENT, new FunctionsByCategory(
-                (r, t) -> convertToStreamOfEvents((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfEvents((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.ASYNC_BINARY, new FunctionsByCategory(
                 (r, t) -> r));
         functionsByCategoryMap.put(Category.ASYNC_PLAIN_TEXT, new FunctionsByCategory(
@@ -277,9 +283,9 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
         functionsByCategoryMap.put(Category.ASYNC_LIST, new FunctionsByCategory(
                 (r, t) -> JsonUtil.jsonToList((String) r, t.getBaseClass())));
         functionsByCategoryMap.put(Category.ASYNC_STREAM, new FunctionsByCategory(
-                (r, t) -> convertToStreamOfObjects((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfObjects((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.ASYNC_STREAM_EVENT, new FunctionsByCategory(
-                (r, t) -> convertToStreamOfEvents((Stream<String>) r, t)));
+                (r, t) -> convertToStreamOfEvents((ResponseData) r, t)));
 
     }
 

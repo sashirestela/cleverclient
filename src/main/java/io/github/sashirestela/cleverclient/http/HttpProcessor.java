@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 /**
  * HttpProcessor orchestrates all the http interaction.
@@ -31,7 +30,6 @@ public class HttpProcessor implements InvocationHandler {
     private final String baseUrl;
     private final List<String> headers;
     private final HttpClientAdapter clientAdapter;
-    private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final Consumer<Object> bodyInspector;
 
     /**
@@ -116,7 +114,7 @@ public class HttpProcessor implements InvocationHandler {
                 .contentType(contentType)
                 .headers(fullHeaders)
                 .build();
-        return clientAdapter.sendRequest(request, requestInterceptor);
+        return clientAdapter.sendRequest(request);
     }
 
     private Object getAndInspectBody(MethodMetadata methodMetadata, Object[] arguments) {
