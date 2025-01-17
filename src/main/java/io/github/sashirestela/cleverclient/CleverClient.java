@@ -5,6 +5,7 @@ import io.github.sashirestela.cleverclient.client.HttpClientAdapter;
 import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
+import io.github.sashirestela.cleverclient.http.HttpResponseData;
 import io.github.sashirestela.cleverclient.support.Configurator;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import lombok.Builder;
@@ -32,39 +33,46 @@ public class CleverClient {
 
     private final String baseUrl;
     private final Map<String, String> headers;
-    private final HttpClientAdapter clientAdapter;
-    private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final Consumer<Object> bodyInspector;
+    private final UnaryOperator<HttpRequestData> requestInterceptor;
+    private final UnaryOperator<HttpResponseData> responseInterceptor;
+    private final HttpClientAdapter clientAdapter;
     private final HttpProcessor httpProcessor;
 
     /**
      * Constructor to create an instance of CleverClient.
      * 
-     * @param baseUrl            Root of the url of the API service to call. Mandatory.
-     * @param headers            Http headers for all the API service. Optional.
-     * @param clientAdapter      Component to call http services. If none is passed the
-     *                           JavaHttpClientAdapter will be used. Optional.
-     * @param requestInterceptor Function to modify the request once it has been built.
-     * @param bodyInspector      Function to inspect the Body request parameter.
-     * @param endsOfStream       Texts used to mark the final of streams when handling server sent
-     *                           events (SSE). Optional.
-     * @param objectMapper       Provides Json conversions either to and from objects. Optional.
+     * @param baseUrl             Root of the url of the API service to call. Mandatory.
+     * @param headers             Http headers for all the API service. Optional.
+     * @param bodyInspector       Function to inspect the Body request parameter.
+     * @param requestInterceptor  Function to modify the request once it has been built.
+     * @param responseInterceptor Function to modify the response once it has been received.
+     * @param clientAdapter       Component to call http services. If none is passed the
+     *                            JavaHttpClientAdapter will be used. Optional.
+     * @param endsOfStream        Texts used to mark the final of streams when handling server sent
+     *                            events (SSE). Optional.
+     * @param objectMapper        Provides Json conversions either to and from objects. Optional.
      */
     @Builder
-    public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, HttpClientAdapter clientAdapter,
-            UnaryOperator<HttpRequestData> requestInterceptor, Consumer<Object> bodyInspector,
-            @Singular("endOfStream") List<String> endsOfStream, ObjectMapper objectMapper) {
+    @SuppressWarnings("java:S107")
+    public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, Consumer<Object> bodyInspector,
+            UnaryOperator<HttpRequestData> requestInterceptor, UnaryOperator<HttpResponseData> responseInterceptor,
+            HttpClientAdapter clientAdapter, @Singular("endOfStream") List<String> endsOfStream,
+            ObjectMapper objectMapper) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
-        this.clientAdapter = Optional.ofNullable(clientAdapter).orElse(new JavaHttpClientAdapter());
-        this.requestInterceptor = requestInterceptor;
         this.bodyInspector = bodyInspector;
+        this.requestInterceptor = requestInterceptor;
+        this.responseInterceptor = responseInterceptor;
+        this.clientAdapter = Optional.ofNullable(clientAdapter).orElse(new JavaHttpClientAdapter());
+        this.clientAdapter.setRequestInterceptor(this.requestInterceptor);
+        this.clientAdapter.setResponseInterceptor(this.responseInterceptor);
+
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
                 .headers(CommonUtil.mapToListOfString(this.headers))
                 .clientAdapter(this.clientAdapter)
-                .requestInterceptor(this.requestInterceptor)
-                .bodyInspector(bodyInspector)
+                .bodyInspector(this.bodyInspector)
                 .build();
         Configurator.builder()
                 .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
