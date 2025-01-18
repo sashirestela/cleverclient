@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,9 +57,20 @@ class OkHttpProcessorTest implements HttpProcessorTest {
     }
 
     @Override
+    public HttpProcessor getHttpProcessor(UnaryOperator<HttpResponseData> responseInterceptor) {
+        var clientAdapter = new OkHttpClientAdapter(okHttpClient);
+        clientAdapter.setResponseInterceptor(responseInterceptor);
+        httpProcessor = HttpProcessor.builder()
+                .baseUrl("https://api.demo")
+                .headers(List.of())
+                .clientAdapter(clientAdapter)
+                .build();
+        return httpProcessor;
+    }
+
+    @Override
     public void setMocksForString(SyncType syncType, String result) throws IOException {
         when(okHttpClient.newCall(any(okhttp3.Request.class))).thenReturn(call);
-
         if (syncType == SyncType.SYNC) {
             when(call.execute()).thenReturn(okHttpResponse);
         } else {
@@ -68,7 +80,6 @@ class OkHttpProcessorTest implements HttpProcessorTest {
                 return null;
             }).when(call).enqueue(any(Callback.class));
         }
-
         when(okHttpResponse.code()).thenReturn(HttpURLConnection.HTTP_OK);
         when(okHttpResponse.headers()).thenReturn(okhttp3.Headers.of(Map.of()));
         when(okHttpResponse.body()).thenReturn(responseBody);
@@ -78,7 +89,6 @@ class OkHttpProcessorTest implements HttpProcessorTest {
     @Override
     public void setMocksForBinary(SyncType syncType, InputStream result) throws IOException {
         when(okHttpClient.newCall(any(okhttp3.Request.class))).thenReturn(call);
-
         if (syncType == SyncType.SYNC) {
             when(call.execute()).thenReturn(okHttpResponse);
         } else {
@@ -88,7 +98,6 @@ class OkHttpProcessorTest implements HttpProcessorTest {
                 return null;
             }).when(call).enqueue(any(Callback.class));
         }
-
         when(okHttpResponse.code()).thenReturn(HttpURLConnection.HTTP_OK);
         when(okHttpResponse.headers()).thenReturn(okhttp3.Headers.of(Map.of()));
         when(okHttpResponse.body()).thenReturn(responseBody);
@@ -98,7 +107,6 @@ class OkHttpProcessorTest implements HttpProcessorTest {
     @Override
     public void setMocksForStream(SyncType syncType, Stream<String> result) throws IOException {
         when(okHttpClient.newCall(any(okhttp3.Request.class))).thenReturn(call);
-
         if (syncType == SyncType.SYNC) {
             when(call.execute()).thenReturn(okHttpResponse);
         } else {
@@ -108,7 +116,6 @@ class OkHttpProcessorTest implements HttpProcessorTest {
                 return null;
             }).when(call).enqueue(any(Callback.class));
         }
-
         when(okHttpResponse.code()).thenReturn(HttpURLConnection.HTTP_OK);
         when(okHttpResponse.headers()).thenReturn(okhttp3.Headers.of(Map.of()));
         when(okHttpResponse.body()).thenReturn(responseBody);
@@ -177,6 +184,25 @@ class OkHttpProcessorTest implements HttpProcessorTest {
         when(okHttpResponse.body()).thenReturn(responseBody);
         when(responseBody.byteStream()).thenReturn(
                 new ByteArrayInputStream(result.collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8)));
+        when(okHttpResponse.request()).thenReturn(okHttpRequest);
+    }
+
+    @Override
+    public void setMocksForInterceptor(String result) throws IOException {
+        when(okHttpClient.newCall(any(okhttp3.Request.class))).thenReturn(call);
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onResponse(call, okHttpResponse);
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+        when(httpUrl.toString()).thenReturn("https://api.com");
+        when(okHttpRequest.method()).thenReturn("GET");
+        when(okHttpRequest.url()).thenReturn(httpUrl);
+        when(okHttpRequest.headers()).thenReturn(okhttp3.Headers.of(Map.of()));
+        when(okHttpResponse.code()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(okHttpResponse.headers()).thenReturn(okhttp3.Headers.of(Map.of()));
+        when(okHttpResponse.body()).thenReturn(responseBody);
+        when(responseBody.string()).thenReturn(result);
         when(okHttpResponse.request()).thenReturn(okHttpRequest);
     }
 

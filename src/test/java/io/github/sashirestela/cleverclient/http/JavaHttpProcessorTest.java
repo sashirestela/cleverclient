@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -27,12 +28,11 @@ import static org.mockito.Mockito.when;
 class JavaHttpProcessorTest implements HttpProcessorTest {
 
     HttpProcessor httpProcessor;
-    HttpClient httpClient = mock(HttpClient.class);
-    HttpResponse<String> httpResponse = mock(HttpResponse.class);
-    HttpResponse<Stream<String>> httpResponseStream = mock(HttpResponse.class);
-    HttpResponse<InputStream> httpResponseBinary = mock(HttpResponse.class);
-    HttpRequest httpRequest = mock(HttpRequest.class);
-    HttpHeaders httpHeaders = mock(HttpHeaders.class);
+    HttpClient httpClient;
+    HttpResponse<String> httpResponse;
+    HttpResponse<Stream<String>> httpResponseStream;
+    HttpResponse<InputStream> httpResponseBinary;
+    HttpRequest httpRequest;
 
     JavaHttpProcessorTest() {
         httpClient = mock(HttpClient.class);
@@ -40,7 +40,6 @@ class JavaHttpProcessorTest implements HttpProcessorTest {
         httpResponseStream = mock(HttpResponse.class);
         httpResponseBinary = mock(HttpResponse.class);
         httpRequest = mock(HttpRequest.class);
-        httpHeaders = mock(HttpHeaders.class);
     }
 
     @Override
@@ -49,6 +48,18 @@ class JavaHttpProcessorTest implements HttpProcessorTest {
                 .baseUrl("https://api.demo")
                 .headers(List.of())
                 .clientAdapter(new JavaHttpClientAdapter(httpClient))
+                .build();
+        return httpProcessor;
+    }
+
+    @Override
+    public HttpProcessor getHttpProcessor(UnaryOperator<HttpResponseData> responseInterceptor) {
+        var clientAdapter = new JavaHttpClientAdapter(httpClient);
+        clientAdapter.setResponseInterceptor(responseInterceptor);
+        httpProcessor = HttpProcessor.builder()
+                .baseUrl("https://api.demo")
+                .headers(List.of())
+                .clientAdapter(clientAdapter)
                 .build();
         return httpProcessor;
     }
@@ -110,13 +121,12 @@ class JavaHttpProcessorTest implements HttpProcessorTest {
     public void setMocksForStringWithError(String result) throws IOException, URISyntaxException {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponse));
-        when(httpHeaders.map()).thenReturn(Map.of());
         when(httpRequest.method()).thenReturn("GET");
         when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
-        when(httpRequest.headers()).thenReturn(httpHeaders);
+        when(httpRequest.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponse.body()).thenReturn(result);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponse.request()).thenReturn(httpRequest);
     }
 
@@ -124,13 +134,12 @@ class JavaHttpProcessorTest implements HttpProcessorTest {
     public void setMocksForBinaryWithError(InputStream result) throws IOException, URISyntaxException {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofInputStream().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseBinary));
-        when(httpHeaders.map()).thenReturn(Map.of());
         when(httpRequest.method()).thenReturn("GET");
         when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
-        when(httpRequest.headers()).thenReturn(httpHeaders);
+        when(httpRequest.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponseBinary.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponseBinary.body()).thenReturn(result);
-        when(httpResponseBinary.headers()).thenReturn(httpHeaders);
+        when(httpResponseBinary.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponseBinary.request()).thenReturn(httpRequest);
     }
 
@@ -138,14 +147,26 @@ class JavaHttpProcessorTest implements HttpProcessorTest {
     public void setMocksForStreamWithError(Stream<String> result) throws IOException, URISyntaxException {
         when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofLines().getClass())))
                 .thenReturn(CompletableFuture.completedFuture(httpResponseStream));
-        when(httpHeaders.map()).thenReturn(Map.of());
         when(httpRequest.method()).thenReturn("GET");
         when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
-        when(httpRequest.headers()).thenReturn(httpHeaders);
+        when(httpRequest.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponseStream.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
         when(httpResponseStream.body()).thenReturn(result);
-        when(httpResponseStream.headers()).thenReturn(httpHeaders);
+        when(httpResponseStream.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
         when(httpResponseStream.request()).thenReturn(httpRequest);
+    }
+
+    @Override
+    public void setMocksForInterceptor(String result) throws IOException, InterruptedException, URISyntaxException {
+        when(httpClient.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
+                .thenReturn(CompletableFuture.completedFuture(httpResponse));
+        when(httpRequest.method()).thenReturn("GET");
+        when(httpRequest.uri()).thenReturn(new URI("https://api.com"));
+        when(httpRequest.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
+        when(httpResponse.statusCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(httpResponse.headers()).thenReturn(HttpHeaders.of(Map.of(), (t, s) -> true));
+        when(httpResponse.body()).thenReturn(result);
+        when(httpResponse.request()).thenReturn(httpRequest);
     }
 
     @Override
