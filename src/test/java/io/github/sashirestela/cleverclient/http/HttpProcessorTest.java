@@ -12,8 +12,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletionException;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 interface HttpProcessorTest {
 
     HttpProcessor getHttpProcessor();
+
+    HttpProcessor getHttpProcessor(UnaryOperator<HttpResponseData> responseInterceptor);
 
     void setMocksForString(SyncType syncType, String result) throws IOException, InterruptedException;
 
@@ -38,6 +48,8 @@ interface HttpProcessorTest {
     void setMocksForBinaryWithError(InputStream result) throws IOException, URISyntaxException;
 
     void setMocksForStreamWithError(Stream<String> result) throws IOException, URISyntaxException;
+
+    void setMocksForInterceptor(String result) throws IOException, InterruptedException, URISyntaxException;
 
     void testShutdown();
 
@@ -337,6 +349,34 @@ interface HttpProcessorTest {
     }
 
     @Test
+    default void shouldModifyAsyncResponseWhenPassingInterceptor()
+            throws IOException, InterruptedException, URISyntaxException {
+        var originalJsonResponse = Files.readString(Path.of("src/test/resources/users.json"), StandardCharsets.UTF_8);
+        setMocksForInterceptor(originalJsonResponse);
+
+        var service = getHttpProcessor(response -> {
+            var body = response.getBody();
+            var newBody = transformUsers(body);
+            response.setBody(newBody);
+            return response;
+        }).createProxy(ITest.UserService.class);
+        var actualUserList = service.getAsyncUsers().join();
+        var actualUser = actualUserList.get(0);
+        var expectedUser = ITest.User.builder()
+                .id(1)
+                .name("Leanne Graham")
+                .username("Bret")
+                .email("Sincere@april.biz")
+                .address("Kulas Light, Apt. 556, Gwenborough")
+                .phone("1-770-736-8031 x56442")
+                .website("hildegard.org")
+                .company("Romaguera-Crona")
+                .build();
+
+        assertEquals(expectedUser, actualUser);
+    }
+
+    @Test
     default void shouldExecuteDefaultMethodWhenItIsCalled() {
         var service = getHttpProcessor().createProxy(ITest.AsyncService.class);
         var actualValue = service.defaultMethod("Test");
@@ -348,6 +388,52 @@ interface HttpProcessorTest {
     @Test
     default void shouldShutdownWithoutExceptions() {
         testShutdown();
+    }
+
+    private String transformUsers(String jsonInput) {
+        List<String> flatUsers = new ArrayList<>();
+        String patternStr = "\"id\":\\s*(\\d+).*?" + // id
+                "\"name\":\\s*\"([^\"]+)\".*?" + // name
+                "\"username\":\\s*\"([^\"]+)\".*?" + // username
+                "\"email\":\\s*\"([^\"]+)\".*?" + // email
+                "\"street\":\\s*\"([^\"]+)\".*?" + // street
+                "\"suite\":\\s*\"([^\"]+)\".*?" + // suite
+                "\"city\":\\s*\"([^\"]+)\".*?" + // city
+                "\"phone\":\\s*\"([^\"]+)\".*?" + // phone
+                "\"website\":\\s*\"([^\"]+)\".*?" + // website
+                "\"company\":\\s*\\{\\s*\"name\":\\s*\"([^\"]+)\""; // company name
+        Pattern pattern = Pattern.compile(patternStr, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(jsonInput);
+        while (matcher.find()) {
+            String flatUser = String.format(
+                    "{\n" +
+                            "  \"id\": %s,\n" +
+                            "  \"name\": \"%s\",\n" +
+                            "  \"username\": \"%s\",\n" +
+                            "  \"email\": \"%s\",\n" +
+                            "  \"address\": \"%s, %s, %s\",\n" +
+                            "  \"phone\": \"%s\",\n" +
+                            "  \"website\": \"%s\",\n" +
+                            "  \"company\": \"%s\"\n" +
+                            "}",
+                    matcher.group(1), // id
+                    matcher.group(2), // name
+                    matcher.group(3), // username
+                    matcher.group(4), // email
+                    matcher.group(5), // street
+                    matcher.group(6), // suite
+                    matcher.group(7), // city
+                    matcher.group(8), // phone
+                    matcher.group(9), // website
+                    matcher.group(10) // company name
+            );
+            flatUsers.add(flatUser);
+        }
+        if (flatUsers.isEmpty()) {
+            System.err.println("No matches found in input: " + jsonInput);
+            return "[]";
+        }
+        return "[\n  " + String.join(",\n  ", flatUsers) + "\n]";
     }
 
 }
