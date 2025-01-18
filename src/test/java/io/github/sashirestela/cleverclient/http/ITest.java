@@ -11,6 +11,8 @@ import io.github.sashirestela.cleverclient.annotation.Query;
 import io.github.sashirestela.cleverclient.annotation.Resource;
 import io.github.sashirestela.cleverclient.annotation.StreamType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -146,6 +148,17 @@ public interface ITest {
 
     }
 
+    @Resource("/users")
+    interface UserService {
+
+        @GET
+        List<User> getSyncUsers();
+
+        @GET
+        CompletableFuture<List<User>> getAsyncUsers();
+
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
@@ -196,6 +209,23 @@ public interface ITest {
         private List<String> group;
 
         private Integer[] numbers;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Data
+    static class User {
+
+        private Integer id;
+        private String name;
+        private String username;
+        private String email;
+        private String address;
+        private String phone;
+        private String website;
+        private String company;
 
     }
 
