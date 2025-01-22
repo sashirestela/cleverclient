@@ -1,6 +1,6 @@
 # 💎 CleverClient
 
-A Java library for making http client requests easily.
+A Java library for making http client and websocket requests easily.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sashirestela_cleverclient&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sashirestela_cleverclient)
 [![codecov](https://codecov.io/gh/sashirestela/cleverclient/graph/badge.svg?token=PEYAFW3EWD)](https://codecov.io/gh/sashirestela/cleverclient)
@@ -26,7 +26,7 @@ A Java library for making http client requests easily.
 
 ## 💡 Description
 
-CleverClient is a Java library that simplifies requesting client-side Http services using annotated interfaces and methods. CleverClient uses behind the scenes the well-known Http client libraries: [Java's HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) (by default) or [Square's OkHttp](https://square.github.io/okhttp/) (adding a dependency).
+CleverClient is a Java library that simplifies requesting client-side Http services and websockets using annotated interfaces and methods. CleverClient uses behind the scenes two out-of-box Http client libraries: [Java's HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) (by default) or [Square's OkHttp](https://square.github.io/okhttp/) (adding a dependency).
 
 ## 📘 How to Use
 
