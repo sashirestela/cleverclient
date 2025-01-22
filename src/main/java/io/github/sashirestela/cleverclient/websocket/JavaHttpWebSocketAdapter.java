@@ -10,36 +10,29 @@ import java.net.http.WebSocket;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-public class JavaHttpWebSocketAdapter implements WebSocketAdapter {
+public class JavaHttpWebSocketAdapter extends WebSocketAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(JavaHttpWebSocketAdapter.class);
     private HttpClient httpClient;
     private WebSocket webSocket;
-    private Consumer<String> messageCallback;
-    private Action openCallback;
-    private BiConsumer<Integer, String> closeCallback;
-    private Consumer<Throwable> errorCallback;
     private final StringBuilder dataBuffer = new StringBuilder();
     private CompletableFuture<Void> sendFuture;
     private CompletableFuture<Void> closeFuture;
 
     public JavaHttpWebSocketAdapter(HttpClient httpClient) {
         this.httpClient = httpClient;
-        logger.debug("Created WebSocketAdapter with custom HttpClient");
+        logger.debug("Created JavaHttpWebSocketAdapter");
     }
 
     public JavaHttpWebSocketAdapter() {
-        this.httpClient = HttpClient.newHttpClient();
-        logger.debug("Created WebSocketAdapter with default HttpClient");
+        this(HttpClient.newHttpClient());
     }
 
     @Override
     @SuppressWarnings("java:S3776")
     public CompletableFuture<Void> connect(String url, Map<String, String> headers) {
-        logger.info("Connecting to WebSocket URL: {}", url);
+        logger.debug("Connecting to WebSocket URL: {}", url);
         logger.debug("Connection headers: {}", headers);
 
         WebSocket.Builder builder = this.httpClient.newWebSocketBuilder();
@@ -52,7 +45,7 @@ public class JavaHttpWebSocketAdapter implements WebSocketAdapter {
             @Override
             public void onOpen(WebSocket webSocket) {
                 JavaHttpWebSocketAdapter.this.webSocket = webSocket;
-                logger.info("WebSocket connection established");
+                logger.debug("WebSocket connection established");
                 if (openCallback != null) {
                     openCallback.execute();
                 }
@@ -82,7 +75,7 @@ public class JavaHttpWebSocketAdapter implements WebSocketAdapter {
 
             @Override
             public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
-                logger.info("WebSocket closing with code: {}, reason: {}", statusCode, reason);
+                logger.debug("WebSocket closing with code: {}, reason: {}", statusCode, reason);
                 if (closeCallback != null) {
                     closeCallback.accept(statusCode, reason);
                 }
@@ -130,7 +123,7 @@ public class JavaHttpWebSocketAdapter implements WebSocketAdapter {
     @Override
     public void close() {
         if (webSocket != null) {
-            logger.info("Initiating WebSocket close");
+            logger.debug("Initiating WebSocket close");
             closeFuture = new CompletableFuture<>();
             webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "Closing connection");
             try {
@@ -143,30 +136,6 @@ public class JavaHttpWebSocketAdapter implements WebSocketAdapter {
                 }
             }
         }
-    }
-
-    @Override
-    public void onMessage(Consumer<String> callback) {
-        logger.trace("Registering message callback");
-        this.messageCallback = callback;
-    }
-
-    @Override
-    public void onOpen(Action callback) {
-        logger.trace("Registering open callback");
-        this.openCallback = callback;
-    }
-
-    @Override
-    public void onClose(BiConsumer<Integer, String> callback) {
-        logger.trace("Registering close callback");
-        this.closeCallback = callback;
-    }
-
-    @Override
-    public void onError(Consumer<Throwable> callback) {
-        logger.trace("Registering error callback");
-        this.errorCallback = callback;
     }
 
 }

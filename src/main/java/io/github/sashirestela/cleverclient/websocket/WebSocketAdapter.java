@@ -5,20 +5,33 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public interface WebSocketAdapter {
+public abstract class WebSocketAdapter {
 
-    CompletableFuture<Void> connect(String url, Map<String, String> headers);
+    protected Consumer<String> messageCallback;
+    protected Action openCallback;
+    protected BiConsumer<Integer, String> closeCallback;
+    protected Consumer<Throwable> errorCallback;
 
-    CompletableFuture<Void> send(String message);
+    public abstract CompletableFuture<Void> connect(String url, Map<String, String> headers);
 
-    void close();
+    public abstract CompletableFuture<Void> send(String message);
 
-    void onMessage(Consumer<String> callback);
+    public abstract void close();
 
-    void onOpen(Action callback);
+    public void onMessage(Consumer<String> callback) {
+        this.messageCallback = callback;
+    }
 
-    void onClose(BiConsumer<Integer, String> callback);
+    public void onOpen(Action callback) {
+        this.openCallback = callback;
+    }
 
-    void onError(Consumer<Throwable> callback);
+    public void onClose(BiConsumer<Integer, String> callback) {
+        this.closeCallback = callback;
+    }
+
+    public void onError(Consumer<Throwable> errorCallback) {
+        this.errorCallback = errorCallback;
+    }
 
 }
