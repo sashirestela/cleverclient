@@ -8,6 +8,7 @@ import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.http.HttpResponseData;
 import io.github.sashirestela.cleverclient.support.Configurator;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
+import io.github.sashirestela.cleverclient.websocket.WebSocketAdapter;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -37,6 +38,7 @@ public class CleverClient {
     private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final UnaryOperator<HttpResponseData> responseInterceptor;
     private final HttpClientAdapter clientAdapter;
+    private final WebSocketAdapter webSockewAdapter;
     private final HttpProcessor httpProcessor;
 
     /**
@@ -49,6 +51,8 @@ public class CleverClient {
      * @param responseInterceptor Function to modify the response once it has been received.
      * @param clientAdapter       Component to call http services. If none is passed the
      *                            JavaHttpClientAdapter will be used. Optional.
+     * @param webSocketAdapter    Component to do web socket interactions. If none is passed the
+     *                            JavaHttpWebSocketAdapter will be used. Optional.
      * @param endsOfStream        Texts used to mark the final of streams when handling server sent
      *                            events (SSE). Optional.
      * @param objectMapper        Provides Json conversions either to and from objects. Optional.
@@ -57,8 +61,8 @@ public class CleverClient {
     @SuppressWarnings("java:S107")
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, Consumer<Object> bodyInspector,
             UnaryOperator<HttpRequestData> requestInterceptor, UnaryOperator<HttpResponseData> responseInterceptor,
-            HttpClientAdapter clientAdapter, @Singular("endOfStream") List<String> endsOfStream,
-            ObjectMapper objectMapper) {
+            HttpClientAdapter clientAdapter, WebSocketAdapter webSocketAdapter,
+            @Singular("endOfStream") List<String> endsOfStream, ObjectMapper objectMapper) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.bodyInspector = bodyInspector;
@@ -67,6 +71,7 @@ public class CleverClient {
         this.clientAdapter = Optional.ofNullable(clientAdapter).orElse(new JavaHttpClientAdapter());
         this.clientAdapter.setRequestInterceptor(this.requestInterceptor);
         this.clientAdapter.setResponseInterceptor(this.responseInterceptor);
+        this.webSockewAdapter = webSocketAdapter;
 
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
