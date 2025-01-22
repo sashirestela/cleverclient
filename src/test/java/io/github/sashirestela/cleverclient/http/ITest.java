@@ -164,7 +164,7 @@ public interface ITest {
     @Getter
     @ToString
     @EqualsAndHashCode
-    static class Demo {
+    class Demo {
 
         private Integer id;
 
@@ -177,7 +177,7 @@ public interface ITest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    static class RequestDemo {
+    class RequestDemo {
 
         private String prefix;
 
@@ -188,7 +188,7 @@ public interface ITest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    static class Generic<T> {
+    class Generic<T> {
 
         private Integer id;
 
@@ -198,7 +198,7 @@ public interface ITest {
 
     @Getter
     @AllArgsConstructor
-    static class MultipartClass {
+    class MultipartClass {
 
         private java.nio.file.Path file;
 
@@ -216,7 +216,7 @@ public interface ITest {
     @AllArgsConstructor
     @Builder
     @Data
-    static class User {
+    class User {
 
         private Integer id;
         private String name;
