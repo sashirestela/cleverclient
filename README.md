@@ -9,6 +9,7 @@ A Java library for making http client requests easily.
 
 ### Table of Contents
 - [Description](#-description)
+- [How to Use](#-how-to-use)
 - [Installation](#-installation)
 - [Features](#-features)
   - [CleverClient Builder](#cleverclient-builder)
@@ -25,7 +26,9 @@ A Java library for making http client requests easily.
 
 ## 💡 Description
 
-CleverClient is a Java library that simplifies requesting client-side Http services using annotated interfaces and methods. CleverClient uses behind the scenes the well-known Http client libraries: [Java's HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) (by default) or [Square's OkHttp](https://square.github.io/okhttp/).
+CleverClient is a Java library that simplifies requesting client-side Http services using annotated interfaces and methods. CleverClient uses behind the scenes the well-known Http client libraries: [Java's HttpClient](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) (by default) or [Square's OkHttp](https://square.github.io/okhttp/) (adding a dependency).
+
+## 📘 How to Use
 
 For example, if we want to use the public API [JsonPlaceHolder](https://jsonplaceholder.typicode.com/) and call its endpoint ```/posts```, we just have to create an entity ```Post```, an interface ```PostService``` with special annotatons, and call the API through ```CleverClient```:
 
