@@ -12,7 +12,8 @@ A Java library for making http client requests easily.
 - [Installation](#-installation)
 - [Features](#-features)
   - [CleverClient Builder](#cleverclient-builder)
-  - [Http Client](#http-client) **NEW**
+  - [Http Client Options](#http-client-options)
+  - [WebSocket Options](#websocket-options)
   - [Interface Annotations](#interface-annotations)
   - [Supported Response Types](#supported-response-types)
   - [Interface Default Methods](#interface-default-methods)
@@ -20,6 +21,7 @@ A Java library for making http client requests easily.
 - [Examples](#-examples)
 - [Contributing](#-contributing)
 - [License](#-license)
+- [Show Us Your Love](#-show-us-your-love)
 
 ## 💡 Description
 
@@ -117,17 +119,19 @@ Take in account that you need to use **Java 11 or greater**.
 
 We have the following attributes to create a CleverClient object:
 
-| Attribute          | Description                                                | Required  |
-| -------------------|------------------------------------------------------------|-----------|
-| baseUrl            | Api's url                                                  | mandatory |
-| headers            | Map of headers (name/value)                                | optional  |
-| header             | Single header as a name and a value                        | optional  |
-| clientAdapter      | Object of one of the specialized HttpClientAdapter classes | optional  |
-| requestInterceptor | Function to modify the request once is built               | optional  |
-| bodyInspector      | Function to inspect the `@Body` request parameter          | optional  |
-| endsOfStream       | List of texts used to mark the end of streams              | optional  |
-| endOfStream        | Text used to mark the end of streams                       | optional  |
-| objectMapper       | Provides Json conversions either to/from objects           | optional  |
+| Attribute          | Description                                                  | Required  |
+| -------------------|--------------------------------------------------------------|-----------|
+| baseUrl            | Api's url                                                    | mandatory |
+| headers            | Map of headers (name/value)                                  | optional  |
+| header             | Single header as a name and a value                          | optional  |
+| bodyInspector      | Function to inspect the `@Body` request parameter            | optional  |
+| requestInterceptor | Function to modify the request once is built                 | optional  |
+| responseInterceptor| Function to modify the response after it's received          | optional  |
+| clientAdapter      | Http client implementation (Java HttpClient or OkHttp based) | optional  |
+| webSocketAdapter   | WebSocket implementation (Java HttpClient or OkHttp based)   | optional  |
+| endsOfStream       | List of texts used to mark the end of streams                | optional  |
+| endOfStream        | Text used to mark the end of streams                         | optional  |
+| objectMapper       | Provides Json conversions either to/from objects             | optional  |
 
 ```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
 
@@ -153,13 +157,6 @@ var objectMapper = new ObjectMapper()
 var cleverClient = CleverClient.builder()
     .baseUrl(BASE_URL)
     .header(HEADER_NAME, HEADER_VALUE)
-    .clientAdapter(new JavaHttpClientAdapter(httpClient))
-    .requestInterceptor(request -> {
-        var url = request.getUrl();
-        url + (url.contains("?") ? "&" : "?") + "env=testing";
-        request.setUrl(url);
-        return request;
-    })
     .bodyInspector(body -> {
         var validator = new Validator();
         var violations = validator.validate(body);
@@ -167,14 +164,29 @@ var cleverClient = CleverClient.builder()
             throw new ConstraintViolationException(violations);
         }
     })
+    .requestInterceptor(request -> {
+        var url = request.getUrl();
+        url + (url.contains("?") ? "&" : "?") + "env=testing";
+        request.setUrl(url);
+        return request;
+    })
+    .responseInterceptor(response -> {
+        var modifiedBody = customProcessing(response.getBody());
+        response.setBody(modifiedBody);
+        return response;
+    })
+    .clientAdapter(new JavaHttpClientAdapter(httpClient))
+    .webSocketAdapter(new JavaHttpWebSocketAdapter(httpClient))
     .endOfStream(END_OF_STREAM)
     .objectMapper(objectMapper)
     .build();
 ```
 
-### Http Client
+### Http Client Options
 
-With CleverClient you have two Http client alternatives: Java's HttpClient or OkHttp. The Builder attribute ```clientAdapter``` is used to indicate which to use. If you don't indicate any Http client, the Java's HttpClient will be used by default:
+The Builder attribute ```clientAdapter``` determines which Http client implementation to use. CleverClient supports two implementations out of the box:
+- Java's HttpClient (default) via ```JavaHttpClientAdapter```
+- Square's OkHttp via ```OkHttpClientAdapter```
 
 | clientAdapter's value                           | Description                         |
 |-------------------------------------------------|-------------------------------------|
@@ -182,6 +194,19 @@ With CleverClient you have two Http client alternatives: Java's HttpClient or Ok
 | new JavaHttpClientAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
 | new OkHttpClientAdapter()                       | Uses a default OkHttpClient         |
 | new OkHttpClientAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
+
+### WebSocket Options
+
+The Builder attribute ```webSocketAdapter``` lets you specify which WebSocket implementation to use. Similar to ```clientAdapter```, you can choose between:
+- Java's HttpClient (default) via ```JavaHttpWebSocketAdapter```
+- Square's OkHttp via ```OkHttpWebSocketAdapter```
+
+| webSocketAdapter's value                           | Description                         |
+|----------------------------------------------------|-------------------------------------|
+| new JavaHttpWebSocketAdapter()                     | Uses a default Java's HttpClient    |
+| new JavaHttpWebSocketAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
+| new OkHttpWebSocketAdapter()                       | Uses a default OkHttpClient         |
+| new OkHttpWebSocketAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
 
 ### Interface Annotations
 
@@ -380,3 +405,10 @@ Please read our [Contributing](CONTRIBUTING.md) guide to learn and understand ho
 CleverClient is licensed under the MIT License. See the
 [LICENSE](https://github.com/sashirestela/cleverclient/blob/main/LICENSE) file
 for more information.
+
+## ❤ Show Us Your Love
+Thanks for using **cleverclient**. If you find this project valuable there are a few ways you can show us your love, preferably all of them 🙂:
+
+* Letting your friends know about this project 🗣📢.
+* Writing a brief review on your social networks ✍🌐.
+* Giving us a star on Github ⭐.
