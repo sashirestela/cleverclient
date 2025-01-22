@@ -11,32 +11,25 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-public class OkHttpWebSocketAdapter implements WebSocketAdapter {
+public class OkHttpWebSocketAdapter extends WebSocketAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(OkHttpWebSocketAdapter.class);
     private OkHttpClient okHttpClient;
     private WebSocket webSocket;
-    private Consumer<String> messageCallback;
-    private Action openCallback;
-    private BiConsumer<Integer, String> closeCallback;
-    private Consumer<Throwable> errorCallback;
 
     public OkHttpWebSocketAdapter(OkHttpClient okHttpClient) {
         this.okHttpClient = okHttpClient;
-        logger.debug("Created WebSocketAdapter with custom OkHttpClient");
+        logger.debug("Created OkHttpWebSocketAdapter");
     }
 
     public OkHttpWebSocketAdapter() {
-        this.okHttpClient = new OkHttpClient();
-        logger.debug("Created WebSocketAdapter with default OkHttpClient");
+        this(new OkHttpClient());
     }
 
     @Override
     public CompletableFuture<Void> connect(String url, Map<String, String> headers) {
-        logger.info("Connecting to WebSocket URL: {}", url);
+        logger.debug("Connecting to WebSocket URL: {}", url);
         logger.debug("Connection headers: {}", headers);
 
         Request.Builder requestBuilder = new Request.Builder().url(url);
@@ -47,7 +40,7 @@ public class OkHttpWebSocketAdapter implements WebSocketAdapter {
 
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
-                logger.info("WebSocket connection established with response code: {}", response.code());
+                logger.debug("WebSocket connection established with response code: {}", response.code());
                 if (openCallback != null) {
                     openCallback.execute();
                 }
@@ -64,7 +57,7 @@ public class OkHttpWebSocketAdapter implements WebSocketAdapter {
 
             @Override
             public void onClosing(WebSocket webSocket, int code, String reason) {
-                logger.info("WebSocket closing with code: {}, reason: {}", code, reason);
+                logger.debug("WebSocket closing with code: {}, reason: {}", code, reason);
                 if (closeCallback != null) {
                     closeCallback.accept(code, reason);
                 }
@@ -103,36 +96,12 @@ public class OkHttpWebSocketAdapter implements WebSocketAdapter {
     @Override
     public void close() {
         if (webSocket != null) {
-            logger.info("Initiating WebSocket close");
+            logger.debug("Initiating WebSocket close");
             webSocket.close(1000, "Closing connection");
             okHttpClient.dispatcher().executorService().shutdown();
             okHttpClient.connectionPool().evictAll();
             logger.debug("WebSocket resources cleaned up");
         }
-    }
-
-    @Override
-    public void onMessage(Consumer<String> callback) {
-        logger.trace("Registering message callback");
-        this.messageCallback = callback;
-    }
-
-    @Override
-    public void onOpen(Action callback) {
-        logger.trace("Registering open callback");
-        this.openCallback = callback;
-    }
-
-    @Override
-    public void onClose(BiConsumer<Integer, String> callback) {
-        logger.trace("Registering close callback");
-        this.closeCallback = callback;
-    }
-
-    @Override
-    public void onError(Consumer<Throwable> errorCallback) {
-        logger.trace("Registering error callback");
-        this.errorCallback = errorCallback;
     }
 
 }
