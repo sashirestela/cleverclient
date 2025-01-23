@@ -155,4 +155,27 @@ class CommonUtilTest {
         assertEquals(expectedMap, actualMap);
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldConvertStringMapToUrlStringWhenMapIsPassed() {
+        Object[][] testData = {
+                { Map.of(), "", "" },
+                { Map.of("key", "val"), "?key=val", "?key=val" },
+                { Map.of("key1", "val1", "key2", "val2"), "?key1=val1&key2=val2", "?key2=val2&key1=val1" }
+        };
+        for (var data : testData) {
+            var expectedResult1 = (String) data[1];
+            var expectedResult2 = (String) data[2];
+            var actualResult = CommonUtil.stringMapToUrl((Map<String, String>) data[0]);
+            assertTrue(actualResult.equals(expectedResult1) || actualResult.equals(expectedResult2));
+        }
+
+        var stringMap = new HashMap<String, String>();
+        stringMap.put("key1", null);
+        stringMap.put("key2", "val2");
+        var expectedResult = "?key2=val2";
+        var actualResult = CommonUtil.stringMapToUrl(stringMap);
+        assertEquals(expectedResult, actualResult);
+    }
+
 }

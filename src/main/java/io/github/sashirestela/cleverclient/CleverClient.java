@@ -8,6 +8,8 @@ import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.http.HttpResponseData;
 import io.github.sashirestela.cleverclient.support.Configurator;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
+import io.github.sashirestela.cleverclient.websocket.Action;
+import io.github.sashirestela.cleverclient.websocket.JavaHttpWebSocketAdapter;
 import io.github.sashirestela.cleverclient.websocket.WebSocketAdapter;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -38,7 +42,6 @@ public class CleverClient {
     private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final UnaryOperator<HttpResponseData> responseInterceptor;
     private final HttpClientAdapter clientAdapter;
-    private final WebSocketAdapter webSockewAdapter;
     private final HttpProcessor httpProcessor;
 
     /**
@@ -51,8 +54,6 @@ public class CleverClient {
      * @param responseInterceptor Function to modify the response once it has been received.
      * @param clientAdapter       Component to call http services. If none is passed the
      *                            JavaHttpClientAdapter will be used. Optional.
-     * @param webSocketAdapter    Component to do web socket interactions. If none is passed the
-     *                            JavaHttpWebSocketAdapter will be used. Optional.
      * @param endsOfStream        Texts used to mark the final of streams when handling server sent
      *                            events (SSE). Optional.
      * @param objectMapper        Provides Json conversions either to and from objects. Optional.
@@ -61,8 +62,8 @@ public class CleverClient {
     @SuppressWarnings("java:S107")
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, Consumer<Object> bodyInspector,
             UnaryOperator<HttpRequestData> requestInterceptor, UnaryOperator<HttpResponseData> responseInterceptor,
-            HttpClientAdapter clientAdapter, WebSocketAdapter webSocketAdapter,
-            @Singular("endOfStream") List<String> endsOfStream, ObjectMapper objectMapper) {
+            HttpClientAdapter clientAdapter, @Singular("endOfStream") List<String> endsOfStream,
+            ObjectMapper objectMapper) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.bodyInspector = bodyInspector;
@@ -71,7 +72,6 @@ public class CleverClient {
         this.clientAdapter = Optional.ofNullable(clientAdapter).orElse(new JavaHttpClientAdapter());
         this.clientAdapter.setRequestInterceptor(this.requestInterceptor);
         this.clientAdapter.setResponseInterceptor(this.responseInterceptor);
-        this.webSockewAdapter = webSocketAdapter;
 
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
@@ -96,6 +96,71 @@ public class CleverClient {
      */
     public <T> T create(Class<T> interfaceClass) {
         return this.httpProcessor.createProxy(interfaceClass);
+    }
+
+    /**
+     * Handles websocket communication.
+     */
+    @Getter
+    public static class WebSocket {
+
+        private final String baseUrl;
+        private final Map<String, String> queryParams;
+        private final Map<String, String> headers;
+        private final WebSocketAdapter webSockewAdapter;
+        private String fullUrl;
+
+        /**
+         * Constructor to create an instance of CleverClient.WebSocket
+         * 
+         * @param baseUrl          Root of the url of the WebSocket to call. Mandatory.
+         * @param queryParams      Query parameters (key=value) to be added to the baseUrl.
+         * @param headers          Http headers to be passed to the WebSocket. Optional.
+         * @param webSockewAdapter Component to do web socket interactions. If none is passed the
+         *                         JavaHttpWebSocketAdapter will be used. Optional.
+         */
+        @Builder
+        public WebSocket(@NonNull String baseUrl, @Singular Map<String, String> queryParams,
+                @Singular Map<String, String> headers, WebSocketAdapter webSockewAdapter) {
+            this.baseUrl = baseUrl;
+            this.queryParams = Optional.ofNullable(queryParams).orElse(Map.of());
+            this.headers = Optional.ofNullable(headers).orElse(Map.of());
+            this.webSockewAdapter = Optional.ofNullable(webSockewAdapter).orElse(new JavaHttpWebSocketAdapter());
+            this.fullUrl = buildFullUrl();
+        }
+
+        private String buildFullUrl() {
+            return baseUrl + CommonUtil.stringMapToUrl(queryParams);
+        }
+
+        public CompletableFuture<Void> connect() {
+            return webSockewAdapter.connect(fullUrl, headers);
+        }
+
+        public CompletableFuture<Void> send(String message) {
+            return webSockewAdapter.send(message);
+        }
+
+        public void close() {
+            webSockewAdapter.close();
+        }
+
+        public void onMessage(Consumer<String> callback) {
+            webSockewAdapter.onMessage(callback);
+        }
+
+        public void onOpen(Action callback) {
+            webSockewAdapter.onOpen(callback);
+        }
+
+        public void onClose(BiConsumer<Integer, String> callback) {
+            webSockewAdapter.onClose(callback);
+        }
+
+        public void onError(Consumer<Throwable> callback) {
+            webSockewAdapter.onError(callback);
+        }
+
     }
 
 }

@@ -30,8 +30,8 @@ public abstract class WebSocketAdapter {
         this.closeCallback = callback;
     }
 
-    public void onError(Consumer<Throwable> errorCallback) {
-        this.errorCallback = errorCallback;
+    public void onError(Consumer<Throwable> callback) {
+        this.errorCallback = callback;
     }
 
 }
