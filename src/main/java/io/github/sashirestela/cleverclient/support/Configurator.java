@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.sashirestela.cleverclient.util.JsonUtil;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class Configurator {
         }
         configurator.endsOfStream = endsOfStream;
         configurator.objectMapper = objectMapper;
+        JsonUtil.updateObjectMapper(objectMapper);
         configurator.wasBuilt = true;
     }
 

@@ -1,9 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
 import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.test.TestSupport;
 import io.github.sashirestela.cleverclient.test.TestSupport.SyncType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -52,11 +50,6 @@ interface HttpProcessorTest {
     void setMocksForInterceptor(String result) throws IOException, InterruptedException, URISyntaxException;
 
     void testShutdown();
-
-    @BeforeAll
-    static void setup() {
-        TestSupport.setupConfigurator();
-    }
 
     @Test
     default void shouldThownExceptionWhenCallingMethodReturnTypeIsUnsupported() {
