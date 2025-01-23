@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
-import io.github.sashirestela.cleverclient.support.Configurator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,17 +16,24 @@ import java.util.Map;
 
 public class JsonUtil {
 
-    private static final ObjectMapper objectMapperStrict = Configurator.one().getObjectMapper();
-
-    private static final ObjectReader objectReaderIgnoringUnknown = objectMapperStrict.reader()
+    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectReader objectReader = objectMapper.reader()
             .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private JsonUtil() {
     }
 
+    public static void updateObjectMapper(ObjectMapper newObjectMapper) {
+        synchronized (JsonUtil.class) {
+            objectMapper = newObjectMapper != null ? newObjectMapper : new ObjectMapper();
+            objectReader = objectMapper.reader()
+                    .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        }
+    }
+
     public static <T> Map<String, Object> objectToMap(T object) {
         try {
-            return objectMapperStrict.convertValue(object, new TypeReference<>() {
+            return objectMapper.convertValue(object, new TypeReference<>() {
             });
         } catch (IllegalArgumentException e) {
             throw new CleverClientException("Cannot convert object {0} to Map.", object, e);
@@ -36,7 +42,7 @@ public class JsonUtil {
 
     public static <T> String objectToJson(T object) {
         try {
-            return objectMapperStrict.writeValueAsString(object);
+            return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new CleverClientException("Cannot convert the object {0} to Json.", object, e);
         }
@@ -44,7 +50,7 @@ public class JsonUtil {
 
     public static <T> T jsonToObject(String json, Class<T> clazz) {
         try {
-            return objectReaderIgnoringUnknown.readValue(json, clazz);
+            return objectReader.readValue(json, clazz);
         } catch (IOException e) {
             throw new CleverClientException("Cannot convert the Json {0} to class {1}.", json, clazz.getName(), e);
         }
@@ -52,9 +58,9 @@ public class JsonUtil {
 
     public static <T> List<T> jsonToList(String json, Class<T> clazz) {
         try {
-            CollectionType listType = objectReaderIgnoringUnknown.getTypeFactory()
+            CollectionType listType = objectReader.getTypeFactory()
                     .constructCollectionType(ArrayList.class, clazz);
-            return objectReaderIgnoringUnknown.forType(listType).readValue(json);
+            return objectReader.forType(listType).readValue(json);
         } catch (JsonProcessingException e) {
             throw new CleverClientException("Cannot convert the Json {0} to List of {1}.", json, clazz.getName(), e);
         }
@@ -62,9 +68,9 @@ public class JsonUtil {
 
     public static <T, U> T jsonToParametricObject(String json, Class<T> clazzT, Class<U> clazzU) {
         try {
-            JavaType javaType = objectReaderIgnoringUnknown.getTypeFactory()
+            JavaType javaType = objectReader.getTypeFactory()
                     .constructParametricType(clazzT, clazzU);
-            return objectReaderIgnoringUnknown.forType(javaType).readValue(json);
+            return objectReader.forType(javaType).readValue(json);
         } catch (JsonProcessingException e) {
             throw new CleverClientException("Cannot convert the Json {0} to class of {1}.", json, clazzT.getName(), e);
         }
