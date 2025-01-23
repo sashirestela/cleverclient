@@ -1,6 +1,8 @@
 package io.github.sashirestela.cleverclient.util;
 
 import java.lang.reflect.Array;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,6 +75,22 @@ public class CommonUtil {
     public static Map<String, String> listToMapOfString(List<String> list) {
         var array = list.toArray(new String[0]);
         return createMapString(array);
+    }
+
+    public static String stringMapToUrl(Map<String, String> stringMap) {
+        if (stringMap.isEmpty()) {
+            return "";
+        }
+        var stringUrl = new StringBuilder();
+        stringMap.forEach((key, value) -> {
+            if (value != null) {
+                stringUrl.append(stringUrl.length() == 0 ? "?" : "&")
+                        .append(URLEncoder.encode(key, StandardCharsets.UTF_8))
+                        .append("=")
+                        .append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+            }
+        });
+        return stringUrl.toString();
     }
 
 }
