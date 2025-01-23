@@ -12,13 +12,12 @@ A Java library for making http client and websocket requests easily.
 - [How to Use](#-how-to-use)
 - [Installation](#-installation)
 - [Features](#-features)
-  - [CleverClient Builder](#cleverclient-builder)
-  - [Http Client Options](#http-client-options)
-  - [WebSocket Options](#websocket-options)
+  - [CleverClient Creation](#cleverclient-creation)
   - [Interface Annotations](#interface-annotations)
   - [Supported Response Types](#supported-response-types)
   - [Interface Default Methods](#interface-default-methods)
   - [Exception Handling](#exception-handling)
+  - [WebSocket](#websocket)
 - [Examples](#-examples)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -118,7 +117,7 @@ Take in account that you need to use **Java 11 or greater**.
 
 ## 📕 Features
 
-### CleverClient Builder
+### CleverClient Creation
 
 We have the following attributes to create a CleverClient object:
 
@@ -137,6 +136,17 @@ We have the following attributes to create a CleverClient object:
 | objectMapper       | Provides Json conversions either to/from objects             | optional  |
 
 ```end(s)OfStream``` is required when you have endpoints sending back streams of data (Server Sent Events - SSE).
+
+The attribute ```clientAdapter``` determines which Http client implementation to use. CleverClient supports two implementations out of the box:
+- Java's HttpClient (default) via ```JavaHttpClientAdapter```
+- Square's OkHttp via ```OkHttpClientAdapter```
+
+| clientAdapter's value                           | Description                         |
+|-------------------------------------------------|-------------------------------------|
+| new JavaHttpClientAdapter()                     | Uses a default Java's HttpClient    |
+| new JavaHttpClientAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
+| new OkHttpClientAdapter()                       | Uses a default OkHttpClient         |
+| new OkHttpClientAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
 
 Example:
 
@@ -184,32 +194,6 @@ var cleverClient = CleverClient.builder()
     .objectMapper(objectMapper)
     .build();
 ```
-
-### Http Client Options
-
-The Builder attribute ```clientAdapter``` determines which Http client implementation to use. CleverClient supports two implementations out of the box:
-- Java's HttpClient (default) via ```JavaHttpClientAdapter```
-- Square's OkHttp via ```OkHttpClientAdapter```
-
-| clientAdapter's value                           | Description                         |
-|-------------------------------------------------|-------------------------------------|
-| new JavaHttpClientAdapter()                     | Uses a default Java's HttpClient    |
-| new JavaHttpClientAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
-| new OkHttpClientAdapter()                       | Uses a default OkHttpClient         |
-| new OkHttpClientAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
-
-### WebSocket Options
-
-The Builder attribute ```webSocketAdapter``` lets you specify which WebSocket implementation to use. Similar to ```clientAdapter```, you can choose between:
-- Java's HttpClient (default) via ```JavaHttpWebSocketAdapter```
-- Square's OkHttp via ```OkHttpWebSocketAdapter```
-
-| webSocketAdapter's value                           | Description                         |
-|----------------------------------------------------|-------------------------------------|
-| new JavaHttpWebSocketAdapter()                     | Uses a default Java's HttpClient    |
-| new JavaHttpWebSocketAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
-| new OkHttpWebSocketAdapter()                       | Uses a default OkHttpClient         |
-| new OkHttpWebSocketAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
 
 ### Interface Annotations
 
@@ -365,6 +349,63 @@ try {
 ```
 
 This mechanism allows you to handle both HTTP errors and other runtime exceptions in a clean, consistent way while preserving the original error information from the API response.
+
+### WebSocket
+
+We have the following attributes to create a CleverClient.WebSocket object:
+
+| Attribute          | Description                                                  | Required  |
+| -------------------|--------------------------------------------------------------|-----------|
+| baseUrl            | WebSocket's url                                              | mandatory |
+| queryParams        | Map of query params (name/value)                             | optional  |
+| queryParam         | Single query param as a name and a value                     | optional  |
+| headers            | Map of headers (name/value)                                  | optional  |
+| header             | Single header as a name and a value                          | optional  |
+| webSocketAdapter   | WebSocket implementation (Java HttpClient or OkHttp based)   | optional  |
+
+The attribute ```webSocketAdapter``` lets you specify which WebSocket implementation to use. You can choose between:
+- Java's HttpClient (default) via ```JavaHttpWebSocketAdapter```
+- Square's OkHttp via ```OkHttpWebSocketAdapter```
+
+| webSocketAdapter's value                           | Description                         |
+|----------------------------------------------------|-------------------------------------|
+| new JavaHttpWebSocketAdapter()                     | Uses a default Java's HttpClient    |
+| new JavaHttpWebSocketAdapter(customJavaHttpClient) | Uses a custom Java's HttpClient     |
+| new OkHttpWebSocketAdapter()                       | Uses a default OkHttpClient         |
+| new OkHttpWebSocketAdapter(customOkHttpClient)     | Uses a custom OkHttpClient          |
+
+Example:
+
+```java
+final var BASE_URL = "ws://websocket.example.com";
+final var HEADER_NAME = "Authorization";
+final var HEADER_VALUE = "Bearer qwertyasdfghzxcvb";
+
+var httpClient = HttpClient.newBuilder()
+    .version(Version.HTTP_1_1)
+    .followRedirects(Redirect.NORMAL)
+    .connectTimeout(Duration.ofSeconds(20))
+    .executor(Executors.newFixedThreadPool(3))
+    .proxy(ProxySelector.of(new InetSocketAddress("proxy.example.com", 80)))
+    .build();
+
+var webSocket = CleverClient.WebSocket.builder()
+    .baseUrl(BASE_URL)
+    .queryParam("model", "qwerty_model")
+    .header(HEADER_NAME, HEADER_VALUE)
+    .webSocketAdapter(new JavaHttpWebSocketAdapter(httpClient))
+    .build();
+
+webSocket.onOpen(() -> System.out.println("Connected"));
+webSocket.onMessage(message -> System.out.println("Received: " + message));
+webSocket.onClose((code, message) -> System.out.println("Closed"));
+
+webSocket.connect().join();
+webSocket.send("Hello World!").join();
+webSocket.send("Welcome to the Jungle!").join();
+webSocket.close();
+```
+
 
 ## ✳ Examples
 
