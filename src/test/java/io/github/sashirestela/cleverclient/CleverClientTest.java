@@ -7,11 +7,9 @@ import io.github.sashirestela.cleverclient.annotation.Resource;
 import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.support.ContentType;
-import io.github.sashirestela.cleverclient.test.TestSupport;
 import io.github.sashirestela.cleverclient.util.HttpRequestBodyTestUtility;
 import lombok.Builder;
 import lombok.Value;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -35,11 +33,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CleverClientTest {
-
-    @BeforeAll
-    static void setup() {
-        TestSupport.setupConfigurator();
-    }
 
     @Test
     void shouldSetPropertiesToDefaultValuesWhenBuilderIsCalledWithoutThoseProperties() {
