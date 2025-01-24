@@ -130,7 +130,6 @@ We have the following attributes to create a CleverClient object:
 | requestInterceptor | Function to modify the request once is built                 | optional  |
 | responseInterceptor| Function to modify the response after it's received          | optional  |
 | clientAdapter      | Http client implementation (Java HttpClient or OkHttp based) | optional  |
-| webSocketAdapter   | WebSocket implementation (Java HttpClient or OkHttp based)   | optional  |
 | endsOfStream       | List of texts used to mark the end of streams                | optional  |
 | endOfStream        | Text used to mark the end of streams                         | optional  |
 | objectMapper       | Provides Json conversions either to/from objects             | optional  |
@@ -189,7 +188,6 @@ var cleverClient = CleverClient.builder()
         return response;
     })
     .clientAdapter(new JavaHttpClientAdapter(httpClient))
-    .webSocketAdapter(new JavaHttpWebSocketAdapter(httpClient))
     .endOfStream(END_OF_STREAM)
     .objectMapper(objectMapper)
     .build();
