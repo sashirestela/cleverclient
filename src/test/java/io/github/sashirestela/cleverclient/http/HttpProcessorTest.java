@@ -390,6 +390,28 @@ interface HttpProcessorTest {
         testShutdown();
     }
 
+    @Test
+    default void shouldReturnAnObjectSyncWhenIsPostMethodAndBodyIsEmpty() throws IOException, InterruptedException {
+        setMocksForString(SyncType.SYNC, "{\"id\":100,\"description\":\"Description\",\"active\":true}");
+
+        var service = getHttpProcessor().createProxy(ITest.SyncService.class);
+        var actualDemo = service.cancelDemo(100);
+        var expectedDemo = new ITest.Demo(100, "Description", true);
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    default void shouldReturnAnObjectAsyncWhenIsPostMethodAndBodyIsEmpty() throws IOException, InterruptedException {
+        setMocksForString(SyncType.ASYNC, "{\"id\":100,\"description\":\"Description\",\"active\":true}");
+
+        var service = getHttpProcessor().createProxy(ITest.AsyncService.class);
+        var actualDemo = service.cancelDemo(100).join();
+        var expectedDemo = new ITest.Demo(100, "Description", true);
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
     private String transformUsers(String jsonInput) {
         List<String> flatUsers = new ArrayList<>();
         String patternStr = "\"id\":\\s*(\\d+).*?" + // id

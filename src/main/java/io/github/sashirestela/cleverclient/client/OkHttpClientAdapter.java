@@ -140,7 +140,7 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
     }
 
     private Request convertToOkHttpRequest(RequestData request) {
-        var requestBody = createRequestBody(request.getBody(), request.getContentType());
+        var requestBody = createRequestBody(request.getBody(), request.getContentType(), request.getHttpMethod());
         var headersArray = request.getHeaders().toArray(new String[0]);
         var requestBuilder = new Request.Builder()
                 .url(request.getUrl())
@@ -152,10 +152,13 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
     }
 
     @SuppressWarnings("unchecked")
-    private RequestBody createRequestBody(Object bodyObject, ContentType contentType) {
+    private RequestBody createRequestBody(Object bodyObject, ContentType contentType, String httpMethod) {
         RequestBody requestBody = null;
         if (contentType == null) {
             logger.debug(REQUEST_BODY_FORMAT, "(Empty)");
+            if (httpMethod.equalsIgnoreCase("POST")) {
+                requestBody = RequestBody.create("", null);
+            }
         } else if (contentType == ContentType.MULTIPART_FORMDATA) {
             logger.debug(REQUEST_BODY_FORMAT, bodyObject);
             var bodyBytes = HttpMultipart.toByteArrays((Map<String, Object>) bodyObject);
