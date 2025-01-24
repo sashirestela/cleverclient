@@ -59,7 +59,7 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
         try {
             var response = okHttpClient.newCall(okHttpRequest).execute();
             logger.debug(RESPONSE_CODE_FORMAT, response.code());
-            if (returnType.isStream()) {
+            if (returnType.isStream() || returnType.isInputStream()) {
                 var responseContent = getResponseContent(response.body(), returnType);
                 var originalResponseData = convertToResponseData(response, responseContent);
                 throwExceptionIfErrorIsPresent(originalResponseData);
@@ -96,7 +96,7 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 logger.debug(RESPONSE_CODE_FORMAT, response.code());
-                if (returnType.isStream()) {
+                if (returnType.isStream() || returnType.isInputStream()) {
                     try {
                         var responseContent = getResponseContent(response.body(), returnType);
                         var originalResponseData = convertToResponseData(response, responseContent);
@@ -262,7 +262,7 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
     private void fillFunctionsByCategory() {
         this.functionsByCategoryMap = new EnumMap<>(Category.class);
         functionsByCategoryMap.put(Category.SYNC_BINARY, new FunctionsByCategory(
-                (r, t) -> r));
+                (r, t) -> ((ResponseData) r).getBody()));
         functionsByCategoryMap.put(Category.SYNC_PLAIN_TEXT, new FunctionsByCategory(
                 (r, t) -> r));
         functionsByCategoryMap.put(Category.SYNC_CUSTOM, new FunctionsByCategory(
@@ -276,7 +276,7 @@ public class OkHttpClientAdapter extends HttpClientAdapter {
         functionsByCategoryMap.put(Category.SYNC_STREAM_EVENT, new FunctionsByCategory(
                 (r, t) -> convertToStreamOfEvents((ResponseData) r, t)));
         functionsByCategoryMap.put(Category.ASYNC_BINARY, new FunctionsByCategory(
-                (r, t) -> r));
+                (r, t) -> ((ResponseData) r).getBody()));
         functionsByCategoryMap.put(Category.ASYNC_PLAIN_TEXT, new FunctionsByCategory(
                 (r, t) -> r));
         functionsByCategoryMap.put(Category.ASYNC_CUSTOM, new FunctionsByCategory(
