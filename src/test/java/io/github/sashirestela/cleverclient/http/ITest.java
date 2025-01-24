@@ -75,6 +75,9 @@ public interface ITest {
         @GET("/{demoId}")
         CompletableFuture<Demo> getDemo(@Path("demoId") Integer demoId);
 
+        @POST
+        CompletableFuture<Demo> cancelDemo(@Path("demoId") Integer demoId);
+
         @GET("/{genericDemoId}")
         CompletableFuture<Generic<Demo>> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
 
@@ -112,6 +115,9 @@ public interface ITest {
 
         @GET("/{demoId}")
         Demo getDemo(@Path("demoId") Integer demoId);
+
+        @POST
+        Demo cancelDemo(@Path("demoId") Integer demoId);
 
         @GET("/{genericDemoId}")
         Generic<Demo> getGenericDemo(@Path("genericDemoId") Integer genericDemoId);
