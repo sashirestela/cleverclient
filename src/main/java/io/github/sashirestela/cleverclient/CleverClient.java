@@ -69,7 +69,9 @@ public class CleverClient {
         this.bodyInspector = bodyInspector;
         this.requestInterceptor = requestInterceptor;
         this.responseInterceptor = responseInterceptor;
-        this.clientAdapter = Optional.ofNullable(clientAdapter).orElse(new JavaHttpClientAdapter());
+        this.clientAdapter = Optional.ofNullable(clientAdapter)
+                // Lazy evaluation to not fail on devices without support for HttpClient
+                .orElseGet(() -> new JavaHttpClientAdapter());
         this.clientAdapter.setRequestInterceptor(this.requestInterceptor);
         this.clientAdapter.setResponseInterceptor(this.responseInterceptor);
 
@@ -125,7 +127,9 @@ public class CleverClient {
             this.baseUrl = baseUrl;
             this.queryParams = Optional.ofNullable(queryParams).orElse(Map.of());
             this.headers = Optional.ofNullable(headers).orElse(Map.of());
-            this.webSockewAdapter = Optional.ofNullable(webSockewAdapter).orElse(new JavaHttpWebSocketAdapter());
+            this.webSockewAdapter = Optional.ofNullable(webSockewAdapter)
+                    // Lazy evaluation to not fail on devices without support for HttpClient
+                    .orElseGet(() -> new JavaHttpWebSocketAdapter());
             this.fullUrl = buildFullUrl();
         }
 
