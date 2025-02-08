@@ -17,6 +17,7 @@ A Java library for making http client and websocket requests easily.
   - [Supported Response Types](#supported-response-types)
   - [Interface Default Methods](#interface-default-methods)
   - [Exception Handling](#exception-handling)
+  - [Retries](#retries)  **NEW**
   - [WebSocket](#websocket)
 - [Examples](#-examples)
 - [Contributing](#-contributing)
@@ -129,6 +130,7 @@ We have the following attributes to create a CleverClient object:
 | bodyInspector      | Function to inspect the `@Body` request parameter            | optional  |
 | requestInterceptor | Function to modify the request once is built                 | optional  |
 | responseInterceptor| Function to modify the response after it's received          | optional  |
+| retryConfig        | Configuration for retrying failed requests                   | optional  |
 | clientAdapter      | Http client implementation (Java HttpClient or OkHttp based) | optional  |
 | endsOfStream       | List of texts used to mark the end of streams                | optional  |
 | endOfStream        | Text used to mark the end of streams                         | optional  |
@@ -187,6 +189,7 @@ var cleverClient = CleverClient.builder()
         response.setBody(modifiedBody);
         return response;
     })
+    .retryConfig(RetryConfig.defaultValues())  // Using the default values for retrying
     .clientAdapter(new JavaHttpClientAdapter(httpClient))
     .endOfStream(END_OF_STREAM)
     .objectMapper(objectMapper)
@@ -276,7 +279,6 @@ interface Completions {
 
 }
 ```
-
 Note that we have named the annotated methods with the suffix "Basic" just to indicate that we should not call them directly but should call the default ones (those without the suffix).
 
 ### Exception Handling
@@ -345,8 +347,44 @@ try {
     }
 }
 ```
-
 This mechanism allows you to handle both HTTP errors and other runtime exceptions in a clean, consistent way while preserving the original error information from the API response.
+
+### Retries
+
+CleverClient provides automatic request retries using exponential backoff with optional jitter. You can configure retries using the `RetryConfig` class.
+
+#### Retry Configuration Options
+
+| Attribute            | Description                                           | Default Value |
+|----------------------|-------------------------------------------------------|---------------|
+| maxAttempts          | Maximum number of retry attempts                      | 3             |
+| initialDelayMs       | Initial delay before retrying (in milliseconds)       | 1000          |
+| maxDelayMs           | Maximum delay between retries (in milliseconds)       | 10000         |
+| backoffMultiplier    | Multiplier for exponential backoff                    | 2.0           |
+| jitterFactor         | Percentage of jitter to apply to delay values         | 0.2           |
+| retryableExceptions  | List of exception types that should trigger a retry   | IOException, ConnectException, SocketTimeoutException |
+| retryableStatusCodes | List of HTTP status codes that should trigger a retry | 408, 409, 429, 500-599 |
+
+#### Example Usage
+
+```java
+var retryConfig = RetryConfig.builder()
+    .maxAttempts(4)
+    .initialDelayMs(500)
+    .maxDelayMs(8000)
+    .backoffMultiplier(1.5)
+    .jitterFactor(0.1)
+    .retryableExceptions(IOException.class, SocketTimeoutException.class)
+    .retryableStatusCodes(new int[][] { { 429 }, { 500, 503 } })
+    .build();
+
+var cleverClient = CleverClient.builder()
+    .baseUrl("https://api.example.com")
+    .retryConfig(retryConfig)
+    .build();
+```
+
+With this configuration, failed requests matching the criteria will be retried automatically with increasing delays based on exponential backoff.
 
 ### WebSocket
 
