@@ -4,14 +4,18 @@ import io.github.sashirestela.cleverclient.annotation.Body;
 import io.github.sashirestela.cleverclient.annotation.GET;
 import io.github.sashirestela.cleverclient.annotation.Query;
 import io.github.sashirestela.cleverclient.annotation.Resource;
+import io.github.sashirestela.cleverclient.client.HttpClientAdapter;
 import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
+import io.github.sashirestela.cleverclient.retry.RetryConfig;
+import io.github.sashirestela.cleverclient.retry.RetryableRequest;
 import io.github.sashirestela.cleverclient.support.ContentType;
 import io.github.sashirestela.cleverclient.util.HttpRequestBodyTestUtility;
 import lombok.Builder;
 import lombok.Value;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -26,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -42,8 +47,24 @@ class CleverClientTest {
         assertEquals(Map.of(), cleverClient.getHeaders());
         assertNotNull(cleverClient.getBaseUrl());
         assertNotNull(cleverClient.getHttpProcessor());
-        assertNull(cleverClient.getRequestInterceptor());
+        assertNotNull(cleverClient.getClientAdapter());
+        assertTrue(cleverClient.getClientAdapter() instanceof JavaHttpClientAdapter);
         assertNull(cleverClient.getBodyInspector());
+        assertNull(cleverClient.getRequestInterceptor());
+        assertNull(cleverClient.getResponseInterceptor());
+        assertNull(cleverClient.getRetryConfig());
+    }
+
+    @Test
+    void shouldSetRetrayableRequestWhenRetryConfigIsProvided() {
+        var mockClientAdapter = Mockito.mock(HttpClientAdapter.class);
+        var cleverClient = CleverClient.builder()
+                .baseUrl("https://api.example.com")
+                .clientAdapter(mockClientAdapter)
+                .retryConfig(RetryConfig.of())
+                .build();
+        assertNotNull(cleverClient.getRetryConfig());
+        verify(mockClientAdapter).setRetryableRequest(any(RetryableRequest.class));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
 import io.github.sashirestela.cleverclient.client.OkHttpClientAdapter;
+import io.github.sashirestela.cleverclient.retry.RetryableRequest;
 import io.github.sashirestela.cleverclient.test.TestSupport.SyncType;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -60,6 +61,18 @@ class OkHttpProcessorTest implements HttpProcessorTest {
     public HttpProcessor getHttpProcessor(UnaryOperator<HttpResponseData> responseInterceptor) {
         var clientAdapter = new OkHttpClientAdapter(okHttpClient);
         clientAdapter.setResponseInterceptor(responseInterceptor);
+        httpProcessor = HttpProcessor.builder()
+                .baseUrl("https://api.demo")
+                .headers(List.of())
+                .clientAdapter(clientAdapter)
+                .build();
+        return httpProcessor;
+    }
+
+    @Override
+    public HttpProcessor getHttpProcessor(RetryableRequest retrayableRequest) {
+        var clientAdapter = new OkHttpClientAdapter(okHttpClient);
+        clientAdapter.setRetryableRequest(retrayableRequest);
         httpProcessor = HttpProcessor.builder()
                 .baseUrl("https://api.demo")
                 .headers(List.of())

@@ -5,6 +5,7 @@ import io.github.sashirestela.cleverclient.ResponseInfo;
 import io.github.sashirestela.cleverclient.ResponseInfo.RequestInfo;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.http.HttpResponseData;
+import io.github.sashirestela.cleverclient.retry.RetryableRequest;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.support.CleverClientSSE;
 import io.github.sashirestela.cleverclient.support.ReturnType;
@@ -34,16 +35,25 @@ public abstract class HttpClientAdapter {
 
     protected UnaryOperator<HttpRequestData> requestInterceptor;
     protected UnaryOperator<HttpResponseData> responseInterceptor;
+    protected RetryableRequest retryableRequest;
 
     public Object sendRequest(RequestData originalRequest) {
         var actualRequest = interceptRequest(originalRequest);
         logger.debug("Http Call : {} {}", actualRequest.getHttpMethod(), actualRequest.getUrl());
         var formattedHeaders = formattedHeaders(actualRequest.getHeaders());
         logger.debug("Request Headers : {}", formattedHeaders);
-        if (actualRequest.getReturnType().isAsync()) {
-            return sendAsync(actualRequest);
+        if (retryableRequest == null) {
+            if (actualRequest.getReturnType().isAsync()) {
+                return sendAsync(actualRequest);
+            } else {
+                return send(actualRequest);
+            }
         } else {
-            return send(actualRequest);
+            if (actualRequest.getReturnType().isAsync()) {
+                return retryableRequest.executeAsync(() -> sendAsync(actualRequest));
+            } else {
+                return retryableRequest.execute(() -> send(actualRequest));
+            }
         }
     }
 

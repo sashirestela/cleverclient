@@ -6,6 +6,8 @@ import io.github.sashirestela.cleverclient.client.JavaHttpClientAdapter;
 import io.github.sashirestela.cleverclient.http.HttpProcessor;
 import io.github.sashirestela.cleverclient.http.HttpRequestData;
 import io.github.sashirestela.cleverclient.http.HttpResponseData;
+import io.github.sashirestela.cleverclient.retry.RetryConfig;
+import io.github.sashirestela.cleverclient.retry.RetryableRequest;
 import io.github.sashirestela.cleverclient.support.Configurator;
 import io.github.sashirestela.cleverclient.util.CommonUtil;
 import io.github.sashirestela.cleverclient.websocket.Action;
@@ -41,6 +43,7 @@ public class CleverClient {
     private final Consumer<Object> bodyInspector;
     private final UnaryOperator<HttpRequestData> requestInterceptor;
     private final UnaryOperator<HttpResponseData> responseInterceptor;
+    private final RetryConfig retryConfig;
     private final HttpClientAdapter clientAdapter;
     private final HttpProcessor httpProcessor;
 
@@ -49,31 +52,36 @@ public class CleverClient {
      * 
      * @param baseUrl             Root of the url of the API service to call. Mandatory.
      * @param headers             Http headers for all the API service. Optional.
-     * @param bodyInspector       Function to inspect the Body request parameter.
-     * @param requestInterceptor  Function to modify the request once it has been built.
-     * @param responseInterceptor Function to modify the response once it has been received.
+     * @param bodyInspector       Function to inspect the Body request parameter. Optional.
+     * @param requestInterceptor  Function to modify the request once it has been built. Optional.
+     * @param responseInterceptor Function to modify the response once it has been received. Optional.
+     * @param retryConfig         Cofiguration for retrying. Optional.
      * @param clientAdapter       Component to call http services. If none is passed the
      *                            JavaHttpClientAdapter will be used. Optional.
+     * @param objectMapper        Provides Json conversions either to and from objects. Optional.
      * @param endsOfStream        Texts used to mark the final of streams when handling server sent
      *                            events (SSE). Optional.
-     * @param objectMapper        Provides Json conversions either to and from objects. Optional.
      */
     @Builder
     @SuppressWarnings("java:S107")
     public CleverClient(@NonNull String baseUrl, @Singular Map<String, String> headers, Consumer<Object> bodyInspector,
             UnaryOperator<HttpRequestData> requestInterceptor, UnaryOperator<HttpResponseData> responseInterceptor,
-            HttpClientAdapter clientAdapter, @Singular("endOfStream") List<String> endsOfStream,
-            ObjectMapper objectMapper) {
+            RetryConfig retryConfig, HttpClientAdapter clientAdapter, ObjectMapper objectMapper,
+            @Singular("endOfStream") List<String> endsOfStream) {
         this.baseUrl = baseUrl;
         this.headers = Optional.ofNullable(headers).orElse(Map.of());
         this.bodyInspector = bodyInspector;
         this.requestInterceptor = requestInterceptor;
         this.responseInterceptor = responseInterceptor;
+        this.retryConfig = retryConfig;
         this.clientAdapter = Optional.ofNullable(clientAdapter)
                 // Lazy evaluation to not fail on devices without support for HttpClient
                 .orElseGet(() -> new JavaHttpClientAdapter());
         this.clientAdapter.setRequestInterceptor(this.requestInterceptor);
         this.clientAdapter.setResponseInterceptor(this.responseInterceptor);
+        if (this.retryConfig != null) {
+            this.clientAdapter.setRetryableRequest(new RetryableRequest(this.retryConfig));
+        }
 
         this.httpProcessor = HttpProcessor.builder()
                 .baseUrl(this.baseUrl)
@@ -82,8 +90,8 @@ public class CleverClient {
                 .bodyInspector(this.bodyInspector)
                 .build();
         Configurator.builder()
-                .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
                 .objectMapper(Optional.ofNullable(objectMapper).orElse(new ObjectMapper()))
+                .endsOfStream(Optional.ofNullable(endsOfStream).orElse(Arrays.asList()))
                 .build();
         logger.debug("CleverClient has been created.");
     }
