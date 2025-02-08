@@ -4,6 +4,7 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +21,7 @@ public class RetryableRequest {
 
     public RetryableRequest(RetryConfig config) {
         this.config = config;
-        this.random = new Random();
+        this.random = new SecureRandom();
     }
 
     public <T> T execute(Supplier<T> operation) {
@@ -82,6 +83,7 @@ public class RetryableRequest {
 
     private boolean isRetryable(Throwable exception) {
         exception = (exception instanceof CompletionException) ? exception.getCause() : exception;
+        if (exception == null) return false;
         Throwable theException = (exception instanceof CleverClientException) ? exception.getCause() : exception;
         if (theException != null) {
             return Arrays.stream(config.getRetryableExceptions())
@@ -97,7 +99,7 @@ public class RetryableRequest {
     }
 
     private long calculateDelayWithJitter(int attempt) {
-        double multiplier = Math.pow(config.getBackoffMultiplier(), attempt - 1);
+        double multiplier = Math.pow(config.getBackoffMultiplier(), attempt - 1.0);
         long baseDelay = (long) (config.getInitialDelayMs() * multiplier);
         baseDelay = Math.min(baseDelay, config.getMaxDelayMs());
 
