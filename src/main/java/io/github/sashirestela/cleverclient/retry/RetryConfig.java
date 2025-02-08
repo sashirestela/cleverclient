@@ -40,7 +40,7 @@ public class RetryConfig {
             { 500, 599 }
     };
 
-    public static RetryConfig of() {
+    public static RetryConfig defaultValues() {
         return RetryConfig.builder().build();
     }
 

@@ -420,7 +420,7 @@ interface HttpProcessorTest {
     default void shouldReturnAnObjectSyncWhenConfiguredRetry() throws IOException, InterruptedException {
         setMocksForString(SyncType.SYNC, "{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
-        var service = getHttpProcessor(new RetryableRequest(RetryConfig.of())).createProxy(ITest.SyncService.class);
+        var service = getHttpProcessor(new RetryableRequest(RetryConfig.defaultValues())).createProxy(ITest.SyncService.class);
         var actualDemo = service.getDemo(100);
         var expectedDemo = new ITest.Demo(100, "Description", true);
 
@@ -431,7 +431,7 @@ interface HttpProcessorTest {
     default void shouldReturnAnObjectAsyncWhenConfiguredRetry() throws IOException, InterruptedException {
         setMocksForString(SyncType.ASYNC, "{\"id\":100,\"description\":\"Description\",\"active\":true}");
 
-        var service = getHttpProcessor(new RetryableRequest(RetryConfig.of())).createProxy(ITest.AsyncService.class);
+        var service = getHttpProcessor(new RetryableRequest(RetryConfig.defaultValues())).createProxy(ITest.AsyncService.class);
         var actualDemo = service.getDemo(100).join();
         var expectedDemo = new ITest.Demo(100, "Description", true);
 

@@ -61,7 +61,7 @@ class CleverClientTest {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://api.example.com")
                 .clientAdapter(mockClientAdapter)
-                .retryConfig(RetryConfig.of())
+                .retryConfig(RetryConfig.defaultValues())
                 .build();
         assertNotNull(cleverClient.getRetryConfig());
         verify(mockClientAdapter).setRetryableRequest(any(RetryableRequest.class));
