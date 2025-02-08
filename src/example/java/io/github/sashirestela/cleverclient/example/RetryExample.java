@@ -21,7 +21,7 @@ public class RetryExample extends AbstractExample {
         var cleverClient = CleverClient.builder()
                 .baseUrl("https://cleverclient.free.beeceptor.com")
                 .clientAdapter(clientAdapter)
-                .retryConfig(RetryConfig.of())
+                .retryConfig(RetryConfig.defaultValues())
                 .build();
         var service = cleverClient.create(BadService.class);
 
