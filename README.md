@@ -463,7 +463,7 @@ Some examples have been created in the folder [example](https://github.com/sashi
 * Run example:
 
   ```sh
-  mvn exec:java -Dexec.mainClass=io.github.sashirestela.cleverclient.example.<className> [logOptions]
+  mvn -q exec:java -Dexec.mainClass=io.github.sashirestela.cleverclient.example.<className>
   ```
 
   Where:
@@ -472,11 +472,8 @@ Some examples have been created in the folder [example](https://github.com/sashi
   
     Some examples require you have an OpenAI account and set the env variable OPENAI_API_TOKEN, such as Multipart*, Stream*.
   
-  * ```[logOptions]``` are optional and you can you use them to set:
-    * Logger lever: ```-Dorg.slf4j.simpleLogger.defaultLogLevel=<logLevel>```
-    * Logger file: ```-Dorg.slf4j.simpleLogger.logFile=<logFile>```
-  * For example, to run the BasicExample with all the log options:
-    * ```mvn exec:java -Dexec.mainClass=io.github.sashirestela.cleverclient.example.BasicExample -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.logFile=example.log```
+  * For example, to run the BasicExample:
+    * ```mvn -q exec:java -Dexec.mainClass=io.github.sashirestela.cleverclient.example.BasicExample```
 
 ## 💼 Contributing
 Please read our [Contributing](CONTRIBUTING.md) guide to learn and understand how to contribute to this project.
