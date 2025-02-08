@@ -1,5 +1,7 @@
 package io.github.sashirestela.cleverclient.http;
 
+import io.github.sashirestela.cleverclient.retry.RetryConfig;
+import io.github.sashirestela.cleverclient.retry.RetryableRequest;
 import io.github.sashirestela.cleverclient.support.CleverClientException;
 import io.github.sashirestela.cleverclient.test.TestSupport;
 import io.github.sashirestela.cleverclient.test.TestSupport.SyncType;
@@ -34,6 +36,8 @@ interface HttpProcessorTest {
     HttpProcessor getHttpProcessor();
 
     HttpProcessor getHttpProcessor(UnaryOperator<HttpResponseData> responseInterceptor);
+
+    HttpProcessor getHttpProcessor(RetryableRequest retrayableRequest);
 
     void setMocksForString(SyncType syncType, String result) throws IOException, InterruptedException;
 
@@ -407,6 +411,28 @@ interface HttpProcessorTest {
 
         var service = getHttpProcessor().createProxy(ITest.AsyncService.class);
         var actualDemo = service.cancelDemo(100).join();
+        var expectedDemo = new ITest.Demo(100, "Description", true);
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    default void shouldReturnAnObjectSyncWhenConfiguredRetry() throws IOException, InterruptedException {
+        setMocksForString(SyncType.SYNC, "{\"id\":100,\"description\":\"Description\",\"active\":true}");
+
+        var service = getHttpProcessor(new RetryableRequest(RetryConfig.of())).createProxy(ITest.SyncService.class);
+        var actualDemo = service.getDemo(100);
+        var expectedDemo = new ITest.Demo(100, "Description", true);
+
+        assertEquals(expectedDemo, actualDemo);
+    }
+
+    @Test
+    default void shouldReturnAnObjectAsyncWhenConfiguredRetry() throws IOException, InterruptedException {
+        setMocksForString(SyncType.ASYNC, "{\"id\":100,\"description\":\"Description\",\"active\":true}");
+
+        var service = getHttpProcessor(new RetryableRequest(RetryConfig.of())).createProxy(ITest.AsyncService.class);
+        var actualDemo = service.getDemo(100).join();
         var expectedDemo = new ITest.Demo(100, "Description", true);
 
         assertEquals(expectedDemo, actualDemo);
