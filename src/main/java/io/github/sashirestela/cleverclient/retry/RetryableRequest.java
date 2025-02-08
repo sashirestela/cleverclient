@@ -83,7 +83,8 @@ public class RetryableRequest {
 
     private boolean isRetryable(Throwable exception) {
         exception = (exception instanceof CompletionException) ? exception.getCause() : exception;
-        if (exception == null) return false;
+        if (exception == null)
+            return false;
         Throwable theException = (exception instanceof CleverClientException) ? exception.getCause() : exception;
         if (theException != null) {
             return Arrays.stream(config.getRetryableExceptions())
@@ -102,16 +103,15 @@ public class RetryableRequest {
         double multiplier = Math.pow(config.getBackoffMultiplier(), attempt - 1.0);
         long baseDelay = (long) (config.getInitialDelayMs() * multiplier);
         baseDelay = Math.min(baseDelay, config.getMaxDelayMs());
-
         if (config.getJitterFactor() > 0) {
-            double jitterRange = baseDelay * config.getJitterFactor();
+            long jitterRange = (long) (baseDelay * config.getJitterFactor());
             // Generate random jitter between -jitterRange/2 and +jitterRange/2
-            long jitter = (long) ((random.nextDouble() - 0.5) * jitterRange);
+            long halfRange = jitterRange / 2;
+            long jitter = -halfRange + (random.nextLong() % (halfRange + 1));
             baseDelay = Math.max(0, baseDelay + jitter);
             // Ensure we don't exceed maxDelayMs even with jitter
             baseDelay = Math.min(baseDelay, config.getMaxDelayMs());
         }
-
         return baseDelay;
     }
 
