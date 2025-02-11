@@ -8,7 +8,7 @@ fi
 
 main_class="io.github.sashirestela.cleverclient.example.${java_file}"
 
-command="mvn -q exec:java -Dexec.mainClass=${main_class}"
+command="mvn exec:java -Dexec.mainClass=${main_class}"
 
 echo $command
 
