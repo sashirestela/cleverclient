@@ -75,9 +75,7 @@ public class HttpProcessor implements InvocationHandler {
                     .bindTo(proxy)
                     .invokeWithArguments(arguments);
         } else {
-            var responseObject = resolve(method, arguments);
-            logger.debug("Received Response");
-            return responseObject;
+            return resolve(method, arguments);
         }
     }
 

@@ -36,7 +36,9 @@ public class CleverClientException extends RuntimeException {
      */
     public CleverClientException(Throwable cause) {
         super(cause);
-        this.responseInfo = null;
+        this.responseInfo = cause instanceof CleverClientException
+                ? ((CleverClientException) cause).responseInfo().orElse(null)
+                : null;
     }
 
     /**

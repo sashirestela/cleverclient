@@ -5,20 +5,24 @@ import io.github.sashirestela.cleverclient.support.CleverClientException;
 public abstract class ExceptionConverter {
 
     public RuntimeException convert(Throwable exception) {
-        var ccException = new CleverClientException(exception);
-        if (exception instanceof CleverClientException) {
-            ccException = (CleverClientException) exception;
-        } else if (exception.getCause() instanceof CleverClientException) {
-            ccException = (CleverClientException) exception.getCause();
-        }
+        var rootCause = getRootCause(exception);
+        var ccException = new CleverClientException(rootCause);
         var optionalResponseInfo = ccException.responseInfo();
         if (optionalResponseInfo.isPresent()) {
             return convertHttpException(optionalResponseInfo.get());
         } else {
-            return (RuntimeException) exception;
+            return ccException;
         }
     }
 
     public abstract RuntimeException convertHttpException(ResponseInfo responseInfo);
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable rootCause = throwable;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
+    }
 
 }
