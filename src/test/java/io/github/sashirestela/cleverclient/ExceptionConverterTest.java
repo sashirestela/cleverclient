@@ -59,7 +59,7 @@ class ExceptionConverterTest {
     }
 
     @Test
-    void convert_WhenNoResponseInfo_ShouldReturnOriginalException() {
+    void convert_WhenNoResponseInfo_ShouldReturnOriginalException_AsCause() {
         // Arrange
         var originalException = new RuntimeException("Original exception");
 
@@ -67,8 +67,8 @@ class ExceptionConverterTest {
         var result = exceptionConverter.convert(originalException);
 
         // Assert
-        assertSame(originalException, result);
-        assertEquals("Original exception", result.getMessage());
+        assertSame(originalException, result.getCause());
+        assertEquals("Original exception", result.getCause().getMessage());
     }
 
     @Test

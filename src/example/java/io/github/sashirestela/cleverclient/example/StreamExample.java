@@ -1,18 +1,15 @@
 package io.github.sashirestela.cleverclient.example;
 
 import io.github.sashirestela.cleverclient.CleverClient;
-import io.github.sashirestela.cleverclient.ExceptionConverter;
-import io.github.sashirestela.cleverclient.ResponseInfo;
 import io.github.sashirestela.cleverclient.example.openai.ChatRequest;
 import io.github.sashirestela.cleverclient.example.openai.ChatResponse;
 import io.github.sashirestela.cleverclient.example.openai.ChatService;
 import io.github.sashirestela.cleverclient.example.openai.Message;
-import lombok.Getter;
+import io.github.sashirestela.cleverclient.example.util.Commons;
+import io.github.sashirestela.cleverclient.example.util.Commons.MyExceptionConverter;
+import io.github.sashirestela.cleverclient.example.util.Commons.MyHttpException;
+import io.github.sashirestela.cleverclient.retry.RetryConfig;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
 
 /**
@@ -34,12 +31,13 @@ public class StreamExample extends AbstractExample {
 
     public void run() {
         try {
-            redirectSystemErr();
+            Commons.redirectSystemErr();
 
             var cleverClient = CleverClient.builder()
                     .baseUrl("https://api.openai.com")
                     .clientAdapter(clientAdapter)
                     .header("Authorization", "Bearer " + System.getenv("OPENAI_API_KEY"))
+                    .retryConfig(RetryConfig.defaultValues())
                     .endOfStream("[DONE]")
                     .build();
             var chatService = cleverClient.create(ChatService.class);
@@ -69,6 +67,7 @@ public class StreamExample extends AbstractExample {
 
             clientAdapter.shutdown();
         } catch (Exception e) {
+            e.printStackTrace();
             try {
                 MyExceptionConverter.rethrow(e);
             } catch (MyHttpException mhe) {
@@ -76,45 +75,8 @@ public class StreamExample extends AbstractExample {
                         "\nError Detail:\n" + mhe.getErrorDetail());
             } catch (RuntimeException re) {
                 System.out.println(re.getMessage());
-                re.printStackTrace();
             }
         }
-    }
-
-    private void redirectSystemErr() throws FileNotFoundException {
-        File file = new File("error.log");
-        FileOutputStream fos = new FileOutputStream(file);
-        PrintStream ps = new PrintStream(fos);
-        System.setErr(ps);
-    }
-
-    public static class MyExceptionConverter extends ExceptionConverter {
-
-        private MyExceptionConverter() {
-        }
-
-        public static void rethrow(Throwable e) {
-            throw new MyExceptionConverter().convert(e);
-        }
-
-        @Override
-        public RuntimeException convertHttpException(ResponseInfo responseInfo) {
-            return new MyHttpException(responseInfo.getStatusCode(), responseInfo.getData());
-        }
-
-    }
-
-    @Getter
-    public static class MyHttpException extends RuntimeException {
-
-        private final int responseCode;
-        private final String errorDetail;
-
-        public MyHttpException(int responseCode, String errorDetail) {
-            this.responseCode = responseCode;
-            this.errorDetail = errorDetail;
-        }
-
     }
 
     public static void main(String[] args) {

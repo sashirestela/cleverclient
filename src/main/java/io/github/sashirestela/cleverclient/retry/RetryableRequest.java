@@ -27,6 +27,7 @@ public class RetryableRequest {
     public <T> T execute(Supplier<T> operation) {
         int attempt = 1;
         Exception lastException = null;
+        logger.debug("Calling (attempt {}/{}).", attempt, config.getMaxAttempts());
         while (attempt <= config.getMaxAttempts()) {
             try {
                 return operation.get();
@@ -36,22 +37,22 @@ public class RetryableRequest {
                     break;
                 }
                 long delayMs = calculateDelayWithJitter(attempt);
-                logger.debug("Request failed (attempt {}/{}). Retrying in {} ms...",
-                        attempt, config.getMaxAttempts(), delayMs);
+                logger.debug("Calling (attempt {}/{}). Retrying in {} ms",
+                        attempt + 1, config.getMaxAttempts(), delayMs);
                 try {
                     Thread.sleep(delayMs);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    throw new CleverClientException(ie);
                 }
                 attempt++;
             }
         }
-        throw new CleverClientException("Request failed after " + config.getMaxAttempts() + " attempts", lastException);
+        throw new CleverClientException("Calling failed after " + attempt + " attempts", lastException);
     }
 
     public <T> CompletableFuture<T> executeAsync(Supplier<Object> operation) {
         CompletableFuture<T> future = new CompletableFuture<>();
+        logger.debug("Calling (attempt {}/{}).", 1, config.getMaxAttempts());
         executeAsyncAttempt(operation, 1, future);
         return future;
     }
@@ -67,13 +68,13 @@ public class RetryableRequest {
 
             if (!isRetryable(error) || attempt >= config.getMaxAttempts()) {
                 resultFuture.completeExceptionally(new CleverClientException(
-                        "Request failed after " + attempt + " attempts", error));
+                        "Calling failed after " + attempt + " attempts", error));
                 return null;
             }
 
             long delayMs = calculateDelayWithJitter(attempt);
-            logger.debug("Async request failed (attempt {}/{}). Retrying in {} ms...",
-                    attempt, config.getMaxAttempts(), delayMs);
+            logger.debug("Calling (attempt {}/{}). Retrying in {} ms",
+                    attempt + 1, config.getMaxAttempts(), delayMs);
 
             CompletableFuture.delayedExecutor(delayMs, TimeUnit.MILLISECONDS)
                     .execute(() -> executeAsyncAttempt(operation, attempt + 1, resultFuture));
