@@ -90,7 +90,6 @@ public class URLBuilder {
         queryParams.forEach((k, v) -> appendQueryParam(k, v, queryParamBuilder));
     }
 
-
     private void appendQueryParam(String name, Object value, StringBuilder queryParamBuilder) {
         if (value == null) {
             return;
@@ -113,7 +112,7 @@ public class URLBuilder {
             appendSingleParam(name, value, queryParamBuilder);
         }
     }
-    
+
     private void appendSingleParam(String name, Object value, StringBuilder queryParamBuilder) {
         queryParamBuilder.append(queryParamBuilder.length() == 0 ? '?' : '&')
                 .append(URLEncoder.encode(name, StandardCharsets.UTF_8))
