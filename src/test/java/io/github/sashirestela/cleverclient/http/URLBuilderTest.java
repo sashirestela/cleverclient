@@ -180,7 +180,8 @@ class URLBuilderTest {
         when(methodMetadata.getPathParameters()).thenReturn(List.of());
         when(methodMetadata.getQueryParameters()).thenReturn(paramsList);
 
-        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { List.of("red", "blue"), new String[] {"low", "high"} });
+        var actualUrl = urlBuilder.build(url, methodMetadata,
+                new Object[] { List.of("red", "blue"), new String[] { "low", "high" } });
         var expectedUrl = "/api/domain/entities?color=red&color=blue&size=low&size=high";
         assertEquals(expectedUrl, actualUrl);
     }
