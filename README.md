@@ -222,7 +222,7 @@ var cleverClient = CleverClient.builder()
 * ```Multipart``` is used to mark an endpoint with a multipart/form-data request. This is required when you need to upload files.
 * ```StreamType``` is used with methods whose return type is Stream of [Event](./src/main/java/io/github/sashirestela/cleverclient/Event.java). Tipically you will use more than one of this annotation to indicate what classes (types) are related to what events (array of Strings). You can also use them for custom annotations in case you want to reuse them for many methods, so you just apply the custom composite annotation.
 * ```Path``` is used to replace the path parameter name in url with the matched method parameter's value.
-* ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for POJOs using its properties and values.
+* ```Query``` is used to add a query parameter to the url in the way: [?]queryValue=parameterValue[&...] for scalar parameters. Also it can be used for POJOs using its properties and values. For array and collection values it'll be expanded as: queryValue=paramValue1&queryValue=paramValue2&...&queryValue=paramValueN.
 * ```Body``` is used to mark a method parameter as the endpoint's payload request, so the request will be application/json at least the endpoint is annotated with Multipart.
 * Check the above [Description's example](#-description) or the [Test](https://github.com/sashirestela/cleverclient/tree/main/src/test/java/io/github/sashirestela/cleverclient) folder to see more of these interface annotations in action.
 

@@ -156,6 +156,35 @@ class URLBuilderTest {
         assertEquals(expectedUrl, actualUrl);
     }
 
+    @Test
+    void shouldReturnReplacedUrlWithQueryParamsWhenMethodContainsListQueryParams() {
+        var url = "/api/domain/entities";
+        var paramsList = List.of(
+                ParameterMetadata.builder()
+                        .index(0)
+                        .annotation(AnnotationMetadata.builder()
+                                .name("Query")
+                                .isHttpMethod(false)
+                                .valueByField(Map.of("value", "color"))
+                                .build())
+                        .build(),
+                ParameterMetadata.builder()
+                        .index(1)
+                        .annotation(AnnotationMetadata.builder()
+                                .name("Query")
+                                .isHttpMethod(false)
+                                .valueByField(Map.of("value", "size"))
+                                .build())
+                        .build());
+
+        when(methodMetadata.getPathParameters()).thenReturn(List.of());
+        when(methodMetadata.getQueryParameters()).thenReturn(paramsList);
+
+        var actualUrl = urlBuilder.build(url, methodMetadata, new Object[] { List.of("red", "blue"), new String[] {"low", "high"} });
+        var expectedUrl = "/api/domain/entities?color=red&color=blue&size=low&size=high";
+        assertEquals(expectedUrl, actualUrl);
+    }
+
     @Data
     @AllArgsConstructor
     static class Pagination {

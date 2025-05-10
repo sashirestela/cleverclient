@@ -10,6 +10,7 @@ import io.github.sashirestela.cleverclient.util.JsonUtil;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -89,13 +90,35 @@ public class URLBuilder {
         queryParams.forEach((k, v) -> appendQueryParam(k, v, queryParamBuilder));
     }
 
+
     private void appendQueryParam(String name, Object value, StringBuilder queryParamBuilder) {
-        if (value != null) {
-            queryParamBuilder.append(queryParamBuilder.length() == 0 ? '?' : '&')
-                    .append(URLEncoder.encode(name, StandardCharsets.UTF_8))
-                    .append('=')
-                    .append(URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));
+        if (value == null) {
+            return;
         }
+        if (value.getClass().isArray()) {
+            Object[] array = (Object[]) value;
+            for (Object item : array) {
+                if (item != null) {
+                    appendSingleParam(name, item, queryParamBuilder);
+                }
+            }
+        } else if (value instanceof Collection) {
+            Collection<?> collection = (Collection<?>) value;
+            for (Object item : collection) {
+                if (item != null) {
+                    appendSingleParam(name, item, queryParamBuilder);
+                }
+            }
+        } else {
+            appendSingleParam(name, value, queryParamBuilder);
+        }
+    }
+    
+    private void appendSingleParam(String name, Object value, StringBuilder queryParamBuilder) {
+        queryParamBuilder.append(queryParamBuilder.length() == 0 ? '?' : '&')
+                .append(URLEncoder.encode(name, StandardCharsets.UTF_8))
+                .append('=')
+                .append(URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));
     }
 
 }
