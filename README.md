@@ -6,6 +6,7 @@ A Java library for making http client and websocket requests easily.
 [![codecov](https://codecov.io/gh/sashirestela/cleverclient/graph/badge.svg?token=PEYAFW3EWD)](https://codecov.io/gh/sashirestela/cleverclient)
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.sashirestela/cleverclient)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sashirestela/cleverclient/build_java_maven.yml)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sashirestela/cleverclient)
 
 ### Table of Contents
 - [Description](#-description)
