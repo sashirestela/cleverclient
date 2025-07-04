@@ -18,7 +18,7 @@ A Java library for making http client and websocket requests easily.
   - [Supported Response Types](#supported-response-types)
   - [Interface Default Methods](#interface-default-methods)
   - [Exception Handling](#exception-handling)
-  - [Retries](#retries)  **NEW**
+  - [Retries](#retries)
   - [WebSocket](#websocket)
 - [Examples](#-examples)
 - [Contributing](#-contributing)
